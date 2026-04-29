@@ -1,7 +1,6 @@
 package com.ing.ide.main.fx;
 
 import com.ing.engine.constants.AppResourcePath;
-import static com.ing.engine.constants.AppResourcePath.SUMMARY_HTML_V2;
 import com.ing.engine.support.DesktopApi;
 import com.ing.ide.main.mainui.components.testexecution.TestExecution;
 import com.ing.ide.main.mainui.components.testexecution.tree.model.ReleaseNode;
@@ -102,6 +101,7 @@ public class FXDashBoard extends javax.swing.JPanel {
         VBox treeContainer = new VBox(treeHeader, treeView);
         VBox.setVgrow(treeView, Priority.ALWAYS);
         treeContainer.getStyleClass().add("panel-container");
+        treeContainer.setMinWidth(200);
 
         // ── Right: WebView with navigation toolbar ──
         webView = new WebView();
@@ -271,15 +271,22 @@ public class FXDashBoard extends javax.swing.JPanel {
         String url = latest ? getDetailedSummary() : getHistory();
         if (checkFile(url)) {
             webEngine.load(url);
+            if (!latest){
+                webEngine.getHistory().setMaxSize(0);
+                webEngine.executeScript("setTimeout(100);location.reload(true);");
+                webEngine.getHistory().setMaxSize(99);
+            }
+            
         } else {
             webEngine.load(ERR_HTML);
         }
     }
+    
 
     private String getDetailedSummary() {
         return getPrefix() + File.separator + release + File.separator + testSet
                 + File.separator + "Latest"
-                + File.separator + SUMMARY_HTML_V2;
+                + File.separator + AppResourcePath.SUMMARY_HTML_V2;
     }
 
     private String getHistory() {
