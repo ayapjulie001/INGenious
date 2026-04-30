@@ -993,7 +993,7 @@ public class TestDataComponent extends JPanel implements ChangeListener, ActionL
                 }
                 
                 // Sort in reverse order for safe removal
-//                modelColList.sort((a, b) -> b - a);
+                modelColList.sort((a, b) -> b - a);
                 std.removeColumn(modelColList);
             } else {
                 // Global data or no frozen pane - original logic
