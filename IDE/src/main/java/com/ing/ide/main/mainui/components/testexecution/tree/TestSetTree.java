@@ -492,9 +492,9 @@ public class TestSetTree implements ActionListener {
     private String getBatRCommand() {
         String os = System.getProperty("os.name").toLowerCase();
         if (os.contains("windows")) {
-            return "Run.bat";
+            return "ingenious.bat";
         }
-        return "./Run.command";
+        return "./ingenious.command";
     }
 
     private void getAzDoYaml() {
