@@ -188,9 +188,10 @@ public class APITesterUI extends JPanel implements PropertyChangeListener {
         JPanel panel = new JPanel(new BorderLayout(0, 0));
         panel.setMinimumSize(new Dimension(200, 0));
         
+        // Note: Temporarily disabled until Environment parameter is implemented.
         // Toolbar with environment selector
-        JPanel toolbar = createLeftToolbar();
-        panel.add(toolbar, BorderLayout.NORTH);
+        // JPanel toolbar = createLeftToolbar();
+        // panel.add(toolbar, BorderLayout.NORTH);
         
         // Tabbed pane for Collections and History
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
