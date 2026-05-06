@@ -1080,7 +1080,7 @@ public class TestDataComponent extends JPanel implements ChangeListener, ActionL
             table.setActionFor("Add", new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    addRow();
+                    insertRowBelow();
                 }
             });
             table.setActionFor("Delete", new AbstractAction() {
