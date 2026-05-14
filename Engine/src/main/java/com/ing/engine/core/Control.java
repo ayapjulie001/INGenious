@@ -13,7 +13,7 @@ import com.ing.engine.execution.run.ProjectRunner;
 import com.ing.engine.reporting.SummaryReport;
 import com.ing.engine.reporting.impl.ConsoleReport;
 import com.ing.engine.reporting.util.DateTimeUtils;
-import com.ing.engine.support.Status;
+import com.ing.ingenious.api.status.Status;
 import com.ing.engine.support.methodInf.MethodInfoManager;
 import com.ing.engine.support.reflect.MethodExecutor;
 import com.ing.util.encryption.Encryption;
@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import com.ing.engine.drivers.WebDriverCreation;
 import com.ing.engine.drivers.WebDriverFactory;
 import java.time.Instant;
+import com.ing.exceptions.DuplicateMethodException;
 
 public class Control {
 
@@ -214,9 +215,30 @@ public class Control {
 
     }
 
+    /**
+     * Initializes all core dependencies required for execution engine startup.
+     * <p>
+     * This method must be called before any execution begins. It performs the following:
+     * <ul>
+     *   <li>Loads test data factory for data-driven testing</li>
+     *   <li>Loads method information manager for action discovery and routing</li>
+     *   <li>Initializes encryption utilities for secure data handling</li>
+     * </ul>
+     * If duplicate methods are detected during loading, the error is logged but
+     * initialization continues to allow the application to start.
+     * </p>
+     *
+     * @see TestDataFactory#load()
+     * @see MethodInfoManager#load()
+     * @see Encryption#getInstance()
+     */
     private static void initDeps() {
         TestDataFactory.load();
-        MethodInfoManager.load();
+        try {
+            MethodInfoManager.load();
+        } catch (DuplicateMethodException ex) {
+            System.getLogger(Control.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
         Encryption.getInstance();
     }
 

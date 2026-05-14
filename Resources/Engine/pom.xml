@@ -49,6 +49,7 @@
         <mac.version>mac-aarch64</mac.version>
         <setupDir>../Dist/release</setupDir>
         <resourceDir>../Resources</resourceDir>
+        <ingenious-api.version>3.0</ingenious-api.version>
 
         <flatlaf.version>3.5.4</flatlaf.version>
         <ikonli.version>12.3.1</ikonli.version>
@@ -181,6 +182,7 @@
         </dependency> 
            
     
+        
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
@@ -220,6 +222,12 @@
             <version>${project.version}</version>
         </dependency>
         
+        <dependency>
+            <groupId>com.ing</groupId>
+            <artifactId>ingenious-api</artifactId>
+            <version>${ingenious-api.version}</version>
+            <type>jar</type>
+        </dependency>
         
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
