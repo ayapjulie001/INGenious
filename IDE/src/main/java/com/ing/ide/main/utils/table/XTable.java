@@ -559,8 +559,11 @@ class SearchRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         JComponent comp = (JComponent) defCellRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-        // Add left padding for modern web-table look
-        comp.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 8, 2, 4));
+        // Add left padding for modern web-table look unless renderer already marked this cell as empty-required error.
+        boolean emptyRequiredError = Boolean.TRUE.equals(comp.getClientProperty("ing.emptyRequiredError"));
+        if (!emptyRequiredError) {
+            comp.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 8, 2, 4));
+        }
 
         Boolean rowSelected = false;
         for (int srow : table.getSelectedRows()) {
@@ -576,6 +579,10 @@ class SearchRenderer extends DefaultTableCellRenderer {
     }
 
     private void setSearchColor(JComponent comp, int row, int column, Boolean cellSelected) {
+        // Preserve empty-required error styling from base renderer.
+        if (Boolean.TRUE.equals(comp.getClientProperty("ing.emptyRequiredError"))) {
+            return;
+        }
         if (!cellSelected) {
             if (searchRowMap.get(row) != null && searchRowMap.get(row).indexOf(column) != -1) {
                 Color searchBg = UIManager.getColor("ing.searchHighlight");
@@ -586,6 +593,10 @@ class SearchRenderer extends DefaultTableCellRenderer {
 
     private void setSelectionColor(Boolean rowSelected, Boolean cellSelected,
             JComponent comp, Color defalutRowBgColor) {
+        // Preserve empty-required error styling from base renderer.
+        if (Boolean.TRUE.equals(comp.getClientProperty("ing.emptyRequiredError"))) {
+            return;
+        }
         if (rowSelected) {
             Color selBg = UIManager.getColor("ing.selectionBackground");
             comp.setBackground(selBg != null ? selBg : Color.decode("#D4EDFD"));
