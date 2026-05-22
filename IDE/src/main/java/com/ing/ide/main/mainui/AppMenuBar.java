@@ -70,7 +70,7 @@ public class AppMenuBar extends JMenuBar {
                 KeyEvent.VK_E, KeyEvent.SHIFT_DOWN_MASK | KeyEvent.ALT_DOWN_MASK));
         shortcuts.put("Dashboard", KeyStroke.getKeyStroke(
                 KeyEvent.VK_D, KeyEvent.SHIFT_DOWN_MASK | KeyEvent.ALT_DOWN_MASK));
-        shortcuts.put("API Tester", KeyStroke.getKeyStroke(
+        shortcuts.put("API Workbench", KeyStroke.getKeyStroke(
                 KeyEvent.VK_T, KeyEvent.SHIFT_DOWN_MASK | KeyEvent.ALT_DOWN_MASK));
         shortcuts.put("AdjustUI", KeyStroke.getKeyStroke(
                 KeyEvent.VK_A, KeyEvent.SHIFT_DOWN_MASK | KeyEvent.ALT_DOWN_MASK));
@@ -262,7 +262,7 @@ public class AppMenuBar extends JMenuBar {
         window.add(
                 withMnemonics(
                         withShortCut(
-                                Utils.createMenuItem("API Tester", sActionListener)), 'P'));
+                                Utils.createMenuItem("API Workbench", sActionListener)), 'P'));
 
         window.add(
                 withMnemonics(
