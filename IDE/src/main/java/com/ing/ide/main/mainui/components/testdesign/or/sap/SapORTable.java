@@ -1,13 +1,12 @@
-package com.ing.ide.main.mainui.components.testdesign.or.api;
 
-import com.ing.datalib.or.api.APIOR;
-import com.ing.datalib.or.api.APIORObject;
-import com.ing.datalib.or.api.APIORPage;
+package com.ing.ide.main.mainui.components.testdesign.or.sap;
+
 import com.ing.datalib.or.common.ORAttribute;
 import com.ing.datalib.or.common.ORObjectInf;
 import com.ing.datalib.or.common.ObjectGroup;
+import com.ing.datalib.or.sap.SapORObject;
+import com.ing.datalib.or.sap.SapORPage;
 import com.ing.ide.main.utils.Utils;
-import com.ing.ide.main.utils.table.PropertyAttributeRenderer;
 import com.ing.ide.main.utils.table.XTable;
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -22,24 +21,18 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
-import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
 
-/**
- * Table component for API Object Repository properties.
- * Shows JsonPath and Xpath attributes (2 columns: Attribute, Value).
- */
-public class APIORTable extends JPanel implements ActionListener {
+public class SapORTable extends JPanel implements ActionListener {
 
     private final XTable table;
 
-    private final APIORPanel apiOR;
+    private final SapORPanel sapOR;
     private final ToolBar toolBar;
     private final PopupMenu popupMenu;
 
-    public APIORTable(APIORPanel apiOR) {
-        this.apiOR = apiOR;
+    public SapORTable(SapORPanel sapOR) {
+        this.sapOR = sapOR;
         table = new XTable();
         toolBar = new ToolBar();
         popupMenu = new PopupMenu();
@@ -59,24 +52,8 @@ public class APIORTable extends JPanel implements ActionListener {
         return table;
     }
 
-    public void loadObject(APIORObject object) {
+    public void loadObject(SapORObject object) {
         table.setModel(object);
-        configureColumns();
-    }
-
-    private void configureColumns() {
-        if (table.getColumnCount() >= 2) {
-            // Column 0: Attribute - narrow width
-            TableColumn attrCol = table.getColumnModel().getColumn(0);
-            attrCol.setCellRenderer(new PropertyAttributeRenderer());
-            attrCol.setPreferredWidth(100);
-            attrCol.setMinWidth(80);
-            attrCol.setMaxWidth(150);
-            
-            // Column 1: Value - takes remaining space
-            TableColumn valueCol = table.getColumnModel().getColumn(1);
-            valueCol.setPreferredWidth(300);
-        }
     }
 
     public void reset() {
@@ -148,8 +125,7 @@ public class APIORTable extends JPanel implements ActionListener {
         if (table.getSelectedRows().length > 0) {
             String[] attrs = getSelectedAttrs();
             for (String attr : attrs) {
-                getObject().removeAttribute(getObject().getAttribute(attr) != null ? 
-                    getObject().getAttributes().indexOf(getObject().getAttribute(attr)) : -1);
+                getObject().removeAttribute(attr);
             }
         }
     }
@@ -168,22 +144,10 @@ public class APIORTable extends JPanel implements ActionListener {
             stopCellEditing();
             int from = table.getSelectedRows()[0];
             int to = table.getSelectedRows()[table.getSelectedRowCount() - 1];
-            if (moveRowsUp(from, to)) {
+            if (getObject().moveRowsUp(from, to)) {
                 table.getSelectionModel().setSelectionInterval(from - 1, to - 1);
             }
         }
-    }
-
-    private boolean moveRowsUp(int from, int to) {
-        if (from > 0) {
-            List<ORAttribute> attrs = getObject().getAttributes();
-            for (int i = from; i <= to; i++) {
-                Collections.swap(attrs, i, i - 1);
-            }
-            table.repaint();
-            return true;
-        }
-        return false;
     }
 
     private void moveDown() {
@@ -191,26 +155,14 @@ public class APIORTable extends JPanel implements ActionListener {
             stopCellEditing();
             int from = table.getSelectedRows()[0];
             int to = table.getSelectedRows()[table.getSelectedRowCount() - 1];
-            if (moveRowsDown(from, to)) {
+            if (getObject().moveRowsDown(from, to)) {
                 table.getSelectionModel().setSelectionInterval(from + 1, to + 1);
             }
         }
     }
 
-    private boolean moveRowsDown(int from, int to) {
-        List<ORAttribute> attrs = getObject().getAttributes();
-        if (to < attrs.size() - 1) {
-            for (int i = to; i >= from; i--) {
-                Collections.swap(attrs, i, i + 1);
-            }
-            table.repaint();
-            return true;
-        }
-        return false;
-    }
-
     private List<ORObjectInf> getSelectedObjects() {
-        return apiOR.getObjectTree().getSelectedObjects();
+        return sapOR.getObjectTree().getSelectedObjects();
     }
 
     private void clearFromSelected() {
@@ -218,7 +170,7 @@ public class APIORTable extends JPanel implements ActionListener {
             String[] attrs = getSelectedAttrs();
             for (String attr : attrs) {
                 getSelectedObjects().stream().forEach((object) -> {
-                    ((APIORObject) object).setAttributeByName(attr, "");
+                    ((SapORObject) object).setAttributeByName(attr, "");
                 });
             }
         }
@@ -227,7 +179,7 @@ public class APIORTable extends JPanel implements ActionListener {
     private void clearFromAll() {
         if (table.getSelectedRowCount() > 0) {
             String[] attrs = getSelectedAttrs();
-            for (APIORPage page : getObject().getPage().getRoot().getPages()) {
+            for (SapORPage page : getObject().getPage().getRoot().getPages()) {
                 clearFromPage(page, attrs);
             }
         }
@@ -239,9 +191,9 @@ public class APIORTable extends JPanel implements ActionListener {
         }
     }
 
-    private void clearFromPage(APIORPage page, String[] attrs) {
-        for (ObjectGroup<APIORObject> objectGroup : page.getObjectGroups()) {
-            for (APIORObject object : objectGroup.getObjects()) {
+    private void clearFromPage(SapORPage page, String[] attrs) {
+        for (ObjectGroup<SapORObject> objectGroup : page.getObjectGroups()) {
+            for (SapORObject object : objectGroup.getObjects()) {
                 for (String attr : attrs) {
                     object.setAttributeByName(attr, "");
                 }
@@ -252,7 +204,7 @@ public class APIORTable extends JPanel implements ActionListener {
     private void removeFromAll() {
         if (table.getSelectedRowCount() > 0) {
             String[] attrs = getSelectedAttrs();
-            for (APIORPage page : getObject().getPage().getRoot().getPages()) {
+            for (SapORPage page : getObject().getPage().getRoot().getPages()) {
                 removeFromPage(page, attrs);
             }
         }
@@ -263,11 +215,7 @@ public class APIORTable extends JPanel implements ActionListener {
             String[] attrs = getSelectedAttrs();
             for (String attr : attrs) {
                 getSelectedObjects().stream().forEach((object) -> {
-                    APIORObject apiObj = (APIORObject) object;
-                    ORAttribute orAttr = apiObj.getAttribute(attr);
-                    if (orAttr != null) {
-                        apiObj.removeAttribute(apiObj.getAttributes().indexOf(orAttr));
-                    }
+                    ((SapORObject) object).removeAttribute(attr);
                 });
             }
         }
@@ -279,14 +227,11 @@ public class APIORTable extends JPanel implements ActionListener {
         }
     }
 
-    private void removeFromPage(APIORPage page, String[] attrs) {
-        for (ObjectGroup<APIORObject> objectGroup : page.getObjectGroups()) {
-            for (APIORObject object : objectGroup.getObjects()) {
+    private void removeFromPage(SapORPage page, String[] attrs) {
+        for (ObjectGroup<SapORObject> objectGroup : page.getObjectGroups()) {
+            for (SapORObject object : objectGroup.getObjects()) {
                 for (String attr : attrs) {
-                    ORAttribute orAttr = object.getAttribute(attr);
-                    if (orAttr != null) {
-                        object.removeAttribute(object.getAttributes().indexOf(orAttr));
-                    }
+                    object.removeAttribute(attr);
                 }
             }
         }
@@ -297,7 +242,7 @@ public class APIORTable extends JPanel implements ActionListener {
             String[] attrs = getSelectedAttrs();
             for (String attr : attrs) {
                 getSelectedObjects().stream().forEach((object) -> {
-                    ((APIORObject) object).addOrUpdateAttribute(attr, "");
+                    ((SapORObject) object).addNewAttribute(attr);
                 });
             }
         }
@@ -306,7 +251,7 @@ public class APIORTable extends JPanel implements ActionListener {
     private void addToAll() {
         if (table.getSelectedRowCount() > 0) {
             String[] attrs = getSelectedAttrs();
-            for (APIORPage page : getObject().getPage().getRoot().getPages()) {
+            for (SapORPage page : getObject().getPage().getRoot().getPages()) {
                 addToPage(page, attrs);
             }
         }
@@ -318,11 +263,11 @@ public class APIORTable extends JPanel implements ActionListener {
         }
     }
 
-    private void addToPage(APIORPage page, String[] attrs) {
-        for (ObjectGroup<APIORObject> objectGroup : page.getObjectGroups()) {
-            for (APIORObject object : objectGroup.getObjects()) {
+    private void addToPage(SapORPage page, String[] attrs) {
+        for (ObjectGroup<SapORObject> objectGroup : page.getObjectGroups()) {
+            for (SapORObject object : objectGroup.getObjects()) {
                 for (String attr : attrs) {
-                    object.addOrUpdateAttribute(attr, "");
+                    object.addNewAttribute(attr);
                 }
             }
         }
@@ -330,29 +275,29 @@ public class APIORTable extends JPanel implements ActionListener {
 
     private void setPriorityToAll() {
         stopCellEditing();
-        APIORObject currObj = getObject();
-        for (APIORPage page : getObject().getPage().getRoot().getPages()) {
+        SapORObject currObj = getObject();
+        for (SapORPage page : getObject().getPage().getRoot().getPages()) {
             setPriorityToPage(page, currObj);
         }
     }
 
     private void setPriorityToSelected() {
         stopCellEditing();
-        APIORObject currObj = getObject();
+        SapORObject currObj = getObject();
         getSelectedObjects().stream().forEach((object) -> {
-            reorderAttributes(currObj.getAttributes(), ((APIORObject) object).getAttributes());
+            reorderAttributes(currObj.getAttributes(), ((SapORObject) object).getAttributes());
         });
     }
 
     private void setPriorityToPage() {
         stopCellEditing();
-        APIORObject currObj = getObject();
+        SapORObject currObj = getObject();
         setPriorityToPage(getObject().getPage(), currObj);
     }
 
-    private void setPriorityToPage(APIORPage page, APIORObject currObj) {
-        for (ObjectGroup<APIORObject> objectGroup : page.getObjectGroups()) {
-            for (APIORObject object : objectGroup.getObjects()) {
+    private void setPriorityToPage(SapORPage page, SapORObject currObj) {
+        for (ObjectGroup<SapORObject> objectGroup : page.getObjectGroups()) {
+            for (SapORObject object : objectGroup.getObjects()) {
                 reorderAttributes(currObj.getAttributes(), object.getAttributes());
             }
         }
@@ -376,9 +321,9 @@ public class APIORTable extends JPanel implements ActionListener {
         }
     }
 
-    public APIORObject getObject() {
-        if (table.getModel() instanceof APIORObject) {
-            return (APIORObject) table.getModel();
+    public SapORObject getObject() {
+        if (table.getModel() instanceof SapORObject) {
+            return (SapORObject) table.getModel();
         }
         return null;
     }
@@ -387,13 +332,12 @@ public class APIORTable extends JPanel implements ActionListener {
 
         public ToolBar() {
             init();
-            setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, UIManager.getColor("Separator.foreground")));
+            setBorder(BorderFactory.createEtchedBorder());
         }
 
         private void init() {
             setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.X_AXIS));
             setFloatable(false);
-            setOpaque(false);
 
             add(new javax.swing.Box.Filler(new java.awt.Dimension(10, 0),
                     new java.awt.Dimension(10, 0),
@@ -404,11 +348,11 @@ public class APIORTable extends JPanel implements ActionListener {
 
             add(new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767)));
 
-            add(Utils.createButton("Add Row", "add", "Ctrl+Plus", APIORTable.this));
-            add(Utils.createButton("Delete Rows", "remove", "Ctrl+Minus", APIORTable.this));
+            add(Utils.createButton("Add Row", "add", "Ctrl+Plus", SapORTable.this));
+            add(Utils.createButton("Delete Rows", "remove", "Ctrl+Minus", SapORTable.this));
             addSeparator();
-            add(Utils.createButton("Move Rows Up", "up", "Ctrl+Up", APIORTable.this));
-            add(Utils.createButton("Move Rows Down", "down", "Ctrl+Down", APIORTable.this));
+            add(Utils.createButton("Move Rows Up", "up", "Ctrl+Up", SapORTable.this));
+            add(Utils.createButton("Move Rows Down", "down", "Ctrl+Down", SapORTable.this));
         }
 
     }
@@ -425,21 +369,21 @@ public class APIORTable extends JPanel implements ActionListener {
             JMenu clearProp = new JMenu("Clear Property");
             JMenu deleteProp = new JMenu("Remove Property");
 
-            setPriority.add(Utils.createMenuItem("Set Priority to Page", APIORTable.this));
-            setPriority.add(Utils.createMenuItem("Set Priority to All", APIORTable.this));
-            setPriority.add(Utils.createMenuItem("Set Priority to Selected", APIORTable.this));
+            setPriority.add(Utils.createMenuItem("Set Priority to Page", SapORTable.this));
+            setPriority.add(Utils.createMenuItem("Set Priority to All", SapORTable.this));
+            setPriority.add(Utils.createMenuItem("Set Priority to Selected", SapORTable.this));
             add(setPriority);
-            clearProp.add(Utils.createMenuItem("Clear from Page", APIORTable.this));
-            clearProp.add(Utils.createMenuItem("Clear from All", APIORTable.this));
-            clearProp.add(Utils.createMenuItem("Clear from Selected", APIORTable.this));
+            clearProp.add(Utils.createMenuItem("Clear from Page", SapORTable.this));
+            clearProp.add(Utils.createMenuItem("Clear from All", SapORTable.this));
+            clearProp.add(Utils.createMenuItem("Clear from Selected", SapORTable.this));
             add(clearProp);
-            deleteProp.add(Utils.createMenuItem("Remove from Page", APIORTable.this));
-            deleteProp.add(Utils.createMenuItem("Remove from All", APIORTable.this));
-            deleteProp.add(Utils.createMenuItem("Remove from Selected", APIORTable.this));
+            deleteProp.add(Utils.createMenuItem("Remove from Page", SapORTable.this));
+            deleteProp.add(Utils.createMenuItem("Remove from All", SapORTable.this));
+            deleteProp.add(Utils.createMenuItem("Remove from Selected", SapORTable.this));
             add(deleteProp);
-            addProp.add(Utils.createMenuItem("Add to Page", APIORTable.this));
-            addProp.add(Utils.createMenuItem("Add to All", APIORTable.this));
-            addProp.add(Utils.createMenuItem("Add to Selected", APIORTable.this));
+            addProp.add(Utils.createMenuItem("Add to Page", SapORTable.this));
+            addProp.add(Utils.createMenuItem("Add to All", SapORTable.this));
+            addProp.add(Utils.createMenuItem("Add to Selected", SapORTable.this));
             add(addProp);
         }
 

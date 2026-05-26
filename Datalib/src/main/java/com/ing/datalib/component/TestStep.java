@@ -1,6 +1,9 @@
 
 package com.ing.datalib.component;
 
+import com.ing.datalib.or.mobile.ResolvedMobileObject;
+import com.ing.datalib.or.structureddata.ResolvedStructuredDataObject;
+import com.ing.datalib.or.web.ResolvedWebObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -202,6 +205,39 @@ public class TestStep {
     public TestStep asObjectStep(String objectName, String pageName) {
         setObject(objectName);
         setReference(pageName);
+        return this;
+    }
+
+    public TestStep asObjectStep(ResolvedWebObject rwo) {
+        setObject(rwo.getObjectName());
+        setReference(
+            new ResolvedWebObject.PageRef(
+                rwo.getPageName(),
+                rwo.getScope()
+            ).qualified()
+        );
+        return this;
+    }
+
+    public TestStep asObjectStep(ResolvedMobileObject rmo) {
+        setObject(rmo.getObjectName());
+        setReference(
+            new ResolvedMobileObject.PageRef(
+                rmo.getPageName(),
+                rmo.getScope()
+            ).qualified()
+        );
+        return this;
+    }
+
+    public TestStep asObjectStep(ResolvedStructuredDataObject rsdo) {
+        setObject(rsdo.getObjectName());
+        setReference(
+            new ResolvedStructuredDataObject.PageRef(
+                rsdo.getPageName(),
+                rsdo.getScope()
+            ).qualified()
+        );
         return this;
     }
 
