@@ -3,7 +3,6 @@ package com.ing.engine.constants;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
-
 import org.testng.annotations.Test;
 
 /**

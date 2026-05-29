@@ -1,20 +1,19 @@
 package com.ing.datalib.or.yaml;
 
-import com.ing.datalib.or.common.ORAttribute;
-import com.ing.datalib.or.common.ObjectGroup;
-import com.ing.datalib.or.mobile.MobileOR;
-import com.ing.datalib.or.mobile.MobileORObject;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.ing.datalib.or.common.ORAttribute;
+import com.ing.datalib.or.common.ObjectGroup;
+import com.ing.datalib.or.mobile.MobileOR;
+import com.ing.datalib.or.mobile.MobileORObject;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * YAML representation of a Mobile OR element.
- * 
+ *
  * Example YAML output:
  * <pre>
  * elements:
@@ -27,38 +26,51 @@ import java.util.List;
  *     uiAutomator: new UiSelector().resourceId("username")
  *     xpath: //android.widget.EditText[@text="Username"]
  * </pre>
- * 
+ *
  * Only non-empty properties are serialized (75% size reduction from XML).
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({"uiAutomator", "uiAutomation", "id", "accessibility", 
-                    "xpath", "css", "name", "tagName", "linkText", "className", "exact"})
+@JsonPropertyOrder(
+    {
+        "uiAutomator",
+        "uiAutomation",
+        "id",
+        "accessibility",
+        "xpath",
+        "css",
+        "name",
+        "tagName",
+        "linkText",
+        "className",
+        "exact"
+    }
+)
 public class YamlMobileElementDefinition {
-    
     // Mobile-specific locator strategies
-    private String uiAutomator;   // Android UiAutomator selector
-    private String uiAutomation;  // iOS UiAutomation selector
-    private String id;            // Resource ID
+    private String uiAutomator; // Android UiAutomator selector
+    private String uiAutomation; // iOS UiAutomation selector
+    private String id; // Resource ID
     private String accessibility; // Accessibility ID
-    
+
     // Standard locators (shared with web)
     private String xpath;
     private String css;
     private String name;
     private String tagName;
+
     @JsonProperty("linkText")
     private String linkText;
+
     @JsonProperty("className")
     private String className;
-    
+
     // List of locator names that should use exact matching
     private List<String> exact;
-    
-    public YamlMobileElementDefinition() {
-    }
-    
+
+    public YamlMobileElementDefinition() {}
+
     // ==================== Getters and Setters ====================
-    
+
     public String getUiAutomator() {
         return uiAutomator;
     }
@@ -138,15 +150,15 @@ public class YamlMobileElementDefinition {
     public void setClassName(String className) {
         this.className = className;
     }
-    
+
     public List<String> getExact() {
         return exact;
     }
-    
+
     public void setExact(List<String> exact) {
         this.exact = exact;
     }
-    
+
     public void addExact(String locatorName) {
         if (this.exact == null) {
             this.exact = new ArrayList<>();
@@ -155,28 +167,28 @@ public class YamlMobileElementDefinition {
             this.exact.add(locatorName.toLowerCase());
         }
     }
-    
+
     public boolean isExact(String locatorName) {
         return exact != null && exact.contains(locatorName.toLowerCase());
     }
-    
+
     // ==================== Conversion Methods ====================
-    
+
     /**
      * Convert a MobileORObject to YamlMobileElementDefinition.
      * Maps MobileOR property names to YAML field names.
      */
     public static YamlMobileElementDefinition fromMobileORObject(MobileORObject obj) {
         YamlMobileElementDefinition yaml = new YamlMobileElementDefinition();
-        
+
         for (ORAttribute attr : obj.getAttributes()) {
             String propName = attr.getName();
             String value = attr.getValue();
-            
+
             if (value == null || value.isEmpty()) {
                 continue;
             }
-            
+
             // Map MobileOR property names to YAML fields
             switch (propName) {
                 case "UiAutomator":
@@ -213,22 +225,22 @@ public class YamlMobileElementDefinition {
                     // Unknown property, ignore
                     break;
             }
-            
+
             // Add to exact list if the attribute has exact flag set
             if (attr.isExact()) {
                 yaml.addExact(propName);
             }
         }
-        
+
         return yaml;
     }
-    
+
     /**
      * Convert YamlMobileElementDefinition to a MobileORObject.
      */
     public MobileORObject toMobileORObject(String name, ObjectGroup<MobileORObject> group) {
         MobileORObject obj = new MobileORObject(name, group);
-        
+
         // Add attributes for each non-empty property with exact flag
         // Using MobileOR property names for compatibility
         setAttributeIfPresent(obj, "UiAutomator", uiAutomator, isExact("uiautomator"));
@@ -241,34 +253,46 @@ public class YamlMobileElementDefinition {
         setAttributeIfPresent(obj, "tagName", tagName, isExact("tagname"));
         setAttributeIfPresent(obj, "link_text", linkText, isExact("link_text"));
         setAttributeIfPresent(obj, "class", className, isExact("class"));
-        
+
         return obj;
     }
-    
-    private void setAttributeIfPresent(MobileORObject obj, String propName, String value, boolean exactMatch) {
+
+    private void setAttributeIfPresent(
+        MobileORObject obj,
+        String propName,
+        String value,
+        boolean exactMatch
+    ) {
         ORAttribute attr = obj.getAttribute(propName);
         if (attr != null && value != null && !value.isEmpty()) {
             attr.setValue(value);
             attr.setExact(exactMatch);
         }
     }
-    
+
     /**
      * Check if this element has any defined locators.
      */
     @JsonIgnore
     public boolean isEmpty() {
-        return isNullOrEmpty(uiAutomator) && isNullOrEmpty(uiAutomation)
-            && isNullOrEmpty(id) && isNullOrEmpty(accessibility)
-            && isNullOrEmpty(xpath) && isNullOrEmpty(css)
-            && isNullOrEmpty(name) && isNullOrEmpty(tagName)
-            && isNullOrEmpty(linkText) && isNullOrEmpty(className);
+        return (
+            isNullOrEmpty(uiAutomator) &&
+            isNullOrEmpty(uiAutomation) &&
+            isNullOrEmpty(id) &&
+            isNullOrEmpty(accessibility) &&
+            isNullOrEmpty(xpath) &&
+            isNullOrEmpty(css) &&
+            isNullOrEmpty(name) &&
+            isNullOrEmpty(tagName) &&
+            isNullOrEmpty(linkText) &&
+            isNullOrEmpty(className)
+        );
     }
-    
+
     private boolean isNullOrEmpty(String s) {
         return s == null || s.isEmpty();
     }
-    
+
     /**
      * Get the primary locator value (first non-empty locator).
      * Priority: accessibility > id > uiAutomator > uiAutomation > xpath > css > name > tagName > linkText > className
@@ -287,7 +311,7 @@ public class YamlMobileElementDefinition {
         if (!isNullOrEmpty(className)) return className;
         return null;
     }
-    
+
     /**
      * Get the primary locator type name.
      */

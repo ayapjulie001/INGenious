@@ -1,8 +1,7 @@
-
 package com.ing.engine.drivers;
 
-import com.ing.engine.constants.FilePath;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ing.engine.constants.FilePath;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,7 +13,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.SystemUtils;
 
 public class ChromeEmulators {
-
     private static final Logger LOG = Logger.getLogger(ChromeEmulators.class.getName());
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -59,12 +57,16 @@ public class ChromeEmulators {
                 List list = MAPPER.readValue(stdemulators, List.class);
                 EMULATORS.clear();
                 EMULATORS.addAll(
-                        (List<String>) list.stream()
-                        .map((device) -> {
-                            return ((Map) device).get("title");
-                        })
-                        .map((val) -> val.toString())
-                        .collect(Collectors.toList()));
+                    (List<String>) list
+                        .stream()
+                        .map(
+                            device -> {
+                                return ((Map) device).get("title");
+                            }
+                        )
+                        .map(val -> val.toString())
+                        .collect(Collectors.toList())
+                );
                 saveList();
             } else {
                 LOG.severe("Either Chrome is not installed or OS not supported");
@@ -81,13 +83,19 @@ public class ChromeEmulators {
      */
     public static String getPrefLocation() {
         if (SystemUtils.IS_OS_WINDOWS) {
-            return SystemUtils.getUserHome().getAbsolutePath() + "/AppData/Local/Google/Chrome/User Data/Default";
+            return (
+                SystemUtils.getUserHome().getAbsolutePath() +
+                "/AppData/Local/Google/Chrome/User Data/Default"
+            );
         }
         if (SystemUtils.IS_OS_MAC_OSX) {
-            return SystemUtils.getUserHome().getAbsolutePath()+"/Library/Application Support/Google/Chrome/Default";
+            return (
+                SystemUtils.getUserHome().getAbsolutePath() +
+                "/Library/Application Support/Google/Chrome/Default"
+            );
         }
         if (SystemUtils.IS_OS_LINUX) {
-            return SystemUtils.getUserHome().getAbsolutePath()+"/.config/google-chrome/Default";
+            return SystemUtils.getUserHome().getAbsolutePath() + "/.config/google-chrome/Default";
         }
         return "OSNotConfigured";
     }

@@ -2,17 +2,16 @@ package com.ing.engine.cli;
 
 import com.ing.engine.cli.commands.*;
 import com.ing.engine.cli.output.OutputFormatter;
-import picocli.CommandLine;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
-import picocli.CommandLine.HelpCommand;
-
 import java.io.PrintWriter;
 import java.util.concurrent.Callable;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.HelpCommand;
+import picocli.CommandLine.Option;
 
 /**
  * INGenious CLI - The comprehensive command-line interface for INGenious Test Automation Platform.
- * 
+ *
  * Supports subcommands for project management, test execution, reporting, and AI/Copilot integration.
  */
 @Command(
@@ -43,20 +42,19 @@ import java.util.concurrent.Callable;
     commandListHeading = "%nCommands:%n"
 )
 public class INGeniousCLI implements Callable<Integer> {
-
-    @Option(names = {"--json"}, description = "Output in JSON format")
+    @Option(names = { "--json" }, description = "Output in JSON format")
     private boolean jsonOutput;
 
-    @Option(names = {"--yaml"}, description = "Output in YAML format")
+    @Option(names = { "--yaml" }, description = "Output in YAML format")
     private boolean yamlOutput;
 
-    @Option(names = {"-q", "--quiet"}, description = "Minimal output")
+    @Option(names = { "-q", "--quiet" }, description = "Minimal output")
     private boolean quiet;
 
-    @Option(names = {"--no-color"}, description = "Disable colored output")
+    @Option(names = { "--no-color" }, description = "Disable colored output")
     private boolean noColor;
 
-    @Option(names = {"--project", "-p"}, description = "Project path (used globally)")
+    @Option(names = { "--project", "-p" }, description = "Project path (used globally)")
     private String projectPath;
 
     // Shared state for subcommands
@@ -115,33 +113,159 @@ public class INGeniousCLI implements Callable<Integer> {
         CommandLine.usage(this, System.out);
         return 0;
     }
-    
+
     /**
      * Print the INGenious ASCII art banner with #7724FF color.
      */
     private void printBanner() {
         if (quiet) return;
-        
+
         // Color #7724FF (Purple/Violet) using 24-bit ANSI escape
-        String p = noColor ? "" : "\u001b[38;2;119;36;255m";    // purple #7724FF
-        String b = noColor ? "" : "\u001b[38;2;147;92;255m";    // bright purple
-        String l = noColor ? "" : "\u001b[38;2;180;140;255m";   // light purple
-        String w = noColor ? "" : "\u001b[38;2;255;255;255m";   // white
-        String r = noColor ? "" : "\u001b[0m";                   // reset
-        String bo = noColor ? "" : "\u001b[1m";                  // bold
-        
+        String p = noColor ? "" : "\u001b[38;2;119;36;255m"; // purple #7724FF
+        String b = noColor ? "" : "\u001b[38;2;147;92;255m"; // bright purple
+        String l = noColor ? "" : "\u001b[38;2;180;140;255m"; // light purple
+        String w = noColor ? "" : "\u001b[38;2;255;255;255m"; // white
+        String r = noColor ? "" : "\u001b[0m"; // reset
+        String bo = noColor ? "" : "\u001b[1m"; // bold
+
         System.out.println();
-        System.out.println(p + "    ██╗" + b + "███╗   ██╗" + p + " ██████╗ " + b + "███████╗" + p + "███╗   ██╗" + b + "██╗" + p + " ██████╗ " + b + "██╗   ██╗" + p + "███████╗" + r);
-        System.out.println(p + "    ██║" + b + "████╗  ██║" + p + "██╔════╝ " + b + "██╔════╝" + p + "████╗  ██║" + b + "██║" + p + "██╔═══██╗" + b + "██║   ██║" + p + "██╔════╝" + r);
-        System.out.println(b + "    ██║" + l + "██╔██╗ ██║" + b + "██║  ███╗" + l + "█████╗  " + b + "██╔██╗ ██║" + l + "██║" + b + "██║   ██║" + l + "██║   ██║" + b + "███████╗" + r);
-        System.out.println(b + "    ██║" + p + "██║╚██╗██║" + b + "██║   ██║" + p + "██╔══╝  " + b + "██║╚██╗██║" + p + "██║" + b + "██║   ██║" + p + "██║   ██║" + b + "╚════██║" + r);
-        System.out.println(l + "    ██║" + b + "██║ ╚████║" + l + "╚██████╔╝" + b + "███████╗" + l + "██║ ╚████║" + b + "██║" + l + "╚██████╔╝" + b + "╚██████╔╝" + l + "███████║" + r);
-        System.out.println(p + "    ╚═╝" + l + "╚═╝  ╚═══╝" + p + " ╚═════╝ " + l + "╚══════╝" + p + "╚═╝  ╚═══╝" + l + "╚═╝" + p + " ╚═════╝ " + l + " ╚═════╝ " + p + "╚══════╝" + r);
+        System.out.println(
+            p +
+            "    ██╗" +
+            b +
+            "███╗   ██╗" +
+            p +
+            " ██████╗ " +
+            b +
+            "███████╗" +
+            p +
+            "███╗   ██╗" +
+            b +
+            "██╗" +
+            p +
+            " ██████╗ " +
+            b +
+            "██╗   ██╗" +
+            p +
+            "███████╗" +
+            r
+        );
+        System.out.println(
+            p +
+            "    ██║" +
+            b +
+            "████╗  ██║" +
+            p +
+            "██╔════╝ " +
+            b +
+            "██╔════╝" +
+            p +
+            "████╗  ██║" +
+            b +
+            "██║" +
+            p +
+            "██╔═══██╗" +
+            b +
+            "██║   ██║" +
+            p +
+            "██╔════╝" +
+            r
+        );
+        System.out.println(
+            b +
+            "    ██║" +
+            l +
+            "██╔██╗ ██║" +
+            b +
+            "██║  ███╗" +
+            l +
+            "█████╗  " +
+            b +
+            "██╔██╗ ██║" +
+            l +
+            "██║" +
+            b +
+            "██║   ██║" +
+            l +
+            "██║   ██║" +
+            b +
+            "███████╗" +
+            r
+        );
+        System.out.println(
+            b +
+            "    ██║" +
+            p +
+            "██║╚██╗██║" +
+            b +
+            "██║   ██║" +
+            p +
+            "██╔══╝  " +
+            b +
+            "██║╚██╗██║" +
+            p +
+            "██║" +
+            b +
+            "██║   ██║" +
+            p +
+            "██║   ██║" +
+            b +
+            "╚════██║" +
+            r
+        );
+        System.out.println(
+            l +
+            "    ██║" +
+            b +
+            "██║ ╚████║" +
+            l +
+            "╚██████╔╝" +
+            b +
+            "███████╗" +
+            l +
+            "██║ ╚████║" +
+            b +
+            "██║" +
+            l +
+            "╚██████╔╝" +
+            b +
+            "╚██████╔╝" +
+            l +
+            "███████║" +
+            r
+        );
+        System.out.println(
+            p +
+            "    ╚═╝" +
+            l +
+            "╚═╝  ╚═══╝" +
+            p +
+            " ╚═════╝ " +
+            l +
+            "╚══════╝" +
+            p +
+            "╚═╝  ╚═══╝" +
+            l +
+            "╚═╝" +
+            p +
+            " ╚═════╝ " +
+            l +
+            " ╚═════╝ " +
+            p +
+            "╚══════╝" +
+            r
+        );
         System.out.println();
-        System.out.println(bo + l + "              ═══════════════════════════════════════════════════════════" + r);
-        System.out.println(bo + w + "               ✦  T E S T   A U T O M A T I O N   F R A M E W O R K  ✦" + r);
+        System.out.println(
+            bo + l + "              ═══════════════════════════════════════════════════════════" + r
+        );
+        System.out.println(
+            bo + w + "               ✦  T E S T   A U T O M A T I O N   F R A M E W O R K  ✦" + r
+        );
         System.out.println(bo + b + "                              Version 3.0.0-preview" + r);
-        System.out.println(bo + l + "              ═══════════════════════════════════════════════════════════" + r);
+        System.out.println(
+            bo + l + "              ═══════════════════════════════════════════════════════════" + r
+        );
         System.out.println();
     }
 
@@ -156,13 +280,17 @@ public class INGeniousCLI implements Callable<Integer> {
             .setColorScheme(CommandLine.Help.defaultColorScheme(CommandLine.Help.Ansi.AUTO));
 
         // Configure for better error handling
-        cmd.setExecutionExceptionHandler((ex, commandLine, parseResult) -> {
-            commandLine.getErr().println(commandLine.getColorScheme().errorText("Error: " + ex.getMessage()));
-            if (System.getProperty("ingenious.debug") != null) {
-                ex.printStackTrace(commandLine.getErr());
+        cmd.setExecutionExceptionHandler(
+            (ex, commandLine, parseResult) -> {
+                commandLine
+                    .getErr()
+                    .println(commandLine.getColorScheme().errorText("Error: " + ex.getMessage()));
+                if (System.getProperty("ingenious.debug") != null) {
+                    ex.printStackTrace(commandLine.getErr());
+                }
+                return 1;
             }
-            return 1;
-        });
+        );
 
         return cmd.execute(args);
     }
@@ -183,10 +311,18 @@ public class INGeniousCLI implements Callable<Integer> {
         }
         // Legacy args start with single dash and are from the old CLI
         String firstArg = args[0];
-        return firstArg.startsWith("-") && !firstArg.startsWith("--") &&
-               (firstArg.equals("-run") || firstArg.equals("-rerun") || 
-                firstArg.equals("-v") || firstArg.equals("-help") ||
-                firstArg.equals("-project_location") || firstArg.equals("-latest_exe_status"));
+        return (
+            firstArg.startsWith("-") &&
+            !firstArg.startsWith("--") &&
+            (
+                firstArg.equals("-run") ||
+                firstArg.equals("-rerun") ||
+                firstArg.equals("-v") ||
+                firstArg.equals("-help") ||
+                firstArg.equals("-project_location") ||
+                firstArg.equals("-latest_exe_status")
+            )
+        );
     }
 
     /**

@@ -2,31 +2,31 @@ package com.ing.engine.commands.structuredData;
 
 import com.ing.engine.commands.browser.General;
 import com.ing.engine.core.CommandControl;
-import com.ing.ingenious.api.status.Status;
 import com.ing.ingenious.api.annotation.Action;
+import com.ing.ingenious.api.status.Status;
 import com.ing.ingenious.api.types.InputType;
 import com.ing.ingenious.api.types.ObjectType;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.io.IOException;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
 import com.jayway.jsonpath.*;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
@@ -55,7 +55,6 @@ public class StructuredData extends General {
         XMLPATH
     }
 
-
     /****** JsonPath Actions ******/
 
     /**
@@ -67,7 +66,11 @@ public class StructuredData extends General {
      *   <li>Input: Expected substring</li>
      * </ul>
      */
-    @Action(object = ObjectType.STRUCTUREDDATA, desc = "Assert JsonPath Result Contains ", input = InputType.YES)
+    @Action(
+        object = ObjectType.STRUCTUREDDATA,
+        desc = "Assert JsonPath Result Contains ",
+        input = InputType.YES
+    )
     public void assertJsonPathResultContains() {
         try {
             String response = responsebodies.get(key);
@@ -75,14 +78,25 @@ public class StructuredData extends General {
             String value = JsonPath.read(response, jsonpath).toString();
             String strObj = getInputValue(Input);
             if (value.contains(strObj)) {
-                Report.updateTestLog(Action, "Element text contains [" + strObj + "] is as expected", Status.PASSNS);
+                Report.updateTestLog(
+                    Action,
+                    "Element text contains [" + strObj + "] is as expected",
+                    Status.PASSNS
+                );
             } else {
-                Report.updateTestLog(Action, "Element text [" + value + "] does not contain [" + strObj + "]",
-                        Status.FAILNS);
+                Report.updateTestLog(
+                    Action,
+                    "Element text [" + value + "] does not contain [" + strObj + "]",
+                    Status.FAILNS
+                );
             }
         } catch (Exception ex) {
             Logger.getLogger(this.getClass().getName()).log(Level.OFF, null, ex);
-            Report.updateTestLog(Action, "Error in validating JSON element :" + "\n" + ex.getMessage(), Status.DEBUG);
+            Report.updateTestLog(
+                Action,
+                "Error in validating JSON element :" + "\n" + ex.getMessage(),
+                Status.DEBUG
+            );
         }
     }
 
@@ -96,7 +110,11 @@ public class StructuredData extends General {
      *   <li>Input: Substring that should NOT be present</li>
      * </ul>
      */
-    @Action(object = ObjectType.STRUCTUREDDATA, desc = "Assert JsonPath Result Not Contains ", input = InputType.YES)
+    @Action(
+        object = ObjectType.STRUCTUREDDATA,
+        desc = "Assert JsonPath Result Not Contains ",
+        input = InputType.YES
+    )
     public void assertJsonPathResultNotContains() {
         try {
             String response = responsebodies.get(key);
@@ -104,14 +122,25 @@ public class StructuredData extends General {
             String value = JsonPath.read(response, jsonpath).toString();
             String strObj = getInputValue(Input);
             if (!value.contains(strObj)) {
-                Report.updateTestLog(Action, "Element text [" + value + "] does not contain [" + strObj + "] as expected", Status.PASSNS);
+                Report.updateTestLog(
+                    Action,
+                    "Element text [" + value + "] does not contain [" + strObj + "] as expected",
+                    Status.PASSNS
+                );
             } else {
-                Report.updateTestLog(Action, "Element text [" + value + "] contains [" + strObj + "] but should not",
-                        Status.FAILNS);
+                Report.updateTestLog(
+                    Action,
+                    "Element text [" + value + "] contains [" + strObj + "] but should not",
+                    Status.FAILNS
+                );
             }
         } catch (Exception ex) {
             Logger.getLogger(this.getClass().getName()).log(Level.OFF, null, ex);
-            Report.updateTestLog(Action, "Error in validating JSON element :" + "\n" + ex.getMessage(), Status.DEBUG);
+            Report.updateTestLog(
+                Action,
+                "Error in validating JSON element :" + "\n" + ex.getMessage(),
+                Status.DEBUG
+            );
         }
     }
 
@@ -124,7 +153,11 @@ public class StructuredData extends General {
      *   <li>Input: Expected value</li>
      * </ul>
      */
-    @Action(object = ObjectType.STRUCTUREDDATA, desc = "Assert JsonPath Result Equals ", input = InputType.YES)
+    @Action(
+        object = ObjectType.STRUCTUREDDATA,
+        desc = "Assert JsonPath Result Equals ",
+        input = InputType.YES
+    )
     public void assertJsonPathResultEquals() {
         try {
             String response = responsebodies.get(key);
@@ -132,14 +165,25 @@ public class StructuredData extends General {
             String value = JsonPath.read(response, jsonpath).toString();
             String strObj = getInputValue(Input);
             if (value.equals(strObj)) {
-                Report.updateTestLog(Action, "Element text [" + value + "] is as expected", Status.PASSNS);
+                Report.updateTestLog(
+                    Action,
+                    "Element text [" + value + "] is as expected",
+                    Status.PASSNS
+                );
             } else {
-                Report.updateTestLog(Action, "Element text is [" + value + "] but is expected to be [" + strObj + "]",
-                        Status.FAILNS);
+                Report.updateTestLog(
+                    Action,
+                    "Element text is [" + value + "] but is expected to be [" + strObj + "]",
+                    Status.FAILNS
+                );
             }
         } catch (Exception ex) {
             Logger.getLogger(this.getClass().getName()).log(Level.OFF, null, ex);
-            Report.updateTestLog(Action, "Error in validating JSON element :" + "\n" + ex.getMessage(), Status.DEBUG);
+            Report.updateTestLog(
+                Action,
+                "Error in validating JSON element :" + "\n" + ex.getMessage(),
+                Status.DEBUG
+            );
         }
     }
 
@@ -153,7 +197,11 @@ public class StructuredData extends General {
      *   <li>Input: Value that should NOT match</li>
      * </ul>
      */
-    @Action(object = ObjectType.STRUCTUREDDATA, desc = "Assert JsonPath Result Not Equals ", input = InputType.YES)
+    @Action(
+        object = ObjectType.STRUCTUREDDATA,
+        desc = "Assert JsonPath Result Not Equals ",
+        input = InputType.YES
+    )
     public void assertJsonPathResultNotEquals() {
         try {
             String response = responsebodies.get(key);
@@ -161,14 +209,25 @@ public class StructuredData extends General {
             String value = JsonPath.read(response, jsonpath).toString();
             String strObj = getInputValue(Input);
             if (!value.equals(strObj)) {
-                Report.updateTestLog(Action, "Element text [" + value + "] is not equal to [" + strObj + "] as expected", Status.PASSNS);
+                Report.updateTestLog(
+                    Action,
+                    "Element text [" + value + "] is not equal to [" + strObj + "] as expected",
+                    Status.PASSNS
+                );
             } else {
-                Report.updateTestLog(Action, "Element text is [" + value + "] but should not be equal to [" + strObj + "]",
-                        Status.FAILNS);
+                Report.updateTestLog(
+                    Action,
+                    "Element text is [" + value + "] but should not be equal to [" + strObj + "]",
+                    Status.FAILNS
+                );
             }
         } catch (Exception ex) {
             Logger.getLogger(this.getClass().getName()).log(Level.OFF, null, ex);
-            Report.updateTestLog(Action, "Error in validating JSON element :" + "\n" + ex.getMessage(), Status.DEBUG);
+            Report.updateTestLog(
+                Action,
+                "Error in validating JSON element :" + "\n" + ex.getMessage(),
+                Status.DEBUG
+            );
         }
     }
 
@@ -181,7 +240,11 @@ public class StructuredData extends General {
      *   <li>Input: Expected count (integer)</li>
      * </ul>
      */
-    @Action(object = ObjectType.STRUCTUREDDATA, desc = "Assert JsonPath Result Count ", input = InputType.YES)
+    @Action(
+        object = ObjectType.STRUCTUREDDATA,
+        desc = "Assert JsonPath Result Count ",
+        input = InputType.YES
+    )
     public void assertJsonPathResultCount() {
         try {
             String response = responsebodies.get(key);
@@ -209,14 +272,29 @@ public class StructuredData extends General {
 
             int expectedObjectCount = Integer.parseInt(strObj);
             if (actualObjectCount == expectedObjectCount) {
-                Report.updateTestLog(Action, "Element count [" + expectedObjectCount + "] is as expected", Status.PASSNS);
+                Report.updateTestLog(
+                    Action,
+                    "Element count [" + expectedObjectCount + "] is as expected",
+                    Status.PASSNS
+                );
             } else {
-                Report.updateTestLog(Action, "Element count is [" + actualObjectCount + "] but is expected to be [" + expectedObjectCount + "]", Status.FAILNS);
+                Report.updateTestLog(
+                    Action,
+                    "Element count is [" +
+                    actualObjectCount +
+                    "] but is expected to be [" +
+                    expectedObjectCount +
+                    "]",
+                    Status.FAILNS
+                );
             }
-
         } catch (Exception ex) {
             Logger.getLogger(this.getClass().getName()).log(Level.OFF, null, ex);
-            Report.updateTestLog(Action, "Error in validating JSON element :" + "\n" + ex.getMessage(), Status.DEBUG);
+            Report.updateTestLog(
+                Action,
+                "Error in validating JSON element :" + "\n" + ex.getMessage(),
+                Status.DEBUG
+            );
         }
     }
 
@@ -229,35 +307,56 @@ public class StructuredData extends General {
      *   <li>Input: sheetName:ColumnName</li>
      * </ul>
      */
-    @Action(object = ObjectType.STRUCTUREDDATA, desc = "Store JsonPath Result count in Datasheet ", input = InputType.YES)
+    @Action(
+        object = ObjectType.STRUCTUREDDATA,
+        desc = "Store JsonPath Result count in Datasheet ",
+        input = InputType.YES
+    )
     public void storeJsonPathResultCountInDataSheet() {
         try {
             String dataSheetReference = Input;
             if (dataSheetReference.matches(".*:.*")) {
                 try {
-                    System.out.println("Updating value in SubIteration " + userData.getSubIteration());
+                    System.out.println(
+                        "Updating value in SubIteration " + userData.getSubIteration()
+                    );
                     String sheetName = dataSheetReference.split(":", 2)[0];
                     String columnName = dataSheetReference.split(":", 2)[1];
                     String actualObjectCount = Integer.toString(getJsonElementCount());
                     userData.putData(sheetName, columnName, actualObjectCount);
-                    Report.updateTestLog(Action, "Element count [" + actualObjectCount + "] is stored in " + dataSheetReference,
-                            Status.DONE);
+                    Report.updateTestLog(
+                        Action,
+                        "Element count [" +
+                        actualObjectCount +
+                        "] is stored in " +
+                        dataSheetReference,
+                        Status.DONE
+                    );
                 } catch (Exception ex) {
                     Logger.getLogger(this.getClass().getName()).log(Level.OFF, ex.getMessage(), ex);
-                    Report.updateTestLog(Action, "Error Storing JSON element in datasheet :" + "\n" + ex.getMessage(),
-                            Status.DEBUG);
+                    Report.updateTestLog(
+                        Action,
+                        "Error Storing JSON element in datasheet :" + "\n" + ex.getMessage(),
+                        Status.DEBUG
+                    );
                 }
             } else {
-                Report.updateTestLog(Action,
-                        "Given input [" + Input + "] format is invalid. It should be [sheetName:ColumnName]",
-                        Status.DEBUG);
+                Report.updateTestLog(
+                    Action,
+                    "Given input [" +
+                    Input +
+                    "] format is invalid. It should be [sheetName:ColumnName]",
+                    Status.DEBUG
+                );
             }
         } catch (Exception ex) {
             Logger.getLogger(this.getClass().getName()).log(Level.OFF, null, ex);
-            Report.updateTestLog(Action, "Error Storing JSON element in datasheet :" + "\n" + ex.getMessage(),
-                    Status.DEBUG);
+            Report.updateTestLog(
+                Action,
+                "Error Storing JSON element in datasheet :" + "\n" + ex.getMessage(),
+                Status.DEBUG
+            );
         }
-
     }
 
     /**
@@ -268,33 +367,49 @@ public class StructuredData extends General {
      *   <li>Input: JsonPath expression (e.g., $.items[*])</li>
      * </ul>
      */
-    @Action(object = ObjectType.STRUCTUREDDATA, desc = "Store JsonPath Result count in variable ", input = InputType.YES)
+    @Action(
+        object = ObjectType.STRUCTUREDDATA,
+        desc = "Store JsonPath Result count in variable ",
+        input = InputType.YES
+    )
     public void storeJsonPathResultCountInVariable() {
         try {
             String varName = Input;
             if (varName.matches("%.*%")) {
                 try {
-                    System.out.println("Updating value in SubIteration " + userData.getSubIteration());
+                    System.out.println(
+                        "Updating value in SubIteration " + userData.getSubIteration()
+                    );
                     String actualObjectCount = Integer.toString(getJsonElementCount());
                     addVar(varName, actualObjectCount);
-                    Report.updateTestLog(Action, "Element count [" + actualObjectCount + "] is stored in " + varName,
-                            Status.DONE);
+                    Report.updateTestLog(
+                        Action,
+                        "Element count [" + actualObjectCount + "] is stored in " + varName,
+                        Status.DONE
+                    );
                 } catch (Exception ex) {
                     Logger.getLogger(this.getClass().getName()).log(Level.OFF, ex.getMessage(), ex);
-                    Report.updateTestLog(Action, "Error Storing JSON element in Variable :" + "\n" + ex.getMessage(),
-                            Status.DEBUG);
+                    Report.updateTestLog(
+                        Action,
+                        "Error Storing JSON element in Variable :" + "\n" + ex.getMessage(),
+                        Status.DEBUG
+                    );
                 }
             } else {
-                Report.updateTestLog(Action,
-                        "Given condition [" + Condition + "] format is invalid. It should be [%Var%]",
-                        Status.DEBUG);
+                Report.updateTestLog(
+                    Action,
+                    "Given condition [" + Condition + "] format is invalid. It should be [%Var%]",
+                    Status.DEBUG
+                );
             }
         } catch (Exception ex) {
             Logger.getLogger(this.getClass().getName()).log(Level.OFF, null, ex);
-            Report.updateTestLog(Action, "Error Storing JSON element in Variable :" + "\n" + ex.getMessage(),
-                    Status.DEBUG);
+            Report.updateTestLog(
+                Action,
+                "Error Storing JSON element in Variable :" + "\n" + ex.getMessage(),
+                Status.DEBUG
+            );
         }
-
     }
 
     /**
@@ -306,34 +421,54 @@ public class StructuredData extends General {
      *   <li>Input: sheetName:ColumnName</li>
      * </ul>
      */
-    @Action(object = ObjectType.STRUCTUREDDATA, desc = "Store JsonPath Result In DataSheet ", input = InputType.YES)
+    @Action(
+        object = ObjectType.STRUCTUREDDATA,
+        desc = "Store JsonPath Result In DataSheet ",
+        input = InputType.YES
+    )
     public void storeJsonPathResultInDataSheet() {
         try {
             String dataSheetReference = Input;
             if (dataSheetReference.matches(".*:.*")) {
                 try {
-                    System.out.println("Updating value in SubIteration " + userData.getSubIteration());
+                    System.out.println(
+                        "Updating value in SubIteration " + userData.getSubIteration()
+                    );
                     String sheetName = dataSheetReference.split(":", 2)[0];
                     String columnName = dataSheetReference.split(":", 2)[1];
                     String response = responsebodies.get(key);
                     String jsonpath = Data;
                     String value = JsonPath.read(response, jsonpath).toString();
                     userData.putData(sheetName, columnName, value);
-                    Report.updateTestLog(Action, "Element text [" + value + "] is stored in " + dataSheetReference, Status.DONE);
+                    Report.updateTestLog(
+                        Action,
+                        "Element text [" + value + "] is stored in " + dataSheetReference,
+                        Status.DONE
+                    );
                 } catch (Exception ex) {
                     Logger.getLogger(this.getClass().getName()).log(Level.OFF, ex.getMessage(), ex);
-                    Report.updateTestLog(Action, "Error Storing JSON element in datasheet :" + "\n" + ex.getMessage(),
-                            Status.DEBUG);
+                    Report.updateTestLog(
+                        Action,
+                        "Error Storing JSON element in datasheet :" + "\n" + ex.getMessage(),
+                        Status.DEBUG
+                    );
                 }
             } else {
-                Report.updateTestLog(Action,
-                        "Given input [" + Input + "] format is invalid. It should be [sheetName:ColumnName]",
-                        Status.DEBUG);
+                Report.updateTestLog(
+                    Action,
+                    "Given input [" +
+                    Input +
+                    "] format is invalid. It should be [sheetName:ColumnName]",
+                    Status.DEBUG
+                );
             }
         } catch (Exception ex) {
             Logger.getLogger(this.getClass().getName()).log(Level.OFF, null, ex);
-            Report.updateTestLog(Action, "Error Storing JSON element in datasheet :" + "\n" + ex.getMessage(),
-                    Status.DEBUG);
+            Report.updateTestLog(
+                Action,
+                "Error Storing JSON element in datasheet :" + "\n" + ex.getMessage(),
+                Status.DEBUG
+            );
         }
     }
 
@@ -345,7 +480,11 @@ public class StructuredData extends General {
      *   <li>Input: JsonPath expression (e.g., $.data.token)</li>
      * </ul>
      */
-    @Action(object = ObjectType.STRUCTUREDDATA, desc = "Store JsonPath Result", input = InputType.YES)
+    @Action(
+        object = ObjectType.STRUCTUREDDATA,
+        desc = "Store JsonPath Result",
+        input = InputType.YES
+    )
     public void storeJsonPathResultInVariable() {
         try {
             String variableName = Input;
@@ -358,12 +497,14 @@ public class StructuredData extends General {
             }
         } catch (Exception ex) {
             Logger.getLogger(this.getClass().getName()).log(Level.OFF, null, ex);
-            Report.updateTestLog(Action, "Error Storing JSON element :" + "\n" + ex.getMessage(), Status.DEBUG);
+            Report.updateTestLog(
+                Action,
+                "Error Storing JSON element :" + "\n" + ex.getMessage(),
+                Status.DEBUG
+            );
         }
     }
 
-
-    
     /****** XmlPath Actions ******/
 
     /**
@@ -375,7 +516,11 @@ public class StructuredData extends General {
      *   <li>Input: Expected substring</li>
      * </ul>
      */
-    @Action(object = ObjectType.STRUCTUREDDATA, desc = "Assert XmlPath Result Contains ", input = InputType.YES)
+    @Action(
+        object = ObjectType.STRUCTUREDDATA,
+        desc = "Assert XmlPath Result Contains ",
+        input = InputType.YES
+    )
     public void assertXmlPathResultContains() {
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -387,20 +532,38 @@ public class StructuredData extends General {
             doc.getDocumentElement().normalize();
             XPath xPath = XPathFactory.newInstance().newXPath();
             String expression = Data;
-            NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
+            NodeList nodeList = (NodeList) xPath
+                .compile(expression)
+                .evaluate(doc, XPathConstants.NODESET);
             Node nNode = nodeList.item(0);
             String value = nNode.getNodeValue();
             String inputValue = getInputValue(Input);
             if (value.contains(inputValue)) {
-                Report.updateTestLog(Action, "Element text contains [" + inputValue + "] is as expected", Status.PASSNS);
+                Report.updateTestLog(
+                    Action,
+                    "Element text contains [" + inputValue + "] is as expected",
+                    Status.PASSNS
+                );
             } else {
-                Report.updateTestLog(Action, "Element text [" + value + "] does not contain [" + inputValue + "]",
-                        Status.FAILNS);
+                Report.updateTestLog(
+                    Action,
+                    "Element text [" + value + "] does not contain [" + inputValue + "]",
+                    Status.FAILNS
+                );
             }
-        } catch (IOException | ParserConfigurationException | XPathExpressionException | DOMException
-                | SAXException ex) {
+        } catch (
+            IOException
+            | ParserConfigurationException
+            | XPathExpressionException
+            | DOMException
+            | SAXException ex
+        ) {
             Logger.getLogger(this.getClass().getName()).log(Level.OFF, null, ex);
-            Report.updateTestLog(Action, "Error validating XML element :" + "\n" + ex.getMessage(), Status.DEBUG);
+            Report.updateTestLog(
+                Action,
+                "Error validating XML element :" + "\n" + ex.getMessage(),
+                Status.DEBUG
+            );
         }
     }
 
@@ -414,7 +577,11 @@ public class StructuredData extends General {
      *   <li>Input: Substring that should NOT be present</li>
      * </ul>
      */
-    @Action(object = ObjectType.STRUCTUREDDATA, desc = "Assert XmlPath Result Not Contains ", input = InputType.YES)
+    @Action(
+        object = ObjectType.STRUCTUREDDATA,
+        desc = "Assert XmlPath Result Not Contains ",
+        input = InputType.YES
+    )
     public void assertXmlPathResultNotContains() {
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -426,19 +593,37 @@ public class StructuredData extends General {
             doc.getDocumentElement().normalize();
             XPath xPath = XPathFactory.newInstance().newXPath();
             String expression = Data;
-            NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
+            NodeList nodeList = (NodeList) xPath
+                .compile(expression)
+                .evaluate(doc, XPathConstants.NODESET);
             Node nNode = nodeList.item(0);
             String value = nNode.getNodeValue();
             if (!value.contains(Input)) {
-                Report.updateTestLog(Action, "Element text [" + value + "] does not contain [" + Input + "] as expected", Status.PASSNS);
+                Report.updateTestLog(
+                    Action,
+                    "Element text [" + value + "] does not contain [" + Input + "] as expected",
+                    Status.PASSNS
+                );
             } else {
-                Report.updateTestLog(Action, "Element text [" + value + "] contains [" + Input + "] but should not",
-                        Status.FAILNS);
+                Report.updateTestLog(
+                    Action,
+                    "Element text [" + value + "] contains [" + Input + "] but should not",
+                    Status.FAILNS
+                );
             }
-        } catch (IOException | ParserConfigurationException | XPathExpressionException | DOMException
-                | SAXException ex) {
+        } catch (
+            IOException
+            | ParserConfigurationException
+            | XPathExpressionException
+            | DOMException
+            | SAXException ex
+        ) {
             Logger.getLogger(this.getClass().getName()).log(Level.OFF, null, ex);
-            Report.updateTestLog(Action, "Error validating XML element :" + "\n" + ex.getMessage(), Status.DEBUG);
+            Report.updateTestLog(
+                Action,
+                "Error validating XML element :" + "\n" + ex.getMessage(),
+                Status.DEBUG
+            );
         }
     }
 
@@ -451,7 +636,11 @@ public class StructuredData extends General {
      *   <li>Input: Expected value</li>
      * </ul>
      */
-    @Action(object = ObjectType.STRUCTUREDDATA, desc = "Assert XmlPath Result Equals ", input = InputType.YES)
+    @Action(
+        object = ObjectType.STRUCTUREDDATA,
+        desc = "Assert XmlPath Result Equals ",
+        input = InputType.YES
+    )
     public void assertXmlPathResultEquals() {
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -463,19 +652,38 @@ public class StructuredData extends General {
             doc.getDocumentElement().normalize();
             XPath xPath = XPathFactory.newInstance().newXPath();
             String expression = Data;
-            NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
+            NodeList nodeList = (NodeList) xPath
+                .compile(expression)
+                .evaluate(doc, XPathConstants.NODESET);
             Node nNode = nodeList.item(0);
             String value = nNode.getNodeValue();
             String inputValue = getInputValue(Input);
             if (value.equals(inputValue)) {
-                Report.updateTestLog(Action, "Element text [" + value + "] is as expected", Status.PASSNS);
+                Report.updateTestLog(
+                    Action,
+                    "Element text [" + value + "] is as expected",
+                    Status.PASSNS
+                );
             } else {
-                Report.updateTestLog(Action, "Element text [" + value + "] is not as expected. " + Data, Status.FAILNS);
+                Report.updateTestLog(
+                    Action,
+                    "Element text [" + value + "] is not as expected. " + Data,
+                    Status.FAILNS
+                );
             }
-        } catch (IOException | ParserConfigurationException | XPathExpressionException | DOMException
-                | SAXException ex) {
+        } catch (
+            IOException
+            | ParserConfigurationException
+            | XPathExpressionException
+            | DOMException
+            | SAXException ex
+        ) {
             Logger.getLogger(this.getClass().getName()).log(Level.OFF, null, ex);
-            Report.updateTestLog(Action, "Error validating XML element :" + "\n" + ex.getMessage(), Status.DEBUG);
+            Report.updateTestLog(
+                Action,
+                "Error validating XML element :" + "\n" + ex.getMessage(),
+                Status.DEBUG
+            );
         }
     }
 
@@ -489,7 +697,11 @@ public class StructuredData extends General {
      *   <li>Input: Value that should NOT match</li>
      * </ul>
      */
-    @Action(object = ObjectType.STRUCTUREDDATA, desc = "Assert XmlPath Result Not Equals ", input = InputType.YES)
+    @Action(
+        object = ObjectType.STRUCTUREDDATA,
+        desc = "Assert XmlPath Result Not Equals ",
+        input = InputType.YES
+    )
     public void assertXmlPathResultNotEquals() {
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -501,22 +713,41 @@ public class StructuredData extends General {
             doc.getDocumentElement().normalize();
             XPath xPath = XPathFactory.newInstance().newXPath();
             String expression = Data;
-            NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
+            NodeList nodeList = (NodeList) xPath
+                .compile(expression)
+                .evaluate(doc, XPathConstants.NODESET);
             Node nNode = nodeList.item(0);
             String value = nNode.getNodeValue();
             String inputValue = getInputValue(Input);
             if (!value.equals(inputValue)) {
-                Report.updateTestLog(Action, "Element text [" + value + "] is not equal to [" + inputValue + "] as expected", Status.PASSNS);
+                Report.updateTestLog(
+                    Action,
+                    "Element text [" + value + "] is not equal to [" + inputValue + "] as expected",
+                    Status.PASSNS
+                );
             } else {
-                Report.updateTestLog(Action, "Element text [" + value + "] should not be equal to [" + inputValue + "]", Status.FAILNS);
+                Report.updateTestLog(
+                    Action,
+                    "Element text [" + value + "] should not be equal to [" + inputValue + "]",
+                    Status.FAILNS
+                );
             }
-        } catch (IOException | ParserConfigurationException | XPathExpressionException | DOMException
-                | SAXException ex) {
+        } catch (
+            IOException
+            | ParserConfigurationException
+            | XPathExpressionException
+            | DOMException
+            | SAXException ex
+        ) {
             Logger.getLogger(this.getClass().getName()).log(Level.OFF, null, ex);
-            Report.updateTestLog(Action, "Error validating XML element :" + "\n" + ex.getMessage(), Status.DEBUG);
+            Report.updateTestLog(
+                Action,
+                "Error validating XML element :" + "\n" + ex.getMessage(),
+                Status.DEBUG
+            );
         }
     }
-    
+
     /**
      * Stores an XmlPath query result in a datasheet column.
      * <p>
@@ -526,13 +757,19 @@ public class StructuredData extends General {
      *   <li>Input: sheetName:ColumnName</li>
      * </ul>
      */
-    @Action(object = ObjectType.STRUCTUREDDATA, desc = "Store XmlPath Result In DataSheet ", input = InputType.YES)
+    @Action(
+        object = ObjectType.STRUCTUREDDATA,
+        desc = "Store XmlPath Result In DataSheet ",
+        input = InputType.YES
+    )
     public void storeXmlPathResultInDataSheet() {
         try {
             String strObj = Input;
             if (strObj.matches(".*:.*")) {
                 try {
-                    System.out.println("Updating value in SubIteration " + userData.getSubIteration());
+                    System.out.println(
+                        "Updating value in SubIteration " + userData.getSubIteration()
+                    );
                     String sheetName = strObj.split(":", 2)[0];
                     String columnName = strObj.split(":", 2)[1];
                     String xmlText = responsebodies.get(key);
@@ -545,26 +782,47 @@ public class StructuredData extends General {
                     doc.getDocumentElement().normalize();
                     XPath xPath = XPathFactory.newInstance().newXPath();
                     String expression = Data;
-                    NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
+                    NodeList nodeList = (NodeList) xPath
+                        .compile(expression)
+                        .evaluate(doc, XPathConstants.NODESET);
                     Node nNode = nodeList.item(0);
                     String value = nNode.getNodeValue();
                     userData.putData(sheetName, columnName, value);
-                    Report.updateTestLog(Action, "Element text [" + value + "] is stored in " + strObj, Status.DONE);
-                } catch (IOException | ParserConfigurationException | XPathExpressionException | DOMException
-                        | SAXException ex) {
+                    Report.updateTestLog(
+                        Action,
+                        "Element text [" + value + "] is stored in " + strObj,
+                        Status.DONE
+                    );
+                } catch (
+                    IOException
+                    | ParserConfigurationException
+                    | XPathExpressionException
+                    | DOMException
+                    | SAXException ex
+                ) {
                     Logger.getLogger(this.getClass().getName()).log(Level.OFF, ex.getMessage(), ex);
-                    Report.updateTestLog(Action, "Error Storing XML element in datasheet :" + "\n" + ex.getMessage(),
-                            Status.DEBUG);
+                    Report.updateTestLog(
+                        Action,
+                        "Error Storing XML element in datasheet :" + "\n" + ex.getMessage(),
+                        Status.DEBUG
+                    );
                 }
             } else {
-                Report.updateTestLog(Action,
-                        "Given input [" + Input + "] format is invalid. It should be [sheetName:ColumnName]",
-                        Status.DEBUG);
+                Report.updateTestLog(
+                    Action,
+                    "Given input [" +
+                    Input +
+                    "] format is invalid. It should be [sheetName:ColumnName]",
+                    Status.DEBUG
+                );
             }
         } catch (Exception ex) {
             Logger.getLogger(this.getClass().getName()).log(Level.OFF, null, ex);
-            Report.updateTestLog(Action, "Error Storing XML element in datasheet :" + "\n" + ex.getMessage(),
-                    Status.DEBUG);
+            Report.updateTestLog(
+                Action,
+                "Error Storing XML element in datasheet :" + "\n" + ex.getMessage(),
+                Status.DEBUG
+            );
         }
     }
 
@@ -576,7 +834,11 @@ public class StructuredData extends General {
      *   <li>Input: XPath expression (e.g., //response/token)</li>
      * </ul>
      */
-    @Action(object = ObjectType.STRUCTUREDDATA, desc = "Store XmlPath Result", input = InputType.YES)
+    @Action(
+        object = ObjectType.STRUCTUREDDATA,
+        desc = "Store XmlPath Result",
+        input = InputType.YES
+    )
     public void storeXmlPathResultInVariable() {
         try {
             String variableName = Input;
@@ -590,7 +852,9 @@ public class StructuredData extends General {
                 Document doc = dBuilder.parse(inputSource);
                 doc.getDocumentElement().normalize();
                 XPath xPath = XPathFactory.newInstance().newXPath();
-                NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
+                NodeList nodeList = (NodeList) xPath
+                    .compile(expression)
+                    .evaluate(doc, XPathConstants.NODESET);
                 Node nNode = nodeList.item(0);
                 String value = nNode.getNodeValue();
                 addVar(variableName, value);
@@ -598,26 +862,33 @@ public class StructuredData extends General {
             } else {
                 Report.updateTestLog(Action, "Variable format is not correct", Status.DEBUG);
             }
-        } catch (IOException | ParserConfigurationException | XPathExpressionException | DOMException
-                | SAXException ex) {
+        } catch (
+            IOException
+            | ParserConfigurationException
+            | XPathExpressionException
+            | DOMException
+            | SAXException ex
+        ) {
             Logger.getLogger(this.getClass().getName()).log(Level.OFF, null, ex);
-            Report.updateTestLog(Action, "Error Storing XML element :" + "\n" + ex.getMessage(), Status.DEBUG);
+            Report.updateTestLog(
+                Action,
+                "Error Storing XML element :" + "\n" + ex.getMessage(),
+                Status.DEBUG
+            );
         }
     }
-
-
 
     /****** Helper Methods ******/
 
     /*
-    * Calculates the count of JSON elements matched by the JsonPath expression.
-    * <p>
-    * Internal method that handles different JSON types (objects, arrays, primitives)
-    * and returns the appropriate count.
-    *
-    * @return the count of elements matched by the JsonPath expression
-    * @throws org.json.simple.parser.ParseException if JSON parsing fails
-    */
+     * Calculates the count of JSON elements matched by the JsonPath expression.
+     * <p>
+     * Internal method that handles different JSON types (objects, arrays, primitives)
+     * and returns the appropriate count.
+     *
+     * @return the count of elements matched by the JsonPath expression
+     * @throws org.json.simple.parser.ParseException if JSON parsing fails
+     */
     public int getJsonElementCount() throws org.json.simple.parser.ParseException {
         int actualObjectCount = 0;
         JSONParser parser = new JSONParser();
@@ -642,18 +913,17 @@ public class StructuredData extends General {
         }
         return actualObjectCount;
     }
-    
-    public String getInputValue(String strObj){
-        if (strObj!=null && strObj.length()!=0){
-            if (strObj.startsWith("@")){
+
+    public String getInputValue(String strObj) {
+        if (strObj != null && strObj.length() != 0) {
+            if (strObj.startsWith("@")) {
                 return strObj.substring(1);
-            } else if (strObj.matches(("%.*%"))){
+            } else if (strObj.matches(("%.*%"))) {
                 return getVar(strObj);
-            } else if (strObj.matches(".*:.*")){
+            } else if (strObj.matches(".*:.*")) {
                 return getDatasheet(strObj);
             }
         }
         return strObj;
     }
-
 }

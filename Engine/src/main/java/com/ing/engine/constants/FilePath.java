@@ -1,29 +1,28 @@
-
 package com.ing.engine.constants;
 
 import com.ing.engine.core.RunManager;
 import java.io.File;
 
 public class FilePath extends AppResourcePath {
+    private static final String OR = "OR.object";
+    private static final String IOR = "IOR.object";
+    private static final String MOR = "MOR.object";
+    private static final String FORMAT = ".csv";
+    private static final String DESIGN = "TestPlan";
+    private static final String REUSABLE = "ReusableComponents";
+    private static final String EXECUTION = "TestLab";
+    private static final String IOR_DATA = "ImageObjectRepository";
+    private static final String OR_DATA = "ObjectRepository";
+    private static final String PAGEDUMP = "PageDump";
 
-    private final static String OR = "OR.object";
-    private final static String IOR = "IOR.object";
-    private final static String MOR = "MOR.object";
-    private final static String FORMAT = ".csv";
-    private final static String DESIGN = "TestPlan";
-    private final static String REUSABLE = "ReusableComponents";
-    private final static String EXECUTION = "TestLab";
-    private final static String IOR_DATA = "ImageObjectRepository";
-    private final static String OR_DATA = "ObjectRepository";
-    private final static String PAGEDUMP = "PageDump";
-
-    private final static String PROJ_SETT = "Settings";
-    private final static String SETT_EXECUTION = "TestExecution";
+    private static final String PROJ_SETT = "Settings";
+    private static final String SETT_EXECUTION = "TestExecution";
 
     public static String getExeSett() {
         return SETT_EXECUTION;
     }
-    private final static String EMULATORS_LOC = "Emulators";
+
+    private static final String EMULATORS_LOC = "Emulators";
 
     public static String getSettingsfolderName() {
         return PROJ_SETT;
@@ -58,8 +57,7 @@ public class FilePath extends AppResourcePath {
     }
 
     public static String getORpageListJsonFile() {
-        return getPageDumpLocation()
-                + File.separatorChar + "pageDetails.js";
+        return getPageDumpLocation() + File.separatorChar + "pageDetails.js";
     }
 
     public static String getTestLabPath() {
@@ -79,17 +77,27 @@ public class FilePath extends AppResourcePath {
     }
 
     public static String getTestSetPath() {
-        return getReleasePath() + File.separatorChar + RunManager.getGlobalSettings().getTestSet() + FORMAT;
+        return (
+            getReleasePath() +
+            File.separatorChar +
+            RunManager.getGlobalSettings().getTestSet() +
+            FORMAT
+        );
     }
 
     public static String getScenarioPath() {
-        return getTestPlanPath() + File.separatorChar
-                + RunManager.getGlobalSettings().getScenario();
+        return (
+            getTestPlanPath() + File.separatorChar + RunManager.getGlobalSettings().getScenario()
+        );
     }
 
     public static String getTestCasePath() {
-        return getScenarioPath() + File.separatorChar
-                + RunManager.getGlobalSettings().getTestCase() + FORMAT;
+        return (
+            getScenarioPath() +
+            File.separatorChar +
+            RunManager.getGlobalSettings().getTestCase() +
+            FORMAT
+        );
     }
 
     public static String getScenarioPath(String scenario) {
@@ -97,8 +105,7 @@ public class FilePath extends AppResourcePath {
     }
 
     public static String getTestCasePath(String scenario, String testCase) {
-        return getScenarioPath(scenario) + File.separatorChar + testCase
-                + FORMAT;
+        return getScenarioPath(scenario) + File.separatorChar + testCase + FORMAT;
     }
 
     public static String getTestEnv() {

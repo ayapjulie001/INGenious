@@ -3,7 +3,6 @@ package com.ing.engine.drivers;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,7 +10,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.testng.annotations.Test;
 
 /**
@@ -19,7 +17,6 @@ import org.testng.annotations.Test;
  * working alternatives that don't depend on Chrome being installed.
  */
 public class ChromeEmulatorsExpandedTest {
-
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     // ── getPrefLocation ─────────────────────────────────────────────────
@@ -140,14 +137,15 @@ public class ChromeEmulatorsExpandedTest {
     @Test
     public void testPreferencesJsonParsingPattern() throws IOException {
         // Simulate the JSON structure that sync() expects from Chrome Preferences
-        String prefsJson = "{"
-                + "\"devtools\": {"
-                + "  \"preferences\": {"
-                + "    \"standardEmulatedDeviceList\": "
-                + "      \"[{\\\"title\\\":\\\"Nexus 5\\\"},{\\\"title\\\":\\\"iPhone 6\\\"},{\\\"title\\\":\\\"iPad\\\"}]\""
-                + "  }"
-                + "}"
-                + "}";
+        String prefsJson =
+            "{" +
+            "\"devtools\": {" +
+            "  \"preferences\": {" +
+            "    \"standardEmulatedDeviceList\": " +
+            "      \"[{\\\"title\\\":\\\"Nexus 5\\\"},{\\\"title\\\":\\\"iPhone 6\\\"},{\\\"title\\\":\\\"iPad\\\"}]\"" +
+            "  }" +
+            "}" +
+            "}";
 
         Path tempFile = Files.createTempFile("prefs-test", ".json");
         try {

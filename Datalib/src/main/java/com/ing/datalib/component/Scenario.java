@@ -1,11 +1,10 @@
 package com.ing.datalib.component;
 
+import com.ing.datalib.component.utils.FileUtils;
+import com.ing.datalib.or.web.WebOR.ORScope;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.ing.datalib.component.utils.FileUtils;
-import com.ing.datalib.or.web.WebOR.ORScope;
 
 /**
  * Represents a scenario within a project’s TestPlan and serves as a container for related test cases.
@@ -76,8 +75,8 @@ public class Scenario extends DataModel {
             return "";
         }
         String dir = source == Source.REUSABLE_COMPONENTS
-                ? Project.REUSABLE_COMPONENTS_DIR
-                : Project.TEST_PLAN_DIR;
+            ? Project.REUSABLE_COMPONENTS_DIR
+            : Project.TEST_PLAN_DIR;
         return base + File.separator + dir + File.separator + name;
     }
 
@@ -126,6 +125,7 @@ public class Scenario extends DataModel {
         }
         return null;
     }
+
     /**
      * Finds a test case by name.
      * @param scenarioName scenario name (case-insensitive)
@@ -137,7 +137,7 @@ public class Scenario extends DataModel {
         if (sc == null) {
             return null;
         }
-        
+
         List<TestCase> tc = sc.getTestCases();
         String tc_name;
         for (TestCase testcase : tc) {
@@ -240,9 +240,7 @@ public class Scenario extends DataModel {
      * @param testCase test case to remove
      */
     public void removeTestCase(TestCase testCase) {
-        if (testCases.remove(testCase)) {
-
-        }
+        if (testCases.remove(testCase)) {}
     }
 
     /**
@@ -343,8 +341,8 @@ public class Scenario extends DataModel {
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         if (columnIndex == 0) {
-//            testCases.get(rowIndex).setName(aValue.toString());
-//            project.reload(testCases.get(rowIndex));
+            //            testCases.get(rowIndex).setName(aValue.toString());
+            //            project.reload(testCases.get(rowIndex));
         } else {
             getTestcasesAlone().get(rowIndex).setValueAt(aValue, columnIndex - 1, 3);
         }
@@ -385,14 +383,14 @@ public class Scenario extends DataModel {
     public String printString() {
         StringBuilder builder = new StringBuilder();
         builder
-                .append("\t")
-                .append("Scenario - ")
-                .append(name)
-                .append("\n")
-                .append("\t")
-                .append("TestCases - ")
-                .append(testCases.size())
-                .append("\n");
+            .append("\t")
+            .append("Scenario - ")
+            .append(name)
+            .append("\n")
+            .append("\t")
+            .append("TestCases - ")
+            .append(testCases.size())
+            .append("\n");
         for (TestCase testCase : testCases) {
             builder.append(testCase.toString());
         }
@@ -500,7 +498,11 @@ public class Scenario extends DataModel {
      * @param oldTestCaseName old test case name
      * @param newTestCaseName new test case name
      */
-    public void refactorTestCase(String scenarioName, String oldTestCaseName, String newTestCaseName) {
+    public void refactorTestCase(
+        String scenarioName,
+        String oldTestCaseName,
+        String newTestCaseName
+    ) {
         for (TestCase testcase : testCases) {
             testcase.refactorTestCase(scenarioName, oldTestCaseName, newTestCaseName);
         }
@@ -512,7 +514,11 @@ public class Scenario extends DataModel {
      * @param oldScenarioName old scenario name
      * @param newScenarioName new scenario name
      */
-    public void refactorTestCaseScenario(String testCaseName, String oldScenarioName, String newScenarioName) {
+    public void refactorTestCaseScenario(
+        String testCaseName,
+        String oldScenarioName,
+        String newScenarioName
+    ) {
         for (TestCase testcase : testCases) {
             testcase.refactorTestCaseScenario(testCaseName, oldScenarioName, newScenarioName);
         }
@@ -530,7 +536,12 @@ public class Scenario extends DataModel {
         }
     }
 
-    public void refactorObjectName(String oldpageName, String oldObjName, String newPageName, String newObjName) {
+    public void refactorObjectName(
+        String oldpageName,
+        String oldObjName,
+        String newPageName,
+        String newObjName
+    ) {
         for (TestCase testCase : testCases) {
             testCase.refactorObjectName(oldpageName, oldObjName, newPageName, newObjName);
         }
@@ -563,7 +574,11 @@ public class Scenario extends DataModel {
         }
     }
 
-    public void refactorTestDataColumn(String testDataName, String oldColumnName, String newColumnName) {
+    public void refactorTestDataColumn(
+        String testDataName,
+        String oldColumnName,
+        String newColumnName
+    ) {
         for (TestCase testCase : testCases) {
             testCase.refactorTestDataColumn(testDataName, oldColumnName, newColumnName);
         }
@@ -629,12 +644,13 @@ public class Scenario extends DataModel {
         }
         return false;
     }
+
     /**
      * Renames this scenario.
      * @param newName new scenario name
      * @return true if successful, false if a scenario with the new name already exists
      */
-    
+
     public Boolean renameReusable(String newName) {
         if (getProject().getReusableScenarioByName(newName) == null) {
             if (FileUtils.renameFile(getLocation(), newName)) {
@@ -643,10 +659,10 @@ public class Scenario extends DataModel {
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     /**
      * Deletes this scenario from disk and removes it from the project.
      * @return true if successful, false otherwise

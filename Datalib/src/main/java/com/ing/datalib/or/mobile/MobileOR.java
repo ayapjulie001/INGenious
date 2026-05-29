@@ -1,14 +1,13 @@
-
 package com.ing.datalib.or.mobile;
 
-import com.ing.datalib.or.ObjectRepository;
-import com.ing.datalib.or.common.ORRootInf;
-import com.ing.datalib.or.common.ORUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.ing.datalib.or.ObjectRepository;
+import com.ing.datalib.or.common.ORRootInf;
+import com.ing.datalib.or.common.ORUtils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,19 +24,20 @@ import javax.swing.tree.TreeNode;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JacksonXmlRootElement(localName = "Root")
 public class MobileOR implements ORRootInf<MobileORPage> {
-
-    public final static List<String> OBJECT_PROPS
-            = new ArrayList<>(Arrays.asList(
-                    "UiAutomator",
-                    "UiAutomation",
-                    "id",
-                    "Accessibility",
-                    "xpath",
-                    "css",
-                    "name",
-                    "tagName",
-                    "link_text",
-                    "class"));
+    public static final List<String> OBJECT_PROPS = new ArrayList<>(
+        Arrays.asList(
+            "UiAutomator",
+            "UiAutomation",
+            "id",
+            "Accessibility",
+            "xpath",
+            "css",
+            "name",
+            "tagName",
+            "link_text",
+            "class"
+        )
+    );
 
     @JacksonXmlProperty(isAttribute = true, localName = "ref")
     private String name;
@@ -48,10 +48,10 @@ public class MobileOR implements ORRootInf<MobileORPage> {
 
     @JacksonXmlProperty(isAttribute = true)
     private String type;
-    
+
     @JacksonXmlProperty(isAttribute = true)
     private ORScope scope = ORScope.PROJECT;
-    
+
     @JacksonXmlElementWrapper(localName = "projects")
     @JacksonXmlProperty(localName = "project")
     private List<String> projects = new ArrayList<>();
@@ -61,7 +61,7 @@ public class MobileOR implements ORRootInf<MobileORPage> {
 
     @JsonIgnore
     private Boolean saved = true;
-    
+
     @JsonIgnore
     private String repLocationOverride;
 
@@ -145,7 +145,7 @@ public class MobileOR implements ORRootInf<MobileORPage> {
                 new File(page.getRepLocation()).mkdirs();
             }
             setSaved(false);
-            
+
             // Auto-save for YAML format
             if (objectRepository != null && objectRepository.isUsingYamlFormat()) {
                 objectRepository.saveMobilePageNow(page);
@@ -186,8 +186,7 @@ public class MobileOR implements ORRootInf<MobileORPage> {
     @JsonIgnore
     @Override
     public int getChildCount() {
-        return pages == null ? 0
-                : pages.size();
+        return pages == null ? 0 : pages.size();
     }
 
     @JsonIgnore
@@ -240,7 +239,7 @@ public class MobileOR implements ORRootInf<MobileORPage> {
     @JsonIgnore
     @Override
     public TreeNode[] getPath() {
-        return new TreeNode[]{this};
+        return new TreeNode[] { this };
     }
 
     @JsonIgnore
@@ -252,8 +251,8 @@ public class MobileOR implements ORRootInf<MobileORPage> {
     @Override
     public String getRepLocation() {
         return repLocationOverride != null
-                ? repLocationOverride
-                : getObjectRepository().getORRepLocation();
+            ? repLocationOverride
+            : getObjectRepository().getORRepLocation();
     }
 
     @JsonIgnore
@@ -261,9 +260,10 @@ public class MobileOR implements ORRootInf<MobileORPage> {
     public void sort() {
         ORUtils.sort(this);
     }
-    
+
     public enum ORScope {
-    PROJECT, SHARED
+        PROJECT,
+        SHARED
     }
 
     @JsonIgnore
@@ -283,7 +283,7 @@ public class MobileOR implements ORRootInf<MobileORPage> {
     public List<String> getSharedProjects() {
         return isShared() ? projects : Collections.emptyList();
     }
-    
+
     public void setSharedProjects(List<String> projects) {
         this.projects = projects;
     }

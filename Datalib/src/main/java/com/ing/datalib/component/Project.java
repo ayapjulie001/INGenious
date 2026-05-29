@@ -1,25 +1,11 @@
-
 package com.ing.datalib.component;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import static com.ing.datalib.component.utils.FileUtils.DIR_FILTER;
 import static java.util.stream.Collectors.toList;
-import java.util.stream.Stream;
-
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ing.datalib.component.utils.FileUtils;
-import static com.ing.datalib.component.utils.FileUtils.DIR_FILTER;
 import com.ing.datalib.exception.TestCaseConversionException;
 import com.ing.datalib.model.DataItem;
 import com.ing.datalib.model.Meta;
@@ -32,7 +18,18 @@ import com.ing.datalib.or.web.WebOR;
 import com.ing.datalib.or.web.WebOR.ORScope;
 import com.ing.datalib.settings.ProjectSettings;
 import com.ing.datalib.util.data.FileScanner;
-
+import java.io.File;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Stream;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 /**
  * Represents an automation project and acts as the central entry point for loading, managing,
@@ -52,7 +49,6 @@ import com.ing.datalib.util.data.FileScanner;
  * </p>
  */
 public class Project {
-
     private static final Logger LOGGER = Logger.getLogger(Project.class.getName());
 
     public static final String TEST_PLAN_DIR = "TestPlan";
@@ -176,8 +172,7 @@ public class Project {
      * @return combined list of all scenarios
      */
     public List<Scenario> getAllScenarios() {
-        return Stream.concat(scenarios.stream(), reusableScenarios.stream())
-                .collect(toList());
+        return Stream.concat(scenarios.stream(), reusableScenarios.stream()).collect(toList());
     }
 
     /**
@@ -312,8 +307,8 @@ public class Project {
      */
     public String getScenarioPath(Scenario.Source source, String scenarioName) {
         String base = source == Scenario.Source.REUSABLE_COMPONENTS
-                ? getReusableComponentsPath()
-                : getTestPlanPath();
+            ? getReusableComponentsPath()
+            : getTestPlanPath();
         return base + File.separator + scenarioName;
     }
 
@@ -350,18 +345,40 @@ public class Project {
      */
     private void updateProjectInfo(ProjectInfo project, Project sp) {
         try {
-            List<String> scns = sp.getAllScenarios().stream().map(Scenario::getName).collect(toList());
-            project.findScenarios().filter(scn -> !scns.contains(scn.getName()))
-                    .collect(toList())
-                    .forEach(scn -> {
+            List<String> scns = sp
+                .getAllScenarios()
+                .stream()
+                .map(Scenario::getName)
+                .collect(toList());
+            project
+                .findScenarios()
+                .filter(scn -> !scns.contains(scn.getName()))
+                .collect(toList())
+                .forEach(
+                    scn -> {
                         project.getMeta().remove(scn);
-                        project.getData().removeAll(project.getData().stream().filter(Objects::nonNull)
-                                .filter(di -> di.hasScenario(scn.getName()))
-                                .collect(toList()));
-                    });
-            project.getData().removeAll(project.getData().stream().filter(Objects::nonNull)
-                    .filter(di -> !sp.hasTestCaseInAnyScenario(di.getScenario(), di.getName()))
-                    .collect(toList()));
+                        project
+                            .getData()
+                            .removeAll(
+                                project
+                                    .getData()
+                                    .stream()
+                                    .filter(Objects::nonNull)
+                                    .filter(di -> di.hasScenario(scn.getName()))
+                                    .collect(toList())
+                            );
+                    }
+                );
+            project
+                .getData()
+                .removeAll(
+                    project
+                        .getData()
+                        .stream()
+                        .filter(Objects::nonNull)
+                        .filter(di -> !sp.hasTestCaseInAnyScenario(di.getScenario(), di.getName()))
+                        .collect(toList())
+                );
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -374,8 +391,10 @@ public class Project {
      * @return true if the test case exists, false otherwise
      */
     public boolean hasTestCaseInAnyScenario(String scenarioName, String testCaseName) {
-        return hasTestCaseInScenario(testCaseName, getScenarioByName(scenarioName))
-                || hasTestCaseInScenario(testCaseName, getReusableScenarioByName(scenarioName));
+        return (
+            hasTestCaseInScenario(testCaseName, getScenarioByName(scenarioName)) ||
+            hasTestCaseInScenario(testCaseName, getReusableScenarioByName(scenarioName))
+        );
     }
 
     /**
@@ -470,7 +489,9 @@ public class Project {
             File reusableRoot = new File(getReusableComponentsPath());
             if (reusableRoot.exists() && reusableRoot.list() != null) {
                 for (String scenario : reusableRoot.list(DIR_FILTER)) {
-                    reusableScenarios.add(new Scenario(this, scenario, Scenario.Source.REUSABLE_COMPONENTS));
+                    reusableScenarios.add(
+                        new Scenario(this, scenario, Scenario.Source.REUSABLE_COMPONENTS)
+                    );
                 }
             }
             return true;
@@ -496,7 +517,11 @@ public class Project {
                         moveTestCaseFile(testCase, Scenario.Source.REUSABLE_COMPONENTS);
                         moved++;
                     } catch (TestCaseConversionException e) {
-                        LOGGER.log(Level.WARNING, "Failed to migrate test case: " + e.getMessage(), e);
+                        LOGGER.log(
+                            Level.WARNING,
+                            "Failed to migrate test case: " + e.getMessage(),
+                            e
+                        );
                     }
                 }
             }
@@ -532,33 +557,46 @@ public class Project {
      * @param targetSource the destination source (TEST_PLAN or REUSABLE_COMPONENTS)
      * @throws TestCaseConversionException if the move operation fails
      */
-    private void moveTestCaseFile(TestCase testCase, Scenario.Source targetSource) throws TestCaseConversionException {
+    private void moveTestCaseFile(TestCase testCase, Scenario.Source targetSource)
+        throws TestCaseConversionException {
         if (testCase == null || testCase.getScenario() == null) {
             throw new TestCaseConversionException("Invalid test case or scenario");
         }
-        
+
         String scenarioName = testCase.getScenario().getName();
         String testCaseName = testCase.getName();
-        String targetName = targetSource == Scenario.Source.REUSABLE_COMPONENTS ? "Reusable Components" : "Test Plan";
-        
+        String targetName = targetSource == Scenario.Source.REUSABLE_COMPONENTS
+            ? "Reusable Components"
+            : "Test Plan";
+
         File source = new File(testCase.getLocation());
         if (!source.exists()) {
             throw new TestCaseConversionException("Test Case file does not exist");
         }
-        
+
         File targetDir = new File(getScenarioPath(targetSource, scenarioName));
         targetDir.mkdirs();
         File target = new File(targetDir, testCaseName + ".csv");
-        
+
         if (target.exists()) {
-            throw new TestCaseConversionException("Test case '" + testCaseName + "' already exists in scenario '" + scenarioName + "' in " + targetName);
+            throw new TestCaseConversionException(
+                "Test case '" +
+                testCaseName +
+                "' already exists in scenario '" +
+                scenarioName +
+                "' in " +
+                targetName
+            );
         }
-        
+
         try {
             Files.move(source.toPath(), target.toPath());
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Failed moving test case file", ex);
-            throw new TestCaseConversionException("Failed to move test case: " + ex.getMessage(), ex);
+            throw new TestCaseConversionException(
+                "Failed to move test case: " + ex.getMessage(),
+                ex
+            );
         }
     }
 
@@ -592,8 +630,7 @@ public class Project {
 
     public void removeRelease(Release release) {
         int index = releases.indexOf(release);
-        if (releases.remove(release)) {
-        }
+        if (releases.remove(release)) {}
     }
 
     /**
@@ -729,15 +766,15 @@ public class Project {
     public String printString() {
         StringBuilder builder = new StringBuilder();
         builder
-                .append("Project - ")
-                .append(name)
-                .append("\n")
-                .append("Location - ")
-                .append(location)
-                .append("\n")
-                .append("Scenarios - ")
-                .append(scenarios.size())
-                .append("\n");
+            .append("Project - ")
+            .append(name)
+            .append("\n")
+            .append("Location - ")
+            .append(location)
+            .append("\n")
+            .append("Scenarios - ")
+            .append(scenarios.size())
+            .append("\n");
 
         for (Scenario scenario : scenarios) {
             builder.append("\n").append(scenario.toString());
@@ -751,7 +788,11 @@ public class Project {
      * @param newScenarioName new scenario name
      */
     public void refactorScenario(String oldScenarioName, String newScenarioName) {
-        LOGGER.log(Level.INFO, "Refactoring started for Scenario [{0}] to [{1}]", new Object[]{oldScenarioName, newScenarioName});
+        LOGGER.log(
+            Level.INFO,
+            "Refactoring started for Scenario [{0}] to [{1}]",
+            new Object[] { oldScenarioName, newScenarioName }
+        );
         for (Scenario scenario : getAllScenarios()) {
             scenario.refactorScenario(oldScenarioName, newScenarioName);
         }
@@ -759,12 +800,25 @@ public class Project {
             release.refactorScenario(oldScenarioName, newScenarioName);
         }
         testData.refactorScenario(oldScenarioName, newScenarioName);
-        LOGGER.log(Level.INFO, "Refactoring done for Scenario [{0}] to [{1}]", new Object[]{oldScenarioName, newScenarioName});
+        LOGGER.log(
+            Level.INFO,
+            "Refactoring done for Scenario [{0}] to [{1}]",
+            new Object[] { oldScenarioName, newScenarioName }
+        );
         getInfo().findScenario(oldScenarioName).ifPresent(scn -> scn.setName(newScenarioName));
-        getInfo().getData().stream().filter(Objects::nonNull).filter(di -> di.hasScenario(oldScenarioName)).forEach(di -> {
-            di.getAttributes().find(Meta.Attributes.scenario.name())
-                    .ifPresent(scn -> scn.setName(newScenarioName));
-        });
+        getInfo()
+            .getData()
+            .stream()
+            .filter(Objects::nonNull)
+            .filter(di -> di.hasScenario(oldScenarioName))
+            .forEach(
+                di -> {
+                    di
+                        .getAttributes()
+                        .find(Meta.Attributes.scenario.name())
+                        .ifPresent(scn -> scn.setName(newScenarioName));
+                }
+            );
     }
 
     /**
@@ -773,8 +827,16 @@ public class Project {
      * @param oldTestCaseName old test case name
      * @param newTestCaseName new test case name
      */
-    public void refactorTestCase(String scenarioName, String oldTestCaseName, String newTestCaseName) {
-        LOGGER.log(Level.INFO, "Refactoring started for TestCase [{0}] to [{1}]", new Object[]{oldTestCaseName, newTestCaseName});
+    public void refactorTestCase(
+        String scenarioName,
+        String oldTestCaseName,
+        String newTestCaseName
+    ) {
+        LOGGER.log(
+            Level.INFO,
+            "Refactoring started for TestCase [{0}] to [{1}]",
+            new Object[] { oldTestCaseName, newTestCaseName }
+        );
         for (Scenario scenario : getAllScenarios()) {
             scenario.refactorTestCase(scenarioName, oldTestCaseName, newTestCaseName);
         }
@@ -782,10 +844,17 @@ public class Project {
             release.refactorTestCase(scenarioName, oldTestCaseName, newTestCaseName);
         }
         testData.refactorTestCase(scenarioName, oldTestCaseName, newTestCaseName);
-        LOGGER.log(Level.INFO, "Refactoring done for TestCase [{0}] to [{1}]", new Object[]{oldTestCaseName, newTestCaseName});
-        getInfo().getData().stream().filter(Objects::nonNull)
-                .filter(di -> di.hasScenario(scenarioName) && di.getName().equals(oldTestCaseName))
-                .forEach(di -> di.setName(newTestCaseName));
+        LOGGER.log(
+            Level.INFO,
+            "Refactoring done for TestCase [{0}] to [{1}]",
+            new Object[] { oldTestCaseName, newTestCaseName }
+        );
+        getInfo()
+            .getData()
+            .stream()
+            .filter(Objects::nonNull)
+            .filter(di -> di.hasScenario(scenarioName) && di.getName().equals(oldTestCaseName))
+            .forEach(di -> di.setName(newTestCaseName));
     }
 
     /**
@@ -794,8 +863,16 @@ public class Project {
      * @param oldScenarioName old scenario name
      * @param newScenarioName new scenario name
      */
-    public void refactorTestCaseScenario(String testCaseName, String oldScenarioName, String newScenarioName) {
-        LOGGER.log(Level.INFO, "Refactoring started TestCase [{0}] from Scenario [{1}] to [{2}]", new Object[]{testCaseName, oldScenarioName, newScenarioName});
+    public void refactorTestCaseScenario(
+        String testCaseName,
+        String oldScenarioName,
+        String newScenarioName
+    ) {
+        LOGGER.log(
+            Level.INFO,
+            "Refactoring started TestCase [{0}] from Scenario [{1}] to [{2}]",
+            new Object[] { testCaseName, oldScenarioName, newScenarioName }
+        );
         for (Scenario scenario : getAllScenarios()) {
             scenario.refactorTestCaseScenario(testCaseName, oldScenarioName, newScenarioName);
         }
@@ -803,15 +880,26 @@ public class Project {
             release.refactorTestCaseScenario(testCaseName, oldScenarioName, newScenarioName);
         }
         testData.refactorTestCaseScenario(testCaseName, oldScenarioName, newScenarioName);
-        LOGGER.log(Level.INFO, "Refactoring done TestCase [{0}] from Scenario [{1}] to [{2}]", new Object[]{testCaseName, oldScenarioName, newScenarioName});
-        getInfo().getData().stream().filter(Objects::nonNull)
-                .filter(di -> di.hasScenario(oldScenarioName) && di.getName().equals(testCaseName))
-                .forEach(di -> {
-                    di.getAttributes().find(Meta.Attributes.scenario.name())
-                            .ifPresent(scn -> scn.setName(newScenarioName));
-                });
+        LOGGER.log(
+            Level.INFO,
+            "Refactoring done TestCase [{0}] from Scenario [{1}] to [{2}]",
+            new Object[] { testCaseName, oldScenarioName, newScenarioName }
+        );
+        getInfo()
+            .getData()
+            .stream()
+            .filter(Objects::nonNull)
+            .filter(di -> di.hasScenario(oldScenarioName) && di.getName().equals(testCaseName))
+            .forEach(
+                di -> {
+                    di
+                        .getAttributes()
+                        .find(Meta.Attributes.scenario.name())
+                        .ifPresent(scn -> scn.setName(newScenarioName));
+                }
+            );
     }
-    
+
     /**
      * Refactors (renames) an object reference across all scenarios in the project.
      * @param pageName page name containing the object
@@ -831,7 +919,12 @@ public class Project {
      * @param newPageName new page name
      * @param newObjName new object name
      */
-    public void refactorObjectName(String oldpageName, String oldObjName, String newPageName, String newObjName) {
+    public void refactorObjectName(
+        String oldpageName,
+        String oldObjName,
+        String newPageName,
+        String newObjName
+    ) {
         for (Scenario scenario : getAllScenarios()) {
             scenario.refactorObjectName(oldpageName, oldObjName, newPageName, newObjName);
         }
@@ -851,44 +944,42 @@ public class Project {
             scenario.refactorObjectName(scope, pageName, oldName, newName);
         }
     }
- 
+
     /**
      * Refactors Mobile OR object references in TestSteps.
      * Mobile scope is mapped to Web scope because Scenarios/TestSteps
      * are tool-agnostic and only care about PROJECT vs SHARED.
      */
-    public void refactorMobileObjectName(MobileOR.ORScope scope, String pageName, String oldName, String newName) {
+    public void refactorMobileObjectName(
+        MobileOR.ORScope scope,
+        String pageName,
+        String oldName,
+        String newName
+    ) {
         for (Scenario scenario : getAllScenarios()) {
-            WebOR.ORScope webScope =
-            (scope == MobileOR.ORScope.SHARED)
+            WebOR.ORScope webScope = (scope == MobileOR.ORScope.SHARED)
                 ? WebOR.ORScope.SHARED
                 : WebOR.ORScope.PROJECT;
-            scenario.refactorObjectName(
-                webScope,
-                pageName,
-                oldName,
-                newName
-            );
+            scenario.refactorObjectName(webScope, pageName, oldName, newName);
         }
     }
 
-     /**
+    /**
      * Refactors Structured Data OR object references in TestSteps.
      * Mobile scope is mapped to Web scope because Scenarios/TestSteps
      * are tool-agnostic and only care about PROJECT vs SHARED.
      */
-    public void refactorStructuredDataObjectName(StructuredDataOR.ORScope scope, String pageName, String oldName, String newName) {
+    public void refactorStructuredDataObjectName(
+        StructuredDataOR.ORScope scope,
+        String pageName,
+        String oldName,
+        String newName
+    ) {
         for (Scenario scenario : getAllScenarios()) {
-            WebOR.ORScope webScope =
-            (scope == StructuredDataOR.ORScope.SHARED)
+            WebOR.ORScope webScope = (scope == StructuredDataOR.ORScope.SHARED)
                 ? WebOR.ORScope.SHARED
                 : WebOR.ORScope.PROJECT;
-            scenario.refactorObjectName(
-                webScope,
-                pageName,
-                oldName,
-                newName
-            );
+            scenario.refactorObjectName(webScope, pageName, oldName, newName);
         }
     }
 
@@ -897,18 +988,17 @@ public class Project {
      * SAP scope is mapped to Web scope because Scenarios/TestSteps
      * are tool-agnostic and only care about PROJECT vs SHARED.
      */
-    public void refactorSapObjectName(SapOR.ORScope scope, String pageName, String oldName, String newName) {
+    public void refactorSapObjectName(
+        SapOR.ORScope scope,
+        String pageName,
+        String oldName,
+        String newName
+    ) {
         for (Scenario scenario : getAllScenarios()) {
-            WebOR.ORScope webScope =
-            (scope == SapOR.ORScope.SHARED)
+            WebOR.ORScope webScope = (scope == SapOR.ORScope.SHARED)
                 ? WebOR.ORScope.SHARED
                 : WebOR.ORScope.PROJECT;
-            scenario.refactorObjectName(
-                webScope,
-                pageName,
-                oldName,
-                newName
-            );
+            scenario.refactorObjectName(webScope, pageName, oldName, newName);
         }
     }
 
@@ -945,8 +1035,12 @@ public class Project {
      *           for the derived scoped form (e.g., {@code "[Shared] Login"}).
      */
     public void refactorPageName(ORScope scope, String oldPageName, String newPageName) {
-        String oldScoped = scope == ORScope.SHARED ? "[Shared] " + oldPageName : "[Project] " + oldPageName;
-        String newScoped = scope == ORScope.SHARED ? "[Shared] " + newPageName : "[Project] " + newPageName;
+        String oldScoped = scope == ORScope.SHARED
+            ? "[Shared] " + oldPageName
+            : "[Project] " + oldPageName;
+        String newScoped = scope == ORScope.SHARED
+            ? "[Shared] " + newPageName
+            : "[Project] " + newPageName;
         for (Scenario scenario : getAllScenarios()) {
             scenario.refactorPageName(oldPageName, newPageName);
             scenario.refactorPageName(oldScoped, newScoped);
@@ -970,7 +1064,11 @@ public class Project {
      * @param oldColumnName old column name
      * @param newColumnName new column name
      */
-    public void refactorTestDataColumn(String testDataName, String oldColumnName, String newColumnName) {
+    public void refactorTestDataColumn(
+        String testDataName,
+        String oldColumnName,
+        String newColumnName
+    ) {
         for (Scenario scenario : scenarios) {
             scenario.refactorTestDataColumn(testDataName, oldColumnName, newColumnName);
         }
@@ -1002,9 +1100,8 @@ public class Project {
         Set impacted = new LinkedHashSet<>();
         String scopedPageName = null;
         if (scope != null) {
-            scopedPageName = (scope == ORScope.SHARED)
-                    ? "[Shared] " + pageName
-                    : "[Project] " + pageName;
+            scopedPageName =
+                (scope == ORScope.SHARED) ? "[Shared] " + pageName : "[Project] " + pageName;
         }
         // Search in TestPlan scenarios
         for (Scenario scenario : scenarios) {
@@ -1022,20 +1119,28 @@ public class Project {
         }
         // Sort by type (Test Plan first), then by scenario name, then by test case name
         List<TestCase> sortedList = new ArrayList<>(impacted);
-        sortedList.sort((tc1, tc2) -> {
-            // First compare by source type (TEST_PLAN comes before REUSABLE_COMPONENTS)
-            int sourceCompare = tc1.getScenario().getSource().compareTo(tc2.getScenario().getSource());
-            if (sourceCompare != 0) {
-                return sourceCompare;
+        sortedList.sort(
+            (tc1, tc2) -> {
+                // First compare by source type (TEST_PLAN comes before REUSABLE_COMPONENTS)
+                int sourceCompare = tc1
+                    .getScenario()
+                    .getSource()
+                    .compareTo(tc2.getScenario().getSource());
+                if (sourceCompare != 0) {
+                    return sourceCompare;
+                }
+                // Then compare by scenario name
+                int scenarioCompare = tc1
+                    .getScenario()
+                    .getName()
+                    .compareToIgnoreCase(tc2.getScenario().getName());
+                if (scenarioCompare != 0) {
+                    return scenarioCompare;
+                }
+                // Finally compare by test case name
+                return tc1.getName().compareToIgnoreCase(tc2.getName());
             }
-            // Then compare by scenario name
-            int scenarioCompare = tc1.getScenario().getName().compareToIgnoreCase(tc2.getScenario().getName());
-            if (scenarioCompare != 0) {
-                return scenarioCompare;
-            }
-            // Finally compare by test case name
-            return tc1.getName().compareToIgnoreCase(tc2.getName());
-        });
+        );
         return sortedList;
     }
 
@@ -1048,7 +1153,9 @@ public class Project {
     public List<TestCase> getImpactedTestCaseTestCases(String scenarioName, String testCaseName) {
         List<TestCase> impactedTestCases = new ArrayList<>();
         for (Scenario scenario : scenarios) {
-            impactedTestCases.addAll(scenario.getImpactedTestCaseTestCases(scenarioName, testCaseName));
+            impactedTestCases.addAll(
+                scenario.getImpactedTestCaseTestCases(scenarioName, testCaseName)
+            );
         }
         return impactedTestCases;
     }
@@ -1180,7 +1287,11 @@ public class Project {
              * @return data item representing the test case
              */
             private static DataItem fromTC(TestCase tc) {
-                DataItem data = create(tc.getKey(), tc.getName(), tc.isReusable() ? Meta.Attributes.reusable : Meta.Attributes.testcase);
+                DataItem data = create(
+                    tc.getKey(),
+                    tc.getName(),
+                    tc.isReusable() ? Meta.Attributes.reusable : Meta.Attributes.testcase
+                );
                 data.getAttributes().add(Meta.Attributes.scenario, tc.getScenario().getName());
                 return data;
             }

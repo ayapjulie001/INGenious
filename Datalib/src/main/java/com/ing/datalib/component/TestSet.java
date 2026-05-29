@@ -21,14 +21,14 @@ import org.apache.commons.csv.CSVRecord;
  * Represents an execution set containing a list of {@link ExecutionStep} rows,
  * backed by a CSV file and exposed as a table model for UI editing. Handles
  * loading, saving, row manipulation, and updating execution entries when
- * scenarios or test cases are renamed. 
+ * scenarios or test cases are renamed.
  */
 public class TestSet extends DataModel {
-
     private Release release;
 
     private final List<ExecutionStep> testSteps = Collections.synchronizedList(
-            new ArrayList<ExecutionStep>());
+        new ArrayList<ExecutionStep>()
+    );
 
     private String name;
 
@@ -45,16 +45,18 @@ public class TestSet extends DataModel {
         } else {
             this.name = name;
         }
-        this.execSettings = new ExecutionSettings(getProject().getLocation()
-                + File.separator
-                + "Settings"
-                + File.separator
-                + "TestExecution"
-                + File.separator
-                + getRelease().getName()
-                + File.separator
-                + getName()
-        );
+        this.execSettings =
+            new ExecutionSettings(
+                getProject().getLocation() +
+                File.separator +
+                "Settings" +
+                File.separator +
+                "TestExecution" +
+                File.separator +
+                getRelease().getName() +
+                File.separator +
+                getName()
+            );
     }
 
     public final Project getProject() {
@@ -223,7 +225,10 @@ public class TestSet extends DataModel {
     public void save() {
         if (!isSaved()) {
             createIfNotExists();
-            try (FileWriter out = new FileWriter(new File(getLocation())); CSVPrinter printer = new CSVPrinter(out, CSVFormat.EXCEL.withIgnoreEmptyLines());) {
+            try (
+                FileWriter out = new FileWriter(new File(getLocation()));
+                CSVPrinter printer = new CSVPrinter(out, CSVFormat.EXCEL.withIgnoreEmptyLines());
+            ) {
                 printer.printRecord(HEADERS.getValues());
                 removeEmptySteps();
                 for (ExecutionStep testStep : testSteps) {
@@ -231,7 +236,9 @@ public class TestSet extends DataModel {
                 }
                 setSaved(true);
             } catch (Exception ex) {
-                Logger.getLogger(TestSet.class.getName()).log(Level.SEVERE, "Error while saving", ex);
+                Logger
+                    .getLogger(TestSet.class.getName())
+                    .log(Level.SEVERE, "Error while saving", ex);
             }
         }
         execSettings.save();
@@ -249,7 +256,6 @@ public class TestSet extends DataModel {
                 fireTableRowsDeleted(i, i);
             }
         }
-
     }
 
     @Override
@@ -308,21 +314,20 @@ public class TestSet extends DataModel {
     public String printString() {
         StringBuilder builder = new StringBuilder();
         builder
-                .append("\t\t")
-                .append("TestCase - ")
-                .append(name)
-                .append("\n")
-                .append("\t\t")
-                .append("TestSteps - ")
-                .append(testSteps.size())
-                .append("\n");
+            .append("\t\t")
+            .append("TestCase - ")
+            .append(name)
+            .append("\n")
+            .append("\t\t")
+            .append("TestSteps - ")
+            .append(testSteps.size())
+            .append("\n");
         return builder.toString();
     }
 
     @Override
     public String toString() {
         return name;
-
     }
 
     public Boolean isSaved() {
@@ -363,15 +368,21 @@ public class TestSet extends DataModel {
         }
     }
 
-    public void refactorTestCase(String scenarioName, String oldTestCaseName, String newTestCaseName) {
+    public void refactorTestCase(
+        String scenarioName,
+        String oldTestCaseName,
+        String newTestCaseName
+    ) {
         boolean wasEmpty = getTestSteps().isEmpty();
         boolean changesDone = false;
 
         loadTableModel();
 
         for (ExecutionStep testStep : testSteps) {
-            if (scenarioName.equals(testStep.getTestScenarioName())
-                    && oldTestCaseName.equals(testStep.getTestCaseName())) {
+            if (
+                scenarioName.equals(testStep.getTestScenarioName()) &&
+                oldTestCaseName.equals(testStep.getTestCaseName())
+            ) {
                 testStep.setTestCase(newTestCaseName);
                 changesDone = true;
             }
@@ -387,15 +398,21 @@ public class TestSet extends DataModel {
         }
     }
 
-    public void refactorTestCaseScenario(String testCaseName, String oldScenarioName, String newScenarioName) {
+    public void refactorTestCaseScenario(
+        String testCaseName,
+        String oldScenarioName,
+        String newScenarioName
+    ) {
         boolean wasEmpty = getTestSteps().isEmpty();
         boolean changesDone = false;
 
         loadTableModel();
 
         for (ExecutionStep testStep : testSteps) {
-            if (oldScenarioName.equals(testStep.getTestScenarioName())
-                    && testCaseName.equals(testStep.getTestCaseName())) {
+            if (
+                oldScenarioName.equals(testStep.getTestScenarioName()) &&
+                testCaseName.equals(testStep.getTestCaseName())
+            ) {
                 testStep.setTestScenario(newScenarioName);
                 changesDone = true;
             }
@@ -479,15 +496,16 @@ public class TestSet extends DataModel {
     }
 
     public void resetExecSettingsLocation() {
-        execSettings.setLocation(getProject().getLocation()
-                + File.separator
-                + "Settings"
-                + File.separator
-                + "TestExecution"
-                + File.separator
-                + getRelease().getName()
-                + File.separator
-                + getName()
+        execSettings.setLocation(
+            getProject().getLocation() +
+            File.separator +
+            "Settings" +
+            File.separator +
+            "TestExecution" +
+            File.separator +
+            getRelease().getName() +
+            File.separator +
+            getName()
         );
     }
 }

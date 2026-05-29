@@ -1,15 +1,14 @@
-
 package com.ing.datalib.or.mobile;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.ing.datalib.component.utils.FileUtils;
 import com.ing.datalib.or.common.ORAttribute;
 import com.ing.datalib.or.common.ORObjectInf;
 import com.ing.datalib.or.common.ORUtils;
 import com.ing.datalib.or.common.ObjectGroup;
 import com.ing.datalib.undoredo.UndoRedoModel;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,7 +28,6 @@ import javax.swing.tree.TreePath;
  * and object repository persistence updates.
  */
 public class MobileORObject extends UndoRedoModel implements ORObjectInf {
-
     @JacksonXmlProperty(isAttribute = true, localName = "ref")
     private String name;
 
@@ -80,7 +78,7 @@ public class MobileORObject extends UndoRedoModel implements ORObjectInf {
         group.getObjects().remove(this);
         if (!group.getParent().getRoot().getObjectRepository().isUsingYamlFormat()) {
             FileUtils.deleteFile(getRepLocation());
-        } 
+        }
     }
 
     @Override
@@ -220,10 +218,12 @@ public class MobileORObject extends UndoRedoModel implements ORObjectInf {
         if (group != null) {
             MobileORPage page = (MobileORPage) group.getParent();
             page.getRoot().setSaved(false);
-            
+
             // Auto-save for YAML format
-            if (page.getRoot().getObjectRepository() != null 
-                && page.getRoot().getObjectRepository().isUsingYamlFormat()) {
+            if (
+                page.getRoot().getObjectRepository() != null &&
+                page.getRoot().getObjectRepository().isUsingYamlFormat()
+            ) {
                 page.getRoot().getObjectRepository().saveMobilePageNow(page);
             }
         }
@@ -498,7 +498,12 @@ public class MobileORObject extends UndoRedoModel implements ORObjectInf {
     public Boolean isEqualOf(ORObjectInf obj) {
         MobileORObject object = (MobileORObject) obj;
         for (ORAttribute attribute : attributes) {
-            if (!Objects.equals(attribute.getValue(), object.getAttributeByName(attribute.getName()))) {
+            if (
+                !Objects.equals(
+                    attribute.getValue(),
+                    object.getAttributeByName(attribute.getName())
+                )
+            ) {
                 return false;
             }
         }

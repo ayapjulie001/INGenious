@@ -5,6 +5,7 @@ import com.ing.datalib.settings.ProjectSettings;
 import com.ing.datalib.settings.emulators.Emulator;
 import com.ing.datalib.util.data.LinkedProperties;
 import com.ing.engine.drivers.PlaywrightDriverFactory;
+import com.ing.ide.main.fx.INGIcons;
 import com.ing.ide.main.mainui.AppMainFrame;
 import com.ing.ide.main.utils.Utils;
 import com.ing.ide.main.utils.table.XTable;
@@ -12,7 +13,6 @@ import com.ing.ide.util.Notification;
 import com.ing.ide.util.Utility;
 import java.awt.Color;
 import java.awt.Toolkit;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -35,10 +35,8 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import com.ing.ide.main.fx.INGIcons;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
-
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -46,7 +44,6 @@ import javax.swing.table.DefaultTableModel;
  *
  */
 public class DriverSettings extends javax.swing.JFrame {
-
     // Theme-aware color constants
     private static final Color DARK_BG = new Color(30, 26, 36);
     private static final Color DARK_PANEL_BG = new Color(37, 32, 48);
@@ -76,7 +73,11 @@ public class DriverSettings extends javax.swing.JFrame {
         this.sMainFrame = sMainFrame;
         initComponents();
 
-        setIconImage(com.ing.ide.main.fx.INGIcons.toImage(Utils.getIconByResourceName("/ui/resources/main/BrowserConfiguration")));
+        setIconImage(
+            com.ing.ide.main.fx.INGIcons.toImage(
+                Utils.getIconByResourceName("/ui/resources/main/BrowserConfiguration")
+            )
+        );
 
         //loadChromeEmulators();
         initAddEmulatorListener();
@@ -86,62 +87,74 @@ public class DriverSettings extends javax.swing.JFrame {
 
         final JTextField resolutionText = new JTextField();
         //final JTextField resolutionText = (JTextField) resolution.getEditor().getEditorComponent();
-        resolutionText.addKeyListener(new KeyAdapter() {
-            public void keyReleased(KeyEvent ke) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        resFilter();
-                    }
-                });
+        resolutionText.addKeyListener(
+            new KeyAdapter() {
+
+                public void keyReleased(KeyEvent ke) {
+                    SwingUtilities.invokeLater(
+                        new Runnable() {
+
+                            public void run() {
+                                resFilter();
+                            }
+                        }
+                    );
+                }
             }
-        });
+        );
         final JTextField brText = (JTextField) browserCombo.getEditor().getEditorComponent();
-        brText.addKeyListener(new KeyAdapter() {
-            public void keyReleased(KeyEvent ke) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        brFilter();
-                    }
-                });
+        brText.addKeyListener(
+            new KeyAdapter() {
+
+                public void keyReleased(KeyEvent ke) {
+                    SwingUtilities.invokeLater(
+                        new Runnable() {
+
+                            public void run() {
+                                brFilter();
+                            }
+                        }
+                    );
+                }
             }
-        });
-        
+        );
+
         applyThemeStyles();
     }
-    
+
     // Theme-aware color getters
     private boolean isDarkMode() {
         return com.ing.ide.main.Main.isDarkMode();
     }
-    
+
     private Color getBgColor() {
         return isDarkMode() ? DARK_BG : WARM_BG;
     }
-    
+
     private Color getPanelBgColor() {
         return isDarkMode() ? DARK_PANEL_BG : PURPLE_VERY_LIGHT;
     }
-    
+
     private Color getBorderColor() {
         return isDarkMode() ? DARK_BORDER : PURPLE_LIGHT;
     }
-    
+
     private Color getInputBgColor() {
         return isDarkMode() ? DARK_INPUT_BG : Color.WHITE;
     }
-    
+
     private Color getTextColor() {
         return isDarkMode() ? DARK_TEXT : ING_BURGUNDY;
     }
-    
+
     private Color getLabelColor() {
         return isDarkMode() ? DARK_LABEL : ING_BURGUNDY;
     }
-    
+
     private Color getAccentColor() {
         return isDarkMode() ? ING_ORANGE_DARK : ING_PURPLE;
     }
-    
+
     /**
      * Apply theme-aware styling to the window.
      */
@@ -151,14 +164,14 @@ public class DriverSettings extends javax.swing.JFrame {
         Color borderColor = getBorderColor();
         Color textColor = getTextColor();
         Color inputBgColor = getInputBgColor();
-        
+
         // Style main frame
         this.setBackground(bgColor);
         getContentPane().setBackground(bgColor);
         if (getContentPane() instanceof JComponent) {
             ((JComponent) getContentPane()).setOpaque(true);
         }
-        
+
         // Style the tabbed pane
         if (mainTab != null) {
             mainTab.setBackground(bgColor);
@@ -170,27 +183,30 @@ public class DriverSettings extends javax.swing.JFrame {
             mainTab.putClientProperty("JTabbedPane.contentOpaque", true);
             mainTab.putClientProperty("JTabbedPane.tabAreaBackground", panelBgColor);
         }
-        
+
         // Style save panel (jPanel1)
         if (jPanel1 != null) {
             jPanel1.setBackground(panelBgColor);
             jPanel1.setOpaque(true);
-            jPanel1.setBorder(BorderFactory.createCompoundBorder(
-                new MatteBorder(1, 0, 0, 0, borderColor),
-                new EmptyBorder(8, 16, 8, 16)));
+            jPanel1.setBorder(
+                BorderFactory.createCompoundBorder(
+                    new MatteBorder(1, 0, 0, 0, borderColor),
+                    new EmptyBorder(8, 16, 8, 16)
+                )
+            );
         }
-        
+
         // Style buttons
         styleButton(saveSettings, true);
         styleButton(resetSettings, false);
-        
+
         // Recursively style all components
         styleComponentsRecursively(getContentPane());
-        
+
         revalidate();
         repaint();
     }
-    
+
     private void styleButton(javax.swing.JButton button, boolean primary) {
         if (button == null) return;
         Color buttonBg = primary ? getAccentColor() : getInputBgColor();
@@ -198,19 +214,22 @@ public class DriverSettings extends javax.swing.JFrame {
         button.setBackground(buttonBg);
         button.setForeground(buttonFg);
         button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(getAccentColor(), 1),
-            new EmptyBorder(8, 20, 8, 20)));
+        button.setBorder(
+            BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(getAccentColor(), 1),
+                new EmptyBorder(8, 20, 8, 20)
+            )
+        );
     }
-    
+
     private void styleComponentsRecursively(java.awt.Container container) {
         if (container == null) return;
-        
+
         Color bgColor = getBgColor();
         Color textColor = getTextColor();
         Color inputBgColor = getInputBgColor();
         Color borderColor = getBorderColor();
-        
+
         for (java.awt.Component comp : container.getComponents()) {
             if (comp instanceof javax.swing.JPanel) {
                 ((javax.swing.JPanel) comp).setBackground(bgColor);
@@ -270,43 +289,63 @@ public class DriverSettings extends javax.swing.JFrame {
     }
 
     private void initAddEmulatorListener() {
-        browserCombo.getEditor().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                addNewEmulator();
-                saveSettings.setEnabled(true);
-            }
-        });
+        browserCombo
+            .getEditor()
+            .addActionListener(
+                new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent ae) {
+                        addNewEmulator();
+                        saveSettings.setEnabled(true);
+                    }
+                }
+            );
     }
 
     private void initAddNewDBListener() {
-        dbCombo.getEditor().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                addNewDB();
-                saveSettings.setEnabled(true);
-            }
-        });
+        dbCombo
+            .getEditor()
+            .addActionListener(
+                new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent ae) {
+                        addNewDB();
+                        saveSettings.setEnabled(true);
+                    }
+                }
+            );
     }
 
     private void initAddNewContextListener() {
-        contextCombo.getEditor().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                addNewContext();
-                saveSettings.setEnabled(true);
-            }
-        });
+        contextCombo
+            .getEditor()
+            .addActionListener(
+                new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent ae) {
+                        addNewContext();
+                        saveSettings.setEnabled(true);
+                    }
+                }
+            );
     }
-    
+
     private void initAddNewDBAPIListener() {
-        apiCombo.getEditor().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                addNewAPI();
-                saveSettings.setEnabled(true);
-            }
-        });
+        apiCombo
+            .getEditor()
+            .addActionListener(
+                new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent ae) {
+                        addNewAPI();
+                        saveSettings.setEnabled(true);
+                    }
+                }
+            );
     }
 
     public void load() {
@@ -320,7 +359,7 @@ public class DriverSettings extends javax.swing.JFrame {
         loadBrowsers();
         loadDatabases();
         loadContexts();
-        loadAPI();;
+        loadAPI();
     }
 
     private void loadDriverPropTable() {
@@ -328,7 +367,7 @@ public class DriverSettings extends javax.swing.JFrame {
         model.setRowCount(0);
         for (Object key : settings.getDriverSettings().orderedKeys()) {
             Object value = settings.getDriverSettings().get(key);
-            model.addRow(new Object[]{key, value});
+            model.addRow(new Object[] { key, value });
         }
     }
 
@@ -348,14 +387,13 @@ public class DriverSettings extends javax.swing.JFrame {
     private void loadBrowsers() {
         DefaultComboBoxModel model = new DefaultComboBoxModel(getTotalBrowserList().toArray());
         browserCombo.setModel(model);
-//        dupDriverCombo.setModel(new DefaultComboBoxModel(
-//                getTotalBrowserList().toArray()));
+        //        dupDriverCombo.setModel(new DefaultComboBoxModel(
+        //                getTotalBrowserList().toArray()));
         browserCombo.setSelectedItem(getTotalBrowserList().get(0));
         checkAndLoadCapabilities();
     }
 
     private void loadDatabases() {
-
         dbCombo.setModel(new DefaultComboBoxModel(getTotalDBList().toArray()));
         dbCombo.setSelectedItem("default");
         checkAndLoadDatabases();
@@ -379,19 +417,19 @@ public class DriverSettings extends javax.swing.JFrame {
 
     private List<String> getTotalBrowserList() {
         List<String> list = new ArrayList<>();
-        
+
         // Add Playwright browsers first
         list.addAll(PlaywrightDriverFactory.Browser.getValuesAsList());
-        
+
         // Extract SAP and add it next
         List<String> emulators = new ArrayList<>(settings.getEmulators().getEmulatorNames());
         if (emulators.remove("SAP")) {
             list.add("SAP");
         }
-        
+
         // Add remaining emulators
         list.addAll(emulators);
-        
+
         return list;
     }
 
@@ -455,7 +493,7 @@ public class DriverSettings extends javax.swing.JFrame {
         if (prop != null) {
             for (Object key : prop.keySet()) {
                 Object value = prop.get(key);
-                model.addRow(new Object[]{key, value});
+                model.addRow(new Object[] { key, value });
             }
         }
     }
@@ -467,10 +505,10 @@ public class DriverSettings extends javax.swing.JFrame {
         if (prop != null) {
             for (Object key : prop.orderedKeys()) {
                 Object value = prop.get(key);
-                model.addRow(new Object[]{key, value});
+                model.addRow(new Object[] { key, value });
             }
         } else {
-            if(!browserName.equals("No Browser")){
+            if (!browserName.equals("No Browser")) {
                 addDefaultCapsNewEmulator();
             }
         }
@@ -483,7 +521,7 @@ public class DriverSettings extends javax.swing.JFrame {
         if (prop != null) {
             for (Object key : prop.keySet()) {
                 Object value = prop.get(key);
-                model.addRow(new Object[]{key, value});
+                model.addRow(new Object[] { key, value });
             }
         }
     }
@@ -496,7 +534,7 @@ public class DriverSettings extends javax.swing.JFrame {
         if (prop != null) {
             for (Object key : prop.keySet()) {
                 Object value = prop.get(key);
-                model.addRow(new Object[]{key, value});
+                model.addRow(new Object[] { key, value });
             }
         }
     }
@@ -538,7 +576,7 @@ public class DriverSettings extends javax.swing.JFrame {
             //dupDriverCombo.addItem(newEmName);
             browserCombo.setSelectedItem(newEmName);
             addDefaultCapsNewEmulator();
-            
+
             emCapTab.setEnabledAt(0, true);
             editEmulator.setEnabled(true);
             deleteEmulator.setEnabled(true);
@@ -546,32 +584,32 @@ public class DriverSettings extends javax.swing.JFrame {
             appiumEmulator.setSelected(true);
             appiumConnectionString.setEnabled(true);
             appiumConnectionString.setText("http://127.0.0.1:4723/");
-            
+
             isAddingEmulator = false;
         } else {
             Notification.show("Emulator/Browser [" + newEmName + "] already Present");
             isAddingEmulator = false;
         }
     }
-    
-    private void addDefaultCapsNewEmulator(){
-            DefaultTableModel model = (DefaultTableModel) capTable.getModel();
-            model.setRowCount(0);
-            
-            String emulatorName = browserCombo.getSelectedItem().toString();
-            LinkedProperties properties;
-            
-            // Check if adding SAP browser
-            if ("SAP".equals(emulatorName)) {
-                properties = settings.getEmulators().defaultSAPCapability();
-            } else {
-                properties = settings.getEmulators().defaultEmulatorCap();
-            }
-            
-            for (Object key : properties.orderedKeys()) {
-                Object value = properties.get(key);
-                model.addRow(new Object[]{key, value});
-            }
+
+    private void addDefaultCapsNewEmulator() {
+        DefaultTableModel model = (DefaultTableModel) capTable.getModel();
+        model.setRowCount(0);
+
+        String emulatorName = browserCombo.getSelectedItem().toString();
+        LinkedProperties properties;
+
+        // Check if adding SAP browser
+        if ("SAP".equals(emulatorName)) {
+            properties = settings.getEmulators().defaultSAPCapability();
+        } else {
+            properties = settings.getEmulators().defaultEmulatorCap();
+        }
+
+        for (Object key : properties.orderedKeys()) {
+            Object value = properties.get(key);
+            model.addRow(new Object[] { key, value });
+        }
     }
 
     private void renameEmulator() {
@@ -602,24 +640,22 @@ public class DriverSettings extends javax.swing.JFrame {
             settings.getEmulators().deleteEmulator(emName);
             browserCombo.removeItem(emName);
             //  dupDriverCombo.removeItem(emName);
-        } else {
-
-        }
+        } else {}
     }
 
     private void saveSettings() {
         if (mainTab.getSelectedIndex() == 0) {
             saveContextProperties();
-        } else if(mainTab.getSelectedIndex() == 1){
+        } else if (mainTab.getSelectedIndex() == 1) {
             saveDBProperties();
-        } else if(mainTab.getSelectedIndex() == 2){
+        } else if (mainTab.getSelectedIndex() == 2) {
             saveCommonSettings();
         } else if (emCapTab.getSelectedIndex() == 0) {
             saveEmulator();
             settings.getEmulators().save();
             saveCapabilities();
         } else {
-            if(emCapTab.isEnabledAt(0)){
+            if (emCapTab.isEnabledAt(0)) {
                 saveEmulator();
             }
             settings.getEmulators().save();
@@ -629,8 +665,9 @@ public class DriverSettings extends javax.swing.JFrame {
 
     private void saveEmulator() {
         settings.getEmulators().addEmulator(browserCombo.getSelectedItem().toString());
-        Emulator emulator = settings.getEmulators().
-                getEmulator(browserCombo.getSelectedItem().toString());
+        Emulator emulator = settings
+            .getEmulators()
+            .getEmulator(browserCombo.getSelectedItem().toString());
         emulator.setType(customDeviceGroup.getSelection().getActionCommand());
         switch (emulator.getType()) {
             case "Remote URL":
@@ -652,12 +689,13 @@ public class DriverSettings extends javax.swing.JFrame {
                 properties.setProperty(prop, value);
             }
         }
-        settings.getCapabilities().addCapability(browserCombo.getSelectedItem().toString(),
-                properties);
+        settings
+            .getCapabilities()
+            .addCapability(browserCombo.getSelectedItem().toString(), properties);
     }
 
     private void saveCommonSettings() {
-        if(apiCombo.getSelectedIndex() != -1) {
+        if (apiCombo.getSelectedIndex() != -1) {
             if (driverPropTable.isEditing()) {
                 driverPropTable.getCellEditor().stopCellEditing();
             }
@@ -722,20 +760,26 @@ public class DriverSettings extends javax.swing.JFrame {
                     properties.setProperty(prop, value);
                 }
             }
-            settings.getContextSettings().addContext(contextCombo.getSelectedItem().toString(), properties);
+            settings
+                .getContextSettings()
+                .addContext(contextCombo.getSelectedItem().toString(), properties);
         }
     }
 
     private Properties encryptpassword(Properties properties) {
-        properties.entrySet().forEach((e) -> {
-            String key = (String) e.getKey();
-            String value = (String) e.getValue();
-            if (value != null && !value.isEmpty()) {
-                if (key.toLowerCase().contains("passw") && !isDatasheetOrVariable(value)) {
-                    properties.setProperty(key, Utility.encrypt(value));
+        properties
+            .entrySet()
+            .forEach(
+                e -> {
+                    String key = (String) e.getKey();
+                    String value = (String) e.getValue();
+                    if (value != null && !value.isEmpty()) {
+                        if (key.toLowerCase().contains("passw") && !isDatasheetOrVariable(value)) {
+                            properties.setProperty(key, Utility.encrypt(value));
+                        }
+                    }
                 }
-            }
-        });
+            );
         return properties;
     }
 
@@ -746,15 +790,15 @@ public class DriverSettings extends javax.swing.JFrame {
         Pattern regex2 = Pattern.compile(pattern2);
         Matcher matcher1 = regex1.matcher(value);
         Matcher matcher2 = regex2.matcher(value);
-        return  matcher1.matches() || matcher2.matches();
+        return matcher1.matches() || matcher2.matches();
     }
 
     private void resFilter() {
-//        if (resolution.getModel().getSize() > 0) {
-//            resolution.showPopup();
-//        } else {
-//            resolution.hidePopup();
-//        }
+        //        if (resolution.getModel().getSize() > 0) {
+        //            resolution.showPopup();
+        //        } else {
+        //            resolution.hidePopup();
+        //        }
     }
 
     private void brFilter() {
@@ -773,7 +817,6 @@ public class DriverSettings extends javax.swing.JFrame {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-
         customDeviceGroup = new javax.swing.ButtonGroup();
         emulatorGroup = new javax.swing.ButtonGroup();
         mainTab = new javax.swing.JTabbedPane();
@@ -783,21 +826,46 @@ public class DriverSettings extends javax.swing.JFrame {
         jToolBar1 = new javax.swing.JToolBar();
         apiJLabel = new javax.swing.JLabel();
         apiCombo = new javax.swing.JComboBox<>();
-        filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767));
+        filler1 =
+            new javax.swing.Box.Filler(
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(32767, 32767)
+            );
         addNewAPIConfig = new javax.swing.JButton();
         deleteAPIConfig = new javax.swing.JButton();
         addPropButton = new javax.swing.JButton();
         removePropButton = new javax.swing.JButton();
         browserPanel = new javax.swing.JPanel();
         jToolBar3 = new javax.swing.JToolBar();
-        filler3 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767));
+        filler3 =
+            new javax.swing.Box.Filler(
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(32767, 32767)
+            );
         jLabel2 = new javax.swing.JLabel();
-        filler6 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 0), new java.awt.Dimension(10, 0), new java.awt.Dimension(10, 32767));
+        filler6 =
+            new javax.swing.Box.Filler(
+                new java.awt.Dimension(10, 0),
+                new java.awt.Dimension(10, 0),
+                new java.awt.Dimension(10, 32767)
+            );
         browserCombo = new javax.swing.JComboBox<>();
-        filler7 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767));
+        filler7 =
+            new javax.swing.Box.Filler(
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(32767, 32767)
+            );
         editEmulator = new javax.swing.JButton();
         deleteEmulator = new javax.swing.JButton();
-        filler4 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767));
+        filler4 =
+            new javax.swing.Box.Filler(
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(32767, 32767)
+            );
         jPanel2 = new javax.swing.JPanel();
         emCapTab = new javax.swing.JTabbedPane();
         emulatorPanel = new javax.swing.JPanel();
@@ -808,15 +876,30 @@ public class DriverSettings extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         capTable = new XTable();
         jToolBar2 = new javax.swing.JToolBar();
-        filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767));
+        filler2 =
+            new javax.swing.Box.Filler(
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(32767, 32767)
+            );
         jSeparator1 = new javax.swing.JToolBar.Separator();
         addCap = new javax.swing.JButton();
         removeCap = new javax.swing.JButton();
-        filler8 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 10), new java.awt.Dimension(0, 10), new java.awt.Dimension(32767, 10));
+        filler8 =
+            new javax.swing.Box.Filler(
+                new java.awt.Dimension(0, 10),
+                new java.awt.Dimension(0, 10),
+                new java.awt.Dimension(32767, 10)
+            );
         jPanel1 = new javax.swing.JPanel();
         saveSettings = new javax.swing.JButton();
         resetSettings = new javax.swing.JButton();
-        filler5 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 10), new java.awt.Dimension(0, 10), new java.awt.Dimension(32767, 10));
+        filler5 =
+            new javax.swing.Box.Filler(
+                new java.awt.Dimension(0, 10),
+                new java.awt.Dimension(0, 10),
+                new java.awt.Dimension(32767, 10)
+            );
 
         databasePanel = new javax.swing.JPanel();
         dbCombo = new javax.swing.JComboBox<>();
@@ -841,15 +924,60 @@ public class DriverSettings extends javax.swing.JFrame {
         jPanel5 = new javax.swing.JPanel();
         jScrollPane5 = new javax.swing.JScrollPane();
         jPanel6 = new javax.swing.JPanel();
-        filler9 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767));
-        filler10 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 0), new java.awt.Dimension(10, 0), new java.awt.Dimension(10, 32767));
-        filler11 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767));
-        filler14 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 0), new java.awt.Dimension(10, 0), new java.awt.Dimension(10, 32767));
-        filler16 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767));
-        filler18 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767));
-        filler19 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 0), new java.awt.Dimension(10, 0), new java.awt.Dimension(10, 32767));
-        filler20 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767));
-        filler21 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767));
+        filler9 =
+            new javax.swing.Box.Filler(
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(32767, 32767)
+            );
+        filler10 =
+            new javax.swing.Box.Filler(
+                new java.awt.Dimension(10, 0),
+                new java.awt.Dimension(10, 0),
+                new java.awt.Dimension(10, 32767)
+            );
+        filler11 =
+            new javax.swing.Box.Filler(
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(32767, 32767)
+            );
+        filler14 =
+            new javax.swing.Box.Filler(
+                new java.awt.Dimension(10, 0),
+                new java.awt.Dimension(10, 0),
+                new java.awt.Dimension(10, 32767)
+            );
+        filler16 =
+            new javax.swing.Box.Filler(
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(32767, 32767)
+            );
+        filler18 =
+            new javax.swing.Box.Filler(
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(32767, 32767)
+            );
+        filler19 =
+            new javax.swing.Box.Filler(
+                new java.awt.Dimension(10, 0),
+                new java.awt.Dimension(10, 0),
+                new java.awt.Dimension(10, 32767)
+            );
+        filler20 =
+            new javax.swing.Box.Filler(
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(32767, 32767)
+            );
+        filler21 =
+            new javax.swing.Box.Filler(
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(32767, 32767)
+            );
 
         mainTab.addTab("Launch Configurations", browserPanel);
         mainTab.addTab("Context Configurations", contextPanel);
@@ -861,31 +989,29 @@ public class DriverSettings extends javax.swing.JFrame {
         commonPanel.setLayout(new java.awt.BorderLayout());
         databasePanel.setLayout(new java.awt.BorderLayout());
 
-
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Configurations");
-        addWindowListener(new java.awt.event.WindowAdapter() {
-            public void windowActivated(java.awt.event.WindowEvent evt) {
-                formWindowActivated(evt);
+        addWindowListener(
+            new java.awt.event.WindowAdapter() {
+
+                public void windowActivated(java.awt.event.WindowEvent evt) {
+                    formWindowActivated(evt);
+                }
+
+                public void windowClosing(java.awt.event.WindowEvent evt) {
+                    formWindowClosing(evt);
+                }
             }
-            public void windowClosing(java.awt.event.WindowEvent evt) {
-                formWindowClosing(evt);
-            }
-        });
+        );
 
         commonPanel.setLayout(new java.awt.BorderLayout());
 
-        driverPropTable.setModel(new javax.swing.table.DefaultTableModel(
-                new Object [][] {
-                        {null, null},
-                        {null, null},
-                        {null, null},
-                        {null, null}
-                },
-                new String [] {
-                        "Property", "Value"
-                }
-        ));
+        driverPropTable.setModel(
+            new javax.swing.table.DefaultTableModel(
+                new Object[][] { { null, null }, { null, null }, { null, null }, { null, null } },
+                new String[] { "Property", "Value" }
+            )
+        );
         jScrollPane3.setViewportView(driverPropTable);
 
         commonPanel.add(jScrollPane3, java.awt.BorderLayout.CENTER);
@@ -903,22 +1029,28 @@ public class DriverSettings extends javax.swing.JFrame {
         apiCombo.setEditable(true);
         apiCombo.setMinimumSize(new java.awt.Dimension(150, 26));
         apiCombo.setPreferredSize(new java.awt.Dimension(150, 26));
-        apiCombo.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                apiComboItemStateChanged(evt);
+        apiCombo.addItemListener(
+            new java.awt.event.ItemListener() {
+
+                public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                    apiComboItemStateChanged(evt);
+                }
             }
-        });
-        
+        );
+
         addNewAPIConfig.setIcon(INGIcons.swingColored("icon.addIcon", 16));
         addNewAPIConfig.setToolTipText("Add New Context");
         addNewAPIConfig.setFocusable(false);
         addNewAPIConfig.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         addNewAPIConfig.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        addNewAPIConfig.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addNewAPIActionPerformed(evt);
+        addNewAPIConfig.addActionListener(
+            new java.awt.event.ActionListener() {
+
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    addNewAPIActionPerformed(evt);
+                }
             }
-        });
+        );
         jToolBar1.add(addNewAPIConfig);
 
         deleteAPIConfig.setIcon(INGIcons.swingColored("icon.deleteIcon", 16));
@@ -926,11 +1058,14 @@ public class DriverSettings extends javax.swing.JFrame {
         deleteAPIConfig.setFocusable(false);
         deleteAPIConfig.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         deleteAPIConfig.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        deleteAPIConfig.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                deleteAPIActionPerformed(evt);
+        deleteAPIConfig.addActionListener(
+            new java.awt.event.ActionListener() {
+
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    deleteAPIActionPerformed(evt);
+                }
             }
-        });
+        );
         jToolBar1.add(deleteAPIConfig);
 
         addPropButton.setIcon(INGIcons.swingColored("icon.add", 16));
@@ -938,11 +1073,14 @@ public class DriverSettings extends javax.swing.JFrame {
         addPropButton.setFocusable(false);
         addPropButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         addPropButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        addPropButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addPropButtonActionPerformed(evt);
+        addPropButton.addActionListener(
+            new java.awt.event.ActionListener() {
+
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    addPropButtonActionPerformed(evt);
+                }
             }
-        });
+        );
         jToolBar1.add(addPropButton);
 
         removePropButton.setIcon(INGIcons.swingColored("icon.remove", 16));
@@ -950,11 +1088,14 @@ public class DriverSettings extends javax.swing.JFrame {
         removePropButton.setFocusable(false);
         removePropButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         removePropButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        removePropButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                removePropButtonActionPerformed(evt);
+        removePropButton.addActionListener(
+            new java.awt.event.ActionListener() {
+
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    removePropButtonActionPerformed(evt);
+                }
             }
-        });
+        );
         jToolBar1.add(removePropButton);
 
         commonPanel.add(jToolBar1, java.awt.BorderLayout.PAGE_START);
@@ -974,14 +1115,21 @@ public class DriverSettings extends javax.swing.JFrame {
         jToolBar3.add(filler6);
 
         browserCombo.setEditable(true);
-        browserCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        browserCombo.setModel(
+            new javax.swing.DefaultComboBoxModel<>(
+                new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }
+            )
+        );
         browserCombo.setMinimumSize(new java.awt.Dimension(150, 26));
         browserCombo.setPreferredSize(new java.awt.Dimension(150, 26));
-        browserCombo.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                browserComboItemStateChanged(evt);
+        browserCombo.addItemListener(
+            new java.awt.event.ItemListener() {
+
+                public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                    browserComboItemStateChanged(evt);
+                }
             }
-        });
+        );
         jToolBar3.add(browserCombo);
         jToolBar3.add(filler7);
 
@@ -989,22 +1137,28 @@ public class DriverSettings extends javax.swing.JFrame {
         editEmulator.setContentAreaFilled(false);
         editEmulator.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         editEmulator.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        editEmulator.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                editEmulatorActionPerformed(evt);
+        editEmulator.addActionListener(
+            new java.awt.event.ActionListener() {
+
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    editEmulatorActionPerformed(evt);
+                }
             }
-        });
+        );
         jToolBar3.add(editEmulator);
 
         deleteEmulator.setToolTipText("Remove Emulator");
         deleteEmulator.setContentAreaFilled(false);
         deleteEmulator.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         deleteEmulator.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        deleteEmulator.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                deleteEmulatorActionPerformed(evt);
+        deleteEmulator.addActionListener(
+            new java.awt.event.ActionListener() {
+
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    deleteEmulatorActionPerformed(evt);
+                }
             }
-        });
+        );
         jToolBar3.add(deleteEmulator);
         jToolBar3.add(filler4);
 
@@ -1020,47 +1174,72 @@ public class DriverSettings extends javax.swing.JFrame {
         customDeviceGroup.add(appiumEmulator);
         appiumEmulator.setText("Remote URL/Appium");
         appiumEmulator.setActionCommand("Remote URL");
-        appiumEmulator.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                appiumEmulatorItemStateChanged(evt);
+        appiumEmulator.addItemListener(
+            new java.awt.event.ItemListener() {
+
+                public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                    appiumEmulatorItemStateChanged(evt);
+                }
             }
-        });
+        );
 
         javax.swing.GroupLayout emulatorPanelLayout = new javax.swing.GroupLayout(emulatorPanel);
         emulatorPanel.setLayout(emulatorPanelLayout);
         emulatorPanelLayout.setHorizontalGroup(
-                emulatorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(emulatorPanelLayout.createSequentialGroup()
-                                .addGap(17, 17, 17)
-                                .addGroup(emulatorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(appiumEmulator)
-                                        .addGroup(emulatorPanelLayout.createSequentialGroup()
-                                                .addGap(24, 24, 24)
-                                                .addComponent(appiumConnectionString, javax.swing.GroupLayout.PREFERRED_SIZE, 383, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addContainerGap(20, Short.MAX_VALUE))
+            emulatorPanelLayout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(
+                    emulatorPanelLayout
+                        .createSequentialGroup()
+                        .addGap(17, 17, 17)
+                        .addGroup(
+                            emulatorPanelLayout
+                                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(appiumEmulator)
+                                .addGroup(
+                                    emulatorPanelLayout
+                                        .createSequentialGroup()
+                                        .addGap(24, 24, 24)
+                                        .addComponent(
+                                            appiumConnectionString,
+                                            javax.swing.GroupLayout.PREFERRED_SIZE,
+                                            383,
+                                            javax.swing.GroupLayout.PREFERRED_SIZE
+                                        )
+                                )
+                        )
+                        .addContainerGap(20, Short.MAX_VALUE)
+                )
         );
         emulatorPanelLayout.setVerticalGroup(
-                emulatorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(emulatorPanelLayout.createSequentialGroup()
-                                .addGap(41, 41, 41)
-                                .addComponent(appiumEmulator)
-                                .addGap(18, 18, 18)
-                                .addComponent(appiumConnectionString, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(352, Short.MAX_VALUE))
+            emulatorPanelLayout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(
+                    emulatorPanelLayout
+                        .createSequentialGroup()
+                        .addGap(41, 41, 41)
+                        .addComponent(appiumEmulator)
+                        .addGap(18, 18, 18)
+                        .addComponent(
+                            appiumConnectionString,
+                            javax.swing.GroupLayout.PREFERRED_SIZE,
+                            javax.swing.GroupLayout.DEFAULT_SIZE,
+                            javax.swing.GroupLayout.PREFERRED_SIZE
+                        )
+                        .addContainerGap(352, Short.MAX_VALUE)
+                )
         );
 
         emCapTab.addTab("Mobile", emulatorPanel);
 
         capabilityPanel.setLayout(new java.awt.BorderLayout());
 
-        capTable.setModel(new javax.swing.table.DefaultTableModel(
-                new Object [][] {
-
-                },
-                new String [] {
-                        "Property", "Value"
-                }
-        ));
+        capTable.setModel(
+            new javax.swing.table.DefaultTableModel(
+                new Object[][] {},
+                new String[] { "Property", "Value" }
+            )
+        );
         jScrollPane1.setViewportView(capTable);
 
         capabilityPanel.add(jScrollPane1, java.awt.BorderLayout.CENTER);
@@ -1075,11 +1254,14 @@ public class DriverSettings extends javax.swing.JFrame {
         addCap.setFocusable(false);
         addCap.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         addCap.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        addCap.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addCapActionPerformed(evt);
+        addCap.addActionListener(
+            new java.awt.event.ActionListener() {
+
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    addCapActionPerformed(evt);
+                }
             }
-        });
+        );
         jToolBar2.add(addCap);
 
         removeCap.setIcon(INGIcons.swingColored("icon.remove", 16));
@@ -1087,11 +1269,14 @@ public class DriverSettings extends javax.swing.JFrame {
         removeCap.setFocusable(false);
         removeCap.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         removeCap.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        removeCap.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                removeCapActionPerformed(evt);
+        removeCap.addActionListener(
+            new java.awt.event.ActionListener() {
+
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    removeCapActionPerformed(evt);
+                }
             }
-        });
+        );
         jToolBar2.add(removeCap);
 
         capabilityPanel.add(jToolBar2, java.awt.BorderLayout.PAGE_START);
@@ -1123,15 +1308,16 @@ public class DriverSettings extends javax.swing.JFrame {
         //dbCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{"No Database"}));
         dbCombo.setMinimumSize(new java.awt.Dimension(150, 26));
         dbCombo.setPreferredSize(new java.awt.Dimension(150, 26));
-        dbCombo.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                dbComboItemStateChanged(evt);
+        dbCombo.addItemListener(
+            new java.awt.event.ItemListener() {
+
+                public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                    dbComboItemStateChanged(evt);
+                }
             }
-        });
+        );
 
-
-
-       /* testConn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ui/resources/toolbar/bulb_yellow.png")));
+        /* testConn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ui/resources/toolbar/bulb_yellow.png")));
         testConn.setText("Test Connection");
         testConn.setFocusable(false);
         testConn.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -1142,17 +1328,19 @@ public class DriverSettings extends javax.swing.JFrame {
         });
         jToolBar5.add(testConn);*/
 
-
         addNewDB.setIcon(INGIcons.swingColored("icon.addIcon", 16));
         addNewDB.setToolTipText("Add New Database");
         addNewDB.setFocusable(false);
         addNewDB.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         addNewDB.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        addNewDB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addNewDBActionPerformed(evt);
+        addNewDB.addActionListener(
+            new java.awt.event.ActionListener() {
+
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    addNewDBActionPerformed(evt);
+                }
             }
-        });
+        );
         jToolBar5.add(addNewDB);
 
         deleteDB.setIcon(INGIcons.swingColored("icon.deleteIcon", 16));
@@ -1160,11 +1348,14 @@ public class DriverSettings extends javax.swing.JFrame {
         deleteDB.setFocusable(false);
         deleteDB.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         deleteDB.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        deleteDB.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                deleteDBActionPerformed(evt);
+        deleteDB.addActionListener(
+            new java.awt.event.ActionListener() {
+
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    deleteDBActionPerformed(evt);
+                }
             }
-        });
+        );
         jToolBar5.add(deleteDB);
 
         // For adding Database Property
@@ -1173,11 +1364,14 @@ public class DriverSettings extends javax.swing.JFrame {
         addDBPropbutton.setFocusable(false);
         addDBPropbutton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         addDBPropbutton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        addDBPropbutton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addDBPropButtonActionPerformed(evt);
+        addDBPropbutton.addActionListener(
+            new java.awt.event.ActionListener() {
+
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    addDBPropButtonActionPerformed(evt);
+                }
             }
-        });
+        );
         jToolBar5.add(addDBPropbutton);
 
         //For deleting database property
@@ -1186,29 +1380,28 @@ public class DriverSettings extends javax.swing.JFrame {
         deleteDBPropbutton.setFocusable(false);
         deleteDBPropbutton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         deleteDBPropbutton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        deleteDBPropbutton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        deleteDBPropbutton.addActionListener(
+            new java.awt.event.ActionListener() {
 
-                removeDBPropButtonActionPerformed(evt);
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    removeDBPropButtonActionPerformed(evt);
+                }
             }
-        });
+        );
         jToolBar5.add(deleteDBPropbutton);
 
+        dbPropTable.setModel(
+            new javax.swing.table.DefaultTableModel(
+                new Object[][] {},
+                new String[] { "Property", "Value" }
+            ) {
+                boolean[] canEdit = new boolean[] { true, true };
 
-        dbPropTable.setModel(new javax.swing.table.DefaultTableModel(
-                new Object[][]{},
-                new String[]{
-                        "Property", "Value"
+                public boolean isCellEditable(int rowIndex, int columnIndex) {
+                    return canEdit[columnIndex];
                 }
-        ) {
-            boolean[] canEdit = new boolean[]{
-                    true, true
-            };
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit[columnIndex];
             }
-        });
+        );
         jScrollPane4.setViewportView(dbPropTable);
 
         dbPropTable.setMinimumSize(new java.awt.Dimension(30, 120));
@@ -1216,33 +1409,69 @@ public class DriverSettings extends javax.swing.JFrame {
         dbPropTable.setPreferredSize(new java.awt.Dimension(150, 120));
         databasePanel.add(jScrollPane4, java.awt.BorderLayout.CENTER);
 
-
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
-                jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 652, Short.MAX_VALUE)
+            jPanel5Layout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(
+                    jScrollPane4,
+                    javax.swing.GroupLayout.DEFAULT_SIZE,
+                    652,
+                    Short.MAX_VALUE
+                )
         );
         jPanel5Layout.setVerticalGroup(
-                jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 557, Short.MAX_VALUE)
+            jPanel5Layout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(
+                    jScrollPane4,
+                    javax.swing.GroupLayout.DEFAULT_SIZE,
+                    557,
+                    Short.MAX_VALUE
+                )
         );
 
         javax.swing.GroupLayout databasePanelLayout = new javax.swing.GroupLayout(databasePanel);
         databasePanel.setLayout(databasePanelLayout);
         databasePanelLayout.setHorizontalGroup(
-                databasePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jToolBar5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            databasePanelLayout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(
+                    jToolBar5,
+                    javax.swing.GroupLayout.Alignment.TRAILING,
+                    javax.swing.GroupLayout.DEFAULT_SIZE,
+                    javax.swing.GroupLayout.DEFAULT_SIZE,
+                    Short.MAX_VALUE
+                )
+                .addComponent(
+                    jPanel5,
+                    javax.swing.GroupLayout.DEFAULT_SIZE,
+                    javax.swing.GroupLayout.DEFAULT_SIZE,
+                    Short.MAX_VALUE
+                )
         );
         databasePanelLayout.setVerticalGroup(
-                databasePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(databasePanelLayout.createSequentialGroup()
-                                .addComponent(jToolBar5, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            databasePanelLayout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(
+                    databasePanelLayout
+                        .createSequentialGroup()
+                        .addComponent(
+                            jToolBar5,
+                            javax.swing.GroupLayout.PREFERRED_SIZE,
+                            50,
+                            javax.swing.GroupLayout.PREFERRED_SIZE
+                        )
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(
+                            jPanel5,
+                            javax.swing.GroupLayout.DEFAULT_SIZE,
+                            javax.swing.GroupLayout.DEFAULT_SIZE,
+                            Short.MAX_VALUE
+                        )
+                )
         );
-
 
         contextJToolBar.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         contextJToolBar.setRollover(true);
@@ -1258,23 +1487,28 @@ public class DriverSettings extends javax.swing.JFrame {
         //contextCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{"Item 1", "Item 2", "Item 3", "Item 4"}));
         contextCombo.setMinimumSize(new java.awt.Dimension(150, 26));
         contextCombo.setPreferredSize(new java.awt.Dimension(150, 26));
-        contextCombo.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                contextComboItemStateChanged(evt);
-            }
-        });
+        contextCombo.addItemListener(
+            new java.awt.event.ItemListener() {
 
+                public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                    contextComboItemStateChanged(evt);
+                }
+            }
+        );
 
         addNewContext.setIcon(INGIcons.swingColored("icon.addIcon", 16));
         addNewContext.setToolTipText("Add New Context");
         addNewContext.setFocusable(false);
         addNewContext.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         addNewContext.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        addNewContext.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addNewContextActionPerformed(evt);
+        addNewContext.addActionListener(
+            new java.awt.event.ActionListener() {
+
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    addNewContextActionPerformed(evt);
+                }
             }
-        });
+        );
         contextJToolBar.add(addNewContext);
 
         deleteContext.setIcon(INGIcons.swingColored("icon.deleteIcon", 16));
@@ -1282,11 +1516,14 @@ public class DriverSettings extends javax.swing.JFrame {
         deleteContext.setFocusable(false);
         deleteContext.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         deleteContext.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        deleteContext.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                deleteContextActionPerformed(evt);
+        deleteContext.addActionListener(
+            new java.awt.event.ActionListener() {
+
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    deleteContextActionPerformed(evt);
+                }
             }
-        });
+        );
         contextJToolBar.add(deleteContext);
 
         addContextPropButton.setIcon(INGIcons.swingColored("icon.add", 16));
@@ -1294,11 +1531,14 @@ public class DriverSettings extends javax.swing.JFrame {
         addContextPropButton.setFocusable(false);
         addContextPropButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         addContextPropButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        addContextPropButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addContextPropButtonActionPerformed(evt);
+        addContextPropButton.addActionListener(
+            new java.awt.event.ActionListener() {
+
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    addContextPropButtonActionPerformed(evt);
+                }
             }
-        });
+        );
         contextJToolBar.add(addContextPropButton);
 
         removeContextPropButton.setIcon(INGIcons.swingColored("icon.remove", 16));
@@ -1306,28 +1546,28 @@ public class DriverSettings extends javax.swing.JFrame {
         removeContextPropButton.setFocusable(false);
         removeContextPropButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         removeContextPropButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        removeContextPropButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        removeContextPropButton.addActionListener(
+            new java.awt.event.ActionListener() {
 
-                removeContextPropButtonActionPerformed(evt);
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    removeContextPropButtonActionPerformed(evt);
+                }
             }
-        });
+        );
         contextJToolBar.add(removeContextPropButton);
 
-        contextPropTable.setModel(new javax.swing.table.DefaultTableModel(
-                new Object[][]{},
-                new String[]{
-                        "Property", "Value"
-                }
-        ) {
-            boolean[] canEdit = new boolean[]{
-                    true, true
-            };
+        contextPropTable.setModel(
+            new javax.swing.table.DefaultTableModel(
+                new Object[][] {},
+                new String[] { "Property", "Value" }
+            ) {
+                boolean[] canEdit = new boolean[] { true, true };
 
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit[columnIndex];
+                public boolean isCellEditable(int rowIndex, int columnIndex) {
+                    return canEdit[columnIndex];
+                }
             }
-        });
+        );
         contextPropTable.setMinimumSize(new java.awt.Dimension(30, 120));
         contextPropTable.setOpaque(false);
         contextPropTable.setPreferredSize(new java.awt.Dimension(150, 120));
@@ -1337,26 +1577,64 @@ public class DriverSettings extends javax.swing.JFrame {
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
         jPanel6Layout.setHorizontalGroup(
-                jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 652, Short.MAX_VALUE)
+            jPanel6Layout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(
+                    jScrollPane5,
+                    javax.swing.GroupLayout.DEFAULT_SIZE,
+                    652,
+                    Short.MAX_VALUE
+                )
         );
         jPanel6Layout.setVerticalGroup(
-                jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 557, Short.MAX_VALUE)
+            jPanel6Layout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(
+                    jScrollPane5,
+                    javax.swing.GroupLayout.DEFAULT_SIZE,
+                    557,
+                    Short.MAX_VALUE
+                )
         );
         javax.swing.GroupLayout contextPanelLayout = new javax.swing.GroupLayout(contextPanel);
         contextPanel.setLayout(contextPanelLayout);
         contextPanelLayout.setHorizontalGroup(
-                contextPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(contextJToolBar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            contextPanelLayout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(
+                    contextJToolBar,
+                    javax.swing.GroupLayout.Alignment.TRAILING,
+                    javax.swing.GroupLayout.DEFAULT_SIZE,
+                    javax.swing.GroupLayout.DEFAULT_SIZE,
+                    Short.MAX_VALUE
+                )
+                .addComponent(
+                    jPanel6,
+                    javax.swing.GroupLayout.DEFAULT_SIZE,
+                    javax.swing.GroupLayout.DEFAULT_SIZE,
+                    Short.MAX_VALUE
+                )
         );
         contextPanelLayout.setVerticalGroup(
-                contextPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(contextPanelLayout.createSequentialGroup()
-                                .addComponent(contextJToolBar, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            contextPanelLayout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(
+                    contextPanelLayout
+                        .createSequentialGroup()
+                        .addComponent(
+                            contextJToolBar,
+                            javax.swing.GroupLayout.PREFERRED_SIZE,
+                            50,
+                            javax.swing.GroupLayout.PREFERRED_SIZE
+                        )
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(
+                            jPanel6,
+                            javax.swing.GroupLayout.DEFAULT_SIZE,
+                            javax.swing.GroupLayout.DEFAULT_SIZE,
+                            Short.MAX_VALUE
+                        )
+                )
         );
 
         getContentPane().add(mainTab, java.awt.BorderLayout.CENTER);
@@ -1365,41 +1643,49 @@ public class DriverSettings extends javax.swing.JFrame {
         jPanel1.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
         saveSettings.setText("Save");
-        saveSettings.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                saveSettingsActionPerformed(evt);
+        saveSettings.addActionListener(
+            new java.awt.event.ActionListener() {
+
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    saveSettingsActionPerformed(evt);
+                }
             }
-        });
+        );
         jPanel1.add(saveSettings);
 
         resetSettings.setText("Reset");
-        resetSettings.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                resetSettingsActionPerformed(evt);
+        resetSettings.addActionListener(
+            new java.awt.event.ActionListener() {
+
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    resetSettingsActionPerformed(evt);
+                }
             }
-        });
+        );
         jPanel1.add(resetSettings);
 
         getContentPane().add(jPanel1, java.awt.BorderLayout.SOUTH);
         getContentPane().add(filler5, java.awt.BorderLayout.PAGE_START);
 
         pack();
-    }// </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 
-    private void browserComboItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_browserComboItemStateChanged
+    private void browserComboItemStateChanged(java.awt.event.ItemEvent evt) { //GEN-FIRST:event_browserComboItemStateChanged
         if (evt.getStateChange() == ItemEvent.SELECTED && !isAddingEmulator) {
-            SwingUtilities.invokeLater(() -> {
-                checkAndLoadCapabilities();
-            });
+            SwingUtilities.invokeLater(
+                () -> {
+                    checkAndLoadCapabilities();
+                }
+            );
         }
-    }//GEN-LAST:event_browserComboItemStateChanged
+    } //GEN-LAST:event_browserComboItemStateChanged
 
-    private void addPropButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addPropButtonActionPerformed
+    private void addPropButtonActionPerformed(java.awt.event.ActionEvent evt) { //GEN-FIRST:event_addPropButtonActionPerformed
         DefaultTableModel model = (DefaultTableModel) driverPropTable.getModel();
-        model.addRow(new Object[]{});
-    }//GEN-LAST:event_addPropButtonActionPerformed
+        model.addRow(new Object[] {});
+    } //GEN-LAST:event_addPropButtonActionPerformed
 
-    private void removePropButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removePropButtonActionPerformed
+    private void removePropButtonActionPerformed(java.awt.event.ActionEvent evt) { //GEN-FIRST:event_removePropButtonActionPerformed
         int[] rows = driverPropTable.getSelectedRows();
         if (rows != null) {
             DefaultTableModel model = (DefaultTableModel) driverPropTable.getModel();
@@ -1407,11 +1693,11 @@ public class DriverSettings extends javax.swing.JFrame {
                 model.removeRow(rows[i]);
             }
         }
-    }//GEN-LAST:event_removePropButtonActionPerformed
+    } //GEN-LAST:event_removePropButtonActionPerformed
 
     private void addContextPropButtonActionPerformed(java.awt.event.ActionEvent evt) {
         DefaultTableModel model = (DefaultTableModel) contextPropTable.getModel();
-        model.addRow(new Object[]{});
+        model.addRow(new Object[] {});
     }
 
     private void removeContextPropButtonActionPerformed(java.awt.event.ActionEvent evt) {
@@ -1424,34 +1710,34 @@ public class DriverSettings extends javax.swing.JFrame {
         }
     }
 
-
-    private void saveSettingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveSettingsActionPerformed
+    private void saveSettingsActionPerformed(java.awt.event.ActionEvent evt) { //GEN-FIRST:event_saveSettingsActionPerformed
         saveSettings();
         saveSettings.setEnabled(false);
-    }//GEN-LAST:event_saveSettingsActionPerformed
+    } //GEN-LAST:event_saveSettingsActionPerformed
 
-    private void resetSettingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetSettingsActionPerformed
+    private void resetSettingsActionPerformed(java.awt.event.ActionEvent evt) { //GEN-FIRST:event_resetSettingsActionPerformed
         // TODO add your handling code here:
         saveSettings.setEnabled(false);
-    }//GEN-LAST:event_resetSettingsActionPerformed
+    } //GEN-LAST:event_resetSettingsActionPerformed
 
-    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+    private void formWindowClosing(java.awt.event.WindowEvent evt) { //GEN-FIRST:event_formWindowClosing
         settings.getEmulators().reload();
         sMainFrame.reloadBrowsers();
-    }//GEN-LAST:event_formWindowClosing
+    } //GEN-LAST:event_formWindowClosing
 
     private void addNewEmulatorActionPerformed(java.awt.event.ActionEvent evt) {
         addNewEmulator();
     }
-    private void editEmulatorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editEmulatorActionPerformed
+
+    private void editEmulatorActionPerformed(java.awt.event.ActionEvent evt) { //GEN-FIRST:event_editEmulatorActionPerformed
         renameEmulator();
-    }//GEN-LAST:event_editEmulatorActionPerformed
+    } //GEN-LAST:event_editEmulatorActionPerformed
 
-    private void deleteEmulatorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteEmulatorActionPerformed
+    private void deleteEmulatorActionPerformed(java.awt.event.ActionEvent evt) { //GEN-FIRST:event_deleteEmulatorActionPerformed
         deleteEmulator();
-    }//GEN-LAST:event_deleteEmulatorActionPerformed
+    } //GEN-LAST:event_deleteEmulatorActionPerformed
 
-    private void removeCapActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeCapActionPerformed
+    private void removeCapActionPerformed(java.awt.event.ActionEvent evt) { //GEN-FIRST:event_removeCapActionPerformed
         int[] rows = capTable.getSelectedRows();
         if (rows != null) {
             DefaultTableModel model = (DefaultTableModel) capTable.getModel();
@@ -1459,16 +1745,16 @@ public class DriverSettings extends javax.swing.JFrame {
                 model.removeRow(rows[i]);
             }
         }
-    }//GEN-LAST:event_removeCapActionPerformed
+    } //GEN-LAST:event_removeCapActionPerformed
 
-    private void addCapActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addCapActionPerformed
+    private void addCapActionPerformed(java.awt.event.ActionEvent evt) { //GEN-FIRST:event_addCapActionPerformed
         DefaultTableModel model = (DefaultTableModel) capTable.getModel();
-        model.addRow(new Object[]{});
-    }//GEN-LAST:event_addCapActionPerformed
+        model.addRow(new Object[] {});
+    } //GEN-LAST:event_addCapActionPerformed
 
-    private void appiumEmulatorItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_appiumEmulatorItemStateChanged
+    private void appiumEmulatorItemStateChanged(java.awt.event.ItemEvent evt) { //GEN-FIRST:event_appiumEmulatorItemStateChanged
         appiumConnectionString.setEnabled(appiumEmulator.isSelected());
-    }//GEN-LAST:event_appiumEmulatorItemStateChanged
+    } //GEN-LAST:event_appiumEmulatorItemStateChanged
 
     private void addNewDBActionPerformed(java.awt.event.ActionEvent evt) {
         addNewDB();
@@ -1478,19 +1764,21 @@ public class DriverSettings extends javax.swing.JFrame {
         deleteDB();
     }
 
-    private void dbComboItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_dbComboItemStateChanged
+    private void dbComboItemStateChanged(java.awt.event.ItemEvent evt) { //GEN-FIRST:event_dbComboItemStateChanged
         if (evt.getStateChange() == ItemEvent.SELECTED) {
-            SwingUtilities.invokeLater(() -> {
-                checkAndLoadDatabases();
-            });
+            SwingUtilities.invokeLater(
+                () -> {
+                    checkAndLoadDatabases();
+                }
+            );
         }
-    }//GEN-LAST:event_dbComboItemStateChanged
+    } //GEN-LAST:event_dbComboItemStateChanged
 
-    private void formWindowActivated(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowActivated
+    private void formWindowActivated(java.awt.event.WindowEvent evt) { //GEN-FIRST:event_formWindowActivated
         // TODO add your handling code here:
         saveSettings.setEnabled(false);
         addListeners();
-    }//GEN-LAST:event_formWindowActivated
+    } //GEN-LAST:event_formWindowActivated
 
     private void addNewDB() {
         String newdbName = dbCombo.getEditor().getItem().toString();
@@ -1512,7 +1800,6 @@ public class DriverSettings extends javax.swing.JFrame {
             dbCombo.removeItem(dbName);
         }
     }
-    
 
     /**
      * Handles the action event triggered when the "Add DB Property" button is clicked.
@@ -1524,10 +1811,9 @@ public class DriverSettings extends javax.swing.JFrame {
      */
     private void addDBPropButtonActionPerformed(java.awt.event.ActionEvent evt) {
         DefaultTableModel model = (DefaultTableModel) dbPropTable.getModel();
-        model.addRow(new Object[]{});
+        model.addRow(new Object[] {});
     }
 
-    
     /**
      * Handles the action event triggered when the "Remove DB Property" button is clicked.
      * <p>
@@ -1556,16 +1842,20 @@ public class DriverSettings extends javax.swing.JFrame {
 
     private void contextComboItemStateChanged(java.awt.event.ItemEvent evt) {
         if (evt.getStateChange() == ItemEvent.SELECTED) {
-            SwingUtilities.invokeLater(() -> {
-                checkAndLoadContexts();
-            });
+            SwingUtilities.invokeLater(
+                () -> {
+                    checkAndLoadContexts();
+                }
+            );
         }
     }
 
     private void addNewContext() {
         String newContextName = contextCombo.getEditor().getItem().toString();
         if (!newContextName.isBlank()) {
-            if (!getTotalContextList().contains(newContextName) || getTotalContextList().isEmpty()) {
+            if (
+                !getTotalContextList().contains(newContextName) || getTotalContextList().isEmpty()
+            ) {
                 settings.getContextSettings().addContextName(newContextName);
                 contextCombo.addItem(newContextName);
                 contextCombo.setSelectedItem(newContextName);
@@ -1632,7 +1922,7 @@ public class DriverSettings extends javax.swing.JFrame {
      *     <li>Removes the alias from the combo box</li>
      * </ul>
      *
-     */ 
+     */
     private void deleteAPI() {
         if (apiCombo.getSelectedIndex() != -1) {
             String apiName = apiCombo.getSelectedItem().toString();
@@ -1644,42 +1934,62 @@ public class DriverSettings extends javax.swing.JFrame {
     // Triggered when a change in the apiCombobox is detected
     private void apiComboItemStateChanged(java.awt.event.ItemEvent evt) {
         if (evt.getStateChange() == ItemEvent.SELECTED) {
-            SwingUtilities.invokeLater(() -> {
-                checkAndLoadApi();
-            });
+            SwingUtilities.invokeLater(
+                () -> {
+                    checkAndLoadApi();
+                }
+            );
         }
     }
-    
 
     private void alterDefaultKeyBindings() {
-
         int menuShortcutKeyMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
-        appiumConnectionString.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_X, menuShortcutKeyMask), "none");
-        appiumConnectionString.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_C, menuShortcutKeyMask), "none");
-        appiumConnectionString.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_V, menuShortcutKeyMask), "none");
+        appiumConnectionString
+            .getInputMap()
+            .put(KeyStroke.getKeyStroke(KeyEvent.VK_X, menuShortcutKeyMask), "none");
+        appiumConnectionString
+            .getInputMap()
+            .put(KeyStroke.getKeyStroke(KeyEvent.VK_C, menuShortcutKeyMask), "none");
+        appiumConnectionString
+            .getInputMap()
+            .put(KeyStroke.getKeyStroke(KeyEvent.VK_V, menuShortcutKeyMask), "none");
 
-        appiumConnectionString.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_X, menuShortcutKeyMask), "cut");
-        appiumConnectionString.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_C, menuShortcutKeyMask), "copy");
-        appiumConnectionString.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_V, menuShortcutKeyMask), "paste");
-
-
+        appiumConnectionString
+            .getInputMap()
+            .put(KeyStroke.getKeyStroke(KeyEvent.VK_X, menuShortcutKeyMask), "cut");
+        appiumConnectionString
+            .getInputMap()
+            .put(KeyStroke.getKeyStroke(KeyEvent.VK_C, menuShortcutKeyMask), "copy");
+        appiumConnectionString
+            .getInputMap()
+            .put(KeyStroke.getKeyStroke(KeyEvent.VK_V, menuShortcutKeyMask), "paste");
     }
-    
-    private void addListeners(){
+
+    private void addListeners() {
         // Add SaveSettings listeners
         saveSettingsListeners = new SaveSettingsListeners(saveSettings);
-        
-        driverPropTable.getModel().addTableModelListener(saveSettingsListeners.new  SaveTableModelListener());
-        appiumConnectionString.getDocument().addDocumentListener(saveSettingsListeners.new SaveDocListener());
-        appiumEmulator.addItemListener(saveSettingsListeners.new  SaveItemListener());
-        capTable.getModel().addTableModelListener(saveSettingsListeners.new  SaveTableModelListener());
-        dbCombo.addItemListener(saveSettingsListeners.new  SaveItemListener());
-        dbPropTable.getModel().addTableModelListener(saveSettingsListeners.new  SaveTableModelListener());
-        contextCombo.addItemListener(saveSettingsListeners.new  SaveItemListener());
-        contextPropTable.getModel().addTableModelListener(saveSettingsListeners.new  SaveTableModelListener());
+
+        driverPropTable
+            .getModel()
+            .addTableModelListener(saveSettingsListeners.new SaveTableModelListener());
+        appiumConnectionString
+            .getDocument()
+            .addDocumentListener(saveSettingsListeners.new SaveDocListener());
+        appiumEmulator.addItemListener(saveSettingsListeners.new SaveItemListener());
+        capTable
+            .getModel()
+            .addTableModelListener(saveSettingsListeners.new SaveTableModelListener());
+        dbCombo.addItemListener(saveSettingsListeners.new SaveItemListener());
+        dbPropTable
+            .getModel()
+            .addTableModelListener(saveSettingsListeners.new SaveTableModelListener());
+        contextCombo.addItemListener(saveSettingsListeners.new SaveItemListener());
+        contextPropTable
+            .getModel()
+            .addTableModelListener(saveSettingsListeners.new SaveTableModelListener());
         // End of SaveSettings Listeners
     }
-    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<String> apiCombo;
     private javax.swing.JLabel apiJLabel;

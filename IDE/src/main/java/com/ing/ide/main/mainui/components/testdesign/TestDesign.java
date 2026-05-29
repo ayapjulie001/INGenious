@@ -1,4 +1,3 @@
-
 package com.ing.ide.main.mainui.components.testdesign;
 
 import com.ing.datalib.component.Project;
@@ -17,10 +16,9 @@ import javax.swing.JPanel;
 
 /**
  *
- * 
+ *
  */
 public class TestDesign {
-
     private final TestDesignUI testDesignUI;
 
     private final ScenarioComponent scenarioComp;
@@ -42,7 +40,6 @@ public class TestDesign {
     private CardLayout testCaseScenarioCard;
 
     private final ImpactUI impactUI;
-    
 
     public TestDesign(AppMainFrame sMainFrame) {
         this.sMainFrame = sMainFrame;
@@ -72,7 +69,7 @@ public class TestDesign {
             if (currentTestCase != null && !currentTestCase.isSaved()) {
                 currentTestCase.save();
             }
-            
+
             testCaseScenarioCard.show(testcaseMirage, "scenario");
             scenarioComp.loadTableModelForSelection(selectedNode);
         } else if (selectedNode instanceof TestCase) {
@@ -167,5 +164,4 @@ public class TestDesign {
     public String getDefaultBrowser() {
         return testcaseComp.getDefaultBrowser();
     }
-
 }

@@ -12,7 +12,6 @@ import java.util.UUID;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class APIRequest implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
     /**
@@ -338,7 +337,7 @@ public class APIRequest implements Serializable {
         copy.setSslVerificationEnabled(this.sslVerificationEnabled);
         copy.setPreRequestScript(this.preRequestScript);
         copy.setTestScript(this.testScript);
-        
+
         // Deep copy collections
         if (this.queryParams != null) {
             copy.setQueryParams(new ArrayList<>());
@@ -373,7 +372,7 @@ public class APIRequest implements Serializable {
                 copy.getAssertions().add(a.copy());
             }
         }
-        
+
         return copy;
     }
 

@@ -1,20 +1,19 @@
 package com.ing.engine.cli.commands;
 
 import com.ing.datalib.component.Project;
+import com.ing.datalib.component.Release;
 import com.ing.datalib.component.Scenario;
 import com.ing.datalib.component.TestCase;
-import com.ing.datalib.component.Release;
 import com.ing.datalib.component.TestSet;
 import com.ing.engine.cli.INGeniousCLI;
 import com.ing.engine.cli.output.OutputFormatter;
+import java.io.File;
+import java.util.*;
+import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ParentCommand;
-
-import java.io.File;
-import java.util.*;
-import java.util.concurrent.Callable;
 
 /**
  * Project management commands.
@@ -30,7 +29,6 @@ import java.util.concurrent.Callable;
     }
 )
 public class ProjectCommand implements Callable<Integer> {
-
     @ParentCommand
     private INGeniousCLI parent;
 
@@ -45,17 +43,20 @@ public class ProjectCommand implements Callable<Integer> {
      */
     @Command(name = "list", description = "List all projects in a directory")
     public static class ListCommand implements Callable<Integer> {
-
         @ParentCommand
         private ProjectCommand parent;
 
-        @Parameters(index = "0", description = "Directory to search for projects", defaultValue = ".")
+        @Parameters(
+            index = "0",
+            description = "Directory to search for projects",
+            defaultValue = "."
+        )
         private File directory;
 
         @Override
         public Integer call() {
             INGeniousCLI cli = INGeniousCLI.getInstance();
-            
+
             if (!directory.exists() || !directory.isDirectory()) {
                 cli.printError("Directory not found: " + directory.getAbsolutePath());
                 return 1;
@@ -72,18 +73,24 @@ public class ProjectCommand implements Callable<Integer> {
                         try {
                             Project project = new Project(subdir.getAbsolutePath());
                             int scenarioCount = project.getScenarios().size();
-                            int testCaseCount = project.getScenarios().stream()
-                                    .mapToInt(s -> s.getTestCases().size())
-                                    .sum();
-                            
-                            rows.add(Arrays.asList(
-                                project.getName(),
-                                subdir.getAbsolutePath(),
-                                String.valueOf(scenarioCount),
-                                String.valueOf(testCaseCount)
-                            ));
+                            int testCaseCount = project
+                                .getScenarios()
+                                .stream()
+                                .mapToInt(s -> s.getTestCases().size())
+                                .sum();
+
+                            rows.add(
+                                Arrays.asList(
+                                    project.getName(),
+                                    subdir.getAbsolutePath(),
+                                    String.valueOf(scenarioCount),
+                                    String.valueOf(testCaseCount)
+                                )
+                            );
                         } catch (Exception e) {
-                            rows.add(Arrays.asList(subdir.getName(), subdir.getAbsolutePath(), "?", "?"));
+                            rows.add(
+                                Arrays.asList(subdir.getName(), subdir.getAbsolutePath(), "?", "?")
+                            );
                         }
                     }
                 }
@@ -99,9 +106,11 @@ public class ProjectCommand implements Callable<Integer> {
         }
 
         private boolean isProjectDirectory(File dir) {
-            return new File(dir, "TestPlan").exists() || 
-                   new File(dir, ".project").exists() ||
-                   new File(dir, "ObjectRepository").exists();
+            return (
+                new File(dir, "TestPlan").exists() ||
+                new File(dir, ".project").exists() ||
+                new File(dir, "ObjectRepository").exists()
+            );
         }
     }
 
@@ -110,7 +119,6 @@ public class ProjectCommand implements Callable<Integer> {
      */
     @Command(name = "info", description = "Show project information")
     public static class InfoCommand implements Callable<Integer> {
-
         @ParentCommand
         private ProjectCommand parent;
 
@@ -120,7 +128,7 @@ public class ProjectCommand implements Callable<Integer> {
         @Override
         public Integer call() {
             INGeniousCLI cli = INGeniousCLI.getInstance();
-            
+
             String path = projectPath.isEmpty() ? cli.getProjectPath() : projectPath;
             if (path == null || path.isEmpty()) {
                 cli.printError("Project path required. Use --project or specify as argument.");
@@ -135,37 +143,47 @@ public class ProjectCommand implements Callable<Integer> {
 
             try {
                 Project project = new Project(projectDir.getAbsolutePath());
-                
+
                 Map<String, Object> info = new LinkedHashMap<>();
                 info.put("name", project.getName());
                 info.put("location", project.getLocation());
                 info.put("scenarios", project.getScenarios().size());
-                
-                int testCaseCount = project.getScenarios().stream()
-                        .mapToInt(s -> s.getTestCases().size())
-                        .sum();
+
+                int testCaseCount = project
+                    .getScenarios()
+                    .stream()
+                    .mapToInt(s -> s.getTestCases().size())
+                    .sum();
                 info.put("testCases", testCaseCount);
-                
+
                 info.put("releases", project.getReleases().size());
-                
-                int testSetCount = project.getReleases().stream()
-                        .mapToInt(r -> r.getTestSets().size())
-                        .sum();
+
+                int testSetCount = project
+                    .getReleases()
+                    .stream()
+                    .mapToInt(r -> r.getTestSets().size())
+                    .sum();
                 info.put("testSets", testSetCount);
-                
+
                 // Object Repository info
-                if (project.getObjectRepository() != null && project.getObjectRepository().getWebOR() != null) {
+                if (
+                    project.getObjectRepository() != null &&
+                    project.getObjectRepository().getWebOR() != null
+                ) {
                     int pageCount = project.getObjectRepository().getWebOR().getPages().size();
-                    int objectCount = project.getObjectRepository().getWebOR().getPages().stream()
-                            .mapToInt(p -> p.getChildCount())
-                            .sum();
+                    int objectCount = project
+                        .getObjectRepository()
+                        .getWebOR()
+                        .getPages()
+                        .stream()
+                        .mapToInt(p -> p.getChildCount())
+                        .sum();
                     info.put("pages", pageCount);
                     info.put("objects", objectCount);
                 }
 
                 System.out.println(cli.getOutputFormatter().formatKeyValue(info));
                 return 0;
-                
             } catch (Exception e) {
                 cli.printError("Failed to load project: " + e.getMessage());
                 return 1;
@@ -178,7 +196,6 @@ public class ProjectCommand implements Callable<Integer> {
      */
     @Command(name = "validate", description = "Validate project structure and configuration")
     public static class ValidateCommand implements Callable<Integer> {
-
         @ParentCommand
         private ProjectCommand parent;
 
@@ -191,7 +208,7 @@ public class ProjectCommand implements Callable<Integer> {
         @Override
         public Integer call() {
             INGeniousCLI cli = INGeniousCLI.getInstance();
-            
+
             String path = projectPath.isEmpty() ? cli.getProjectPath() : projectPath;
             if (path == null || path.isEmpty()) {
                 cli.printError("Project path required.");
@@ -210,17 +227,23 @@ public class ProjectCommand implements Callable<Integer> {
 
             try {
                 Project project = new Project(projectDir.getAbsolutePath());
-                
+
                 // Validate scenarios have test cases
                 for (Scenario scenario : project.getScenarios()) {
                     if (scenario.getTestCases().isEmpty()) {
                         warnings.add("Scenario '" + scenario.getName() + "' has no test cases");
                     }
-                    
+
                     // Validate test cases have steps
                     for (TestCase tc : scenario.getTestCases()) {
                         if (tc.getTestSteps().isEmpty()) {
-                            warnings.add("Test case '" + scenario.getName() + "/" + tc.getName() + "' has no steps");
+                            warnings.add(
+                                "Test case '" +
+                                scenario.getName() +
+                                "/" +
+                                tc.getName() +
+                                "' has no steps"
+                            );
                         }
                     }
                 }
@@ -231,7 +254,6 @@ public class ProjectCommand implements Callable<Integer> {
                         warnings.add("Release '" + release.getName() + "' has no test sets");
                     }
                 }
-
             } catch (Exception e) {
                 errors.add("Failed to load project: " + e.getMessage());
             }
@@ -272,25 +294,28 @@ public class ProjectCommand implements Callable<Integer> {
      */
     @Command(name = "create", description = "Create a new project")
     public static class CreateCommand implements Callable<Integer> {
-
         @ParentCommand
         private ProjectCommand parent;
 
         @Parameters(index = "0", description = "Project name")
         private String projectName;
 
-        @Option(names = {"-d", "--directory"}, description = "Parent directory", defaultValue = ".")
+        @Option(
+            names = { "-d", "--directory" },
+            description = "Parent directory",
+            defaultValue = "."
+        )
         private File directory;
 
-        @Option(names = {"--template"}, description = "Project template (web, mobile, api)")
+        @Option(names = { "--template" }, description = "Project template (web, mobile, api)")
         private String template;
 
         @Override
         public Integer call() {
             INGeniousCLI cli = INGeniousCLI.getInstance();
-            
+
             File projectDir = new File(directory, projectName);
-            
+
             if (projectDir.exists()) {
                 cli.printError("Project already exists: " + projectDir.getAbsolutePath());
                 return 1;
@@ -316,15 +341,14 @@ public class ProjectCommand implements Callable<Integer> {
                 new File(defaultRelease, "NewTestSet.csv").createNewFile();
 
                 cli.printSuccess("Project created: " + projectDir.getAbsolutePath());
-                
+
                 Map<String, Object> result = new LinkedHashMap<>();
                 result.put("name", projectName);
                 result.put("location", projectDir.getAbsolutePath());
                 result.put("template", template != null ? template : "default");
-                
+
                 System.out.println(cli.getOutputFormatter().formatKeyValue(result));
                 return 0;
-                
             } catch (Exception e) {
                 cli.printError("Failed to create project: " + e.getMessage());
                 return 1;

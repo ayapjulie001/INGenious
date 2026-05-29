@@ -3,7 +3,6 @@ package com.ing.engine.cli.output;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +11,6 @@ import java.util.Map;
  * Supports JSON, YAML, and Table formats.
  */
 public abstract class OutputFormatter {
-
     protected boolean colored;
 
     protected OutputFormatter(boolean colored) {
@@ -61,7 +59,10 @@ public abstract class OutputFormatter {
     }
 
     public enum MessageType {
-        SUCCESS, ERROR, WARNING, INFO
+        SUCCESS,
+        ERROR,
+        WARNING,
+        INFO
     }
 
     /**
@@ -201,7 +202,13 @@ public abstract class OutputFormatter {
             for (int i = 0; i < headers.size(); i++) {
                 String header = headers.get(i);
                 if (colored) {
-                    sb.append(" ").append(BOLD).append(CYAN).append(padRight(header, widths[i])).append(RESET).append(" │");
+                    sb
+                        .append(" ")
+                        .append(BOLD)
+                        .append(CYAN)
+                        .append(padRight(header, widths[i]))
+                        .append(RESET)
+                        .append(" │");
                 } else {
                     sb.append(" ").append(padRight(header, widths[i])).append(" │");
                 }
@@ -238,17 +245,20 @@ public abstract class OutputFormatter {
 
         @Override
         public String formatKeyValue(Map<String, Object> data) {
-            int maxKeyLength = data.keySet().stream()
-                    .mapToInt(String::length)
-                    .max()
-                    .orElse(10);
+            int maxKeyLength = data.keySet().stream().mapToInt(String::length).max().orElse(10);
 
             StringBuilder sb = new StringBuilder();
             for (Map.Entry<String, Object> entry : data.entrySet()) {
                 String key = padRight(entry.getKey(), maxKeyLength);
                 String value = entry.getValue() != null ? entry.getValue().toString() : "null";
                 if (colored) {
-                    sb.append(CYAN).append(key).append(RESET).append(" : ").append(value).append("\n");
+                    sb
+                        .append(CYAN)
+                        .append(key)
+                        .append(RESET)
+                        .append(" : ")
+                        .append(value)
+                        .append("\n");
                 } else {
                     sb.append(key).append(" : ").append(value).append("\n");
                 }
@@ -261,21 +271,36 @@ public abstract class OutputFormatter {
             if (!colored) {
                 String prefix;
                 switch (type) {
-                    case SUCCESS: prefix = "✓"; break;
-                    case ERROR: prefix = "✗"; break;
-                    case WARNING: prefix = "⚠"; break;
-                    case INFO: prefix = "ℹ"; break;
-                    default: prefix = ""; break;
+                    case SUCCESS:
+                        prefix = "✓";
+                        break;
+                    case ERROR:
+                        prefix = "✗";
+                        break;
+                    case WARNING:
+                        prefix = "⚠";
+                        break;
+                    case INFO:
+                        prefix = "ℹ";
+                        break;
+                    default:
+                        prefix = "";
+                        break;
                 }
                 return prefix + " " + message;
             }
 
             switch (type) {
-                case SUCCESS: return GREEN + "✓ " + message + RESET;
-                case ERROR: return RED + "✗ " + message + RESET;
-                case WARNING: return YELLOW + "⚠ " + message + RESET;
-                case INFO: return CYAN + "ℹ " + message + RESET;
-                default: return message;
+                case SUCCESS:
+                    return GREEN + "✓ " + message + RESET;
+                case ERROR:
+                    return RED + "✗ " + message + RESET;
+                case WARNING:
+                    return YELLOW + "⚠ " + message + RESET;
+                case INFO:
+                    return CYAN + "ℹ " + message + RESET;
+                default:
+                    return message;
             }
         }
 

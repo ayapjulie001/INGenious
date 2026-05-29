@@ -1,8 +1,8 @@
 package com.ing.engine.commands.mobile;
 
 import com.ing.engine.core.CommandControl;
-import com.ing.ingenious.api.status.Status;
 import com.ing.ingenious.api.annotation.Action;
+import com.ing.ingenious.api.status.Status;
 import com.ing.ingenious.api.types.InputType;
 import com.ing.ingenious.api.types.ObjectType;
 import io.appium.java_client.AppiumBy;
@@ -13,7 +13,8 @@ import java.util.logging.Logger;
 import org.openqa.selenium.JavascriptExecutor;
 
 public class Scroll extends MobileGeneral {
-/*
+
+    /*
     private final String currentHScrollPos = "Math.max("
             + "document.body.scrollLeft, document.documentElement.scrollLeft,"
             + "document.body.offsetLeft, document.documentElement.offsetLeft,"
@@ -34,7 +35,8 @@ public class Scroll extends MobileGeneral {
     public Scroll(CommandControl cc) {
         super(cc);
     }
-/*
+
+    /*
     @Action(object = ObjectType.MOBILE, desc = "Scroll horizondally to [<Data>]", input = InputType.YES)
     public void scrollHorizontallyTo() {
         if (Data != null && Data.trim().toLowerCase().matches("(left|right|\\d*)")) {
@@ -110,33 +112,51 @@ public class Scroll extends MobileGeneral {
         }
 
     }
-*/    
-    @Action(object = ObjectType.MOBILE, desc ="Scroll to Text in Android", input = InputType.YES)
+*/
+    @Action(object = ObjectType.MOBILE, desc = "Scroll to Text in Android", input = InputType.YES)
     public void scrollInAndroid() {
         try {
-            mDriver.findElement(AppiumBy.androidUIAutomator("new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new UiSelector().text(\"" + Data + "\").instance(0))"));
+            mDriver.findElement(
+                AppiumBy.androidUIAutomator(
+                    "new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new UiSelector().text(\"" +
+                    Data +
+                    "\").instance(0))"
+                )
+            );
             Report.updateTestLog(Action, "Scrolled to '" + Data + "'", Status.DONE);
         } catch (Exception e) {
             Logger.getLogger(this.getClass().getName()).log(Level.OFF, null, e);
-            Report.updateTestLog("Could not perfom [" + Action + "] action", "Error: " + e.getMessage(), Status.FAIL);
+            Report.updateTestLog(
+                "Could not perfom [" + Action + "] action",
+                "Error: " + e.getMessage(),
+                Status.FAIL
+            );
         }
     }
 
-    @Action(object = ObjectType.MOBILE, desc ="Scroll to Element in iOS", input = InputType.YES, condition = InputType.YES)
+    @Action(
+        object = ObjectType.MOBILE,
+        desc = "Scroll to Element in iOS",
+        input = InputType.YES,
+        condition = InputType.YES
+    )
     public void scrollInIOS() {
         try {
             HashMap<String, Object> scrollObject = new HashMap<>();
             scrollObject.put("direction", Condition.toLowerCase());
             String attribute = Data.split("=")[0];
             String value = Data.split("=")[1];
-            scrollObject.put(attribute,value);
+            scrollObject.put(attribute, value);
             IOSDriver driver = (IOSDriver) mDriver;
-            driver.executeScript("mobile:scroll",scrollObject);
+            driver.executeScript("mobile:scroll", scrollObject);
             Report.updateTestLog(Action, "Scrolled to '" + Data + "'", Status.DONE);
         } catch (Exception e) {
             Logger.getLogger(this.getClass().getName()).log(Level.OFF, null, e);
-            Report.updateTestLog("Could not perfom [" + Action + "] action", "Error: " + e.getMessage(), Status.FAIL);
+            Report.updateTestLog(
+                "Could not perfom [" + Action + "] action",
+                "Error: " + e.getMessage(),
+                Status.FAIL
+            );
         }
     }
-
 }
