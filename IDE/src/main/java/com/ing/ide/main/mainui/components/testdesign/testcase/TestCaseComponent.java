@@ -1,26 +1,33 @@
 package com.ing.ide.main.mainui.components.testdesign.testcase;
 
+import com.ing.ide.main.playwrightrecording.RecordedStepsImportDialog;
 import com.ing.datalib.component.Scenario;
 import com.ing.datalib.component.TestCase;
 import com.ing.datalib.component.TestStep;
+import com.ing.datalib.component.TestStep.HEADERS;
 import static com.ing.datalib.component.TestStep.HEADERS.Description;
 import com.ing.datalib.component.utils.SaveListener;
 import com.ing.engine.constants.SystemDefaults;
 import com.ing.engine.core.RunManager;
 import com.ing.engine.support.methodInf.MethodInfoManager;
+import com.ing.ide.main.mainui.AppMainFrame;
 import com.ing.ide.main.mainui.EngineConfig;
 import com.ing.ide.main.mainui.components.testdesign.TestDesign;
 import com.ing.ide.main.playwrightrecording.PlaywrightSpinner;
+import com.ing.ide.main.playwrightrecording.ClipboardMonitor;
+import com.ing.ide.main.utils.AppIcon;
 import com.ing.ide.main.utils.ConsolePanel;
 import com.ing.ide.main.utils.MenuScroller;
 import com.ing.ide.main.utils.Utils;
 import com.ing.ide.main.utils.keys.Keystroke;
 import com.ing.ide.main.utils.table.TableColumnManager;
 import com.ing.ide.main.utils.table.XTable;
+import com.ing.ide.util.Notification;
 import com.ing.ide.util.Canvas;
 import com.ing.ide.util.Notification;
 import com.ing.ide.util.WindowMover;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -30,31 +37,59 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 
 /**
+ * Main UI component for creating, editing, validating, and executing
+ * test cases within the Test Design module.
+ * <p>
+ * {@code TestCaseComponent} manages the test case table, toolbars,
+ * popup menus, auto‑suggest systems, validations, breakpoints, comment
+ * toggling, and history tracking. It also integrates execution and debug
+ * workflows, invokes Playwright recording, handles table actions such as
+ * insert/delete/move/replicate steps, supports reusable creation, and
+ * synchronizes navigation to objects and test data.
+ * </p>
  *
- *
+ * <p>
+ * The component orchestrates multiple sub‑dialogs (console, debugger,
+ * recorder), manages runner threads, ensures save lifecycle handling,
+ * and provides a unified environment for building and running automated
+ * test cases.
+ * </p>
  */
 public class TestCaseComponent extends JPanel implements ActionListener {
 
@@ -83,9 +118,18 @@ public class TestCaseComponent extends JPanel implements ActionListener {
     TableColumnManager tableColumnManager;
 
     private final TCHistory testCaseHistory;
+    
+    private final AppMainFrame sMainFrame;
+    
+    private ClipboardMonitor monitor;
+    
+    private CompletableFuture<Void> launchPlaywrightTask;
+    
+    public static long INSTANCE_START_TIME;
 
-    public TestCaseComponent(TestDesign testDesign) {
+    public TestCaseComponent(TestDesign testDesign, AppMainFrame sMainFrame) {
         this.testDesign = testDesign;
+        this.sMainFrame = sMainFrame;
         toolBar = new TestCaseToolBar(this);
         popupMenu = new TestCasePopupMenu(this);
         testCaseTable = new XTable();
@@ -109,6 +153,12 @@ public class TestCaseComponent extends JPanel implements ActionListener {
 
     public void loadTableModelForSelection(Object obj) {
         if (obj != null && obj instanceof TestCase) {
+            // Save the current test case before switching to a new one
+            TestCase currentTestCase = getCurrentTestCase();
+            if (currentTestCase != null && !currentTestCase.isSaved()) {
+                currentTestCase.save();
+            }
+            
             testCaseHistory.log();
             TestCase tc = (TestCase) obj;
             tc.setSaveListener(saveListener);
@@ -117,6 +167,17 @@ public class TestCaseComponent extends JPanel implements ActionListener {
             validator.initValidations();
             changeSave(tc.isSaved());
             refreshTitle();
+            
+            // Check if migration occurred and show notification
+            int migratedCount = tc.getMigratedReferencesCount();
+            if (migratedCount > 0) {
+                Notification.show(
+                    String.format("Migrated %d object reference%s to explicit scope prefix in '%s'",
+                        migratedCount,
+                        migratedCount > 1 ? "es" : "",
+                        tc.getName())
+                );
+            }
         }
     }
 
@@ -268,7 +329,6 @@ public class TestCaseComponent extends JPanel implements ActionListener {
         };
 
         testCaseTable.setTransferHandler(new TestCaseTableDnD());
-
         testCaseTable.addMouseListener(new MouseAdapter() {
 
             @Override
@@ -383,7 +443,7 @@ public class TestCaseComponent extends JPanel implements ActionListener {
             case "Toggle Validation":
                 validator.toggleValidation();
                 break;
-            case "Paramterize":
+            case "Parameterize":
                 parameterizeSelectedSteps();
                 break;
             case "Up One Level":
@@ -402,100 +462,218 @@ public class TestCaseComponent extends JPanel implements ActionListener {
     }
 
     public void record() throws IOException {
-        CompletableFuture<Void> launchPlaywright = CompletableFuture.runAsync(() -> {
-            try {
-                launchPlaywright();
-            } catch (IOException ex) {
-                Logger.getLogger(TestCaseComponent.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-        CompletableFuture<Void> playwrightLoading = CompletableFuture.runAsync(() -> {
-            playwrightLoading();
-        });
-        CompletableFuture<Void> playwright = CompletableFuture.allOf(launchPlaywright, playwrightLoading);
+        String projectLocation = sMainFrame.getProject().getLocation();
+        INSTANCE_START_TIME = System.currentTimeMillis();
+        if (launchPlaywrightTask == null || launchPlaywrightTask.isDone()) {
+            PlaywrightSpinner playwrightSpinnerGUI = new PlaywrightSpinner();
+
+            launchPlaywrightTask = CompletableFuture.runAsync(() -> {
+                try {
+                    launchPlaywright(playwrightSpinnerGUI);
+                } catch (IOException ex) {
+                    Logger.getLogger(TestCaseComponent.class.getName()).log(Level.SEVERE, "Error launching Playwright", ex);
+                }
+            });
+
+            CompletableFuture<Void> playwrightLoading = CompletableFuture.runAsync(() -> {
+                try {
+                    playwrightLoading(playwrightSpinnerGUI);
+                } catch (Exception ex) {
+                    Logger.getLogger(TestCaseComponent.class.getName()).log(Level.WARNING, "Error in playwright loading UI", ex);
+                }
+            });
+            CompletableFuture.allOf(launchPlaywrightTask, playwrightLoading)
+                .whenComplete((result, throwable) -> {
+                    if (throwable != null) {
+                        Logger.getLogger(TestCaseComponent.class.getName()).log(Level.SEVERE, "Playwright tasks failed", throwable);
+                    }
+                    SwingUtilities.invokeLater(() -> toolBar.enableRecordButton());
+                });
+
+        } else {
+            System.out.println("Playwright is already running. Skipping duplicate launch.");
+            SwingUtilities.invokeLater(() -> toolBar.enableRecordButton());
+        }
     }
 
-    public Process startPlaywrightProcess(String processName){
-        try{
-            String[] command = new String[0];
+    public Process startPlaywrightProcess(String processName, PlaywrightSpinner playwrightSpinnerGUI) {
+        try {
             String osName = System.getProperty("os.name").toLowerCase();
-            if (osName.contains("windows")) {
-                // Windows command
-                command = new String[]{"cmd", "/c", "mvn initialize -f engine/pom.xml ^&^& mvn exec:java -f engine/pom.xml -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args=" + processName};
-            } else if (osName.contains("mac")) {
-                // Mac command
-              command = new String[]{"bash", "-l", "-c", "mvn initialize -f engine/pom.xml && mvn exec:java -f engine/pom.xml -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args=" + processName};
-            } 
+            String classpath;
+            if (osName.contains("win")) {
+                String userHome = System.getProperty("user.home");
+                String printDepsDir = userHome + "\\AppData\\Local\\ms-playwright\\winldd-1007";
+                String printDepsPath = printDepsDir + "\\PrintDeps.exe";
+                File printDeps = new File(printDepsPath);
+                if (!printDeps.exists()) {
+                    new File(printDepsDir).mkdirs();
+
+                    try (InputStream in = getClass().getResourceAsStream("/Engine/winldd-1007/PrintDeps.exe")) {
+                        if (in == null) {
+                            throw new FileNotFoundException("PrintDeps.exe not found in resources!");
+                        }
+                        Files.copy(in, Path.of(printDepsPath), StandardCopyOption.REPLACE_EXISTING);
+                    }
+                }
+                classpath = "lib/*;."; // Windows
+            } else {
+                classpath = "lib/*:."; // Mac
+            }
+
+            String javaCommand = String.format(
+                "java -cp \"%s\" com.microsoft.playwright.CLI %s",
+                classpath,
+                processName
+            );
+
+            String[] command = osName.contains("windows")
+                ? new String[]{"cmd", "/c", javaCommand}
+                : new String[]{"bash", "-l", "-c", javaCommand};
+
             Process process = Runtime.getRuntime().exec(command);
             return process;
-       }catch (Exception ex){
-         System.out.println(ex.getMessage());
-       }
+
+        } catch (Exception ex) {
+            System.out.println("Error starting Playwright process: " + ex.getMessage());
+            //playwrightSpinnerGUI.appendLog(ex.getMessage());
+        }
 
         return null;
     }
-    
-     public void initialization(){
-        try{
-            String[] command = new String[0];
-            String osName = System.getProperty("os.name").toLowerCase();
-            if (osName.contains("windows")) {
-                // Windows command
-                
-                command = new String[]{"cmd", "/c", "mvn initialize -f engine/pom.xml"};
-            } else if (osName.contains("mac")) {
-                // Mac command
-                command = new String[]{"bash", "-l", "-c", "mvn initialize -f engine/pom.xml"};
-            } 
-           Runtime.getRuntime().exec(command);
-       }catch (Exception ex){
-         System.out.println(ex.getMessage());
-       }
-    }
 
-    public void launchPlaywright() throws IOException {
+//    public void initialization(PlaywrightSpinner playwrightSpinnerGUI){
+//        try{
+//            String[] command = new String[0];
+//            String osName = System.getProperty("os.name").toLowerCase();
+//            if (osName.contains("windows")) {
+//                // Windows command
+//                
+//                command = new String[]{"cmd", "/c", "mvn initialize -f engine/pom.xml"};
+//            } else if (osName.contains("mac")) {
+//                // Mac command
+//                command = new String[]{"bash", "-l", "-c", "mvn initialize -f engine/pom.xml"};
+//            } 
+//           Runtime.getRuntime().exec(command);
+//       }catch (Exception ex){
+//         System.out.println(ex.getMessage());
+//         //playwrightSpinnerGUI.appendLog(ex.getMessage());
+//       }
+//    }
+    
+    /**
+     * Launches the Playwright codegen process and handles the recording workflow.
+     * <p>
+     * Displays an informational dialog, starts clipboard monitoring, and executes
+     * the Playwright codegen process. If required, triggers Playwright installation.
+     * After recording, attempts to import the latest recorded steps and notifies the user
+     * if no recording is available.
+     * </p>
+     *
+     * @param playwrightSpinnerGUI the spinner GUI component for Playwright status updates
+     * @throws IOException if an I/O error occurs during process execution
+     */
+    public void launchPlaywright(PlaywrightSpinner playwrightSpinnerGUI) throws IOException {
         System.out.println("============================== Playwright Log Started ==============================");
-        initialization();
-        Process launchRecorder = startPlaywrightProcess("codegen");
+        //playwrightSpinnerGUI.appendLog("============================== Playwright Log Started ==============================");
+        //initialization(playwrightSpinnerGUI);
+        JDialog topDialog = new JDialog();
+        topDialog.setAlwaysOnTop(true);
+        JOptionPane.showMessageDialog(
+            topDialog,
+            "To import the recorded steps, make sure to copy the script from the Playwright Inspector before closing the Recorder.",
+            "Info",
+            JOptionPane.PLAIN_MESSAGE
+        );
+        monitor = new ClipboardMonitor(sMainFrame);
+        monitor.startMonitoring();
+        Process launchRecorder = startPlaywrightProcess("codegen", playwrightSpinnerGUI);
         BufferedReader stdInput = new BufferedReader(new InputStreamReader(launchRecorder.getInputStream()));
         BufferedReader stdError = new BufferedReader(new InputStreamReader(launchRecorder.getErrorStream()));
         String s = null;
         while ((s = stdInput.readLine()) != null) {
             System.out.println(s);
+            //playwrightSpinnerGUI.appendLog(s);
         }
         while ((s = stdError.readLine()) != null) {
             System.out.println(s);
             if (s.contains("mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args=\"install\"")) {
                 System.out.println("");
-                System.out.println("--> mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args=\"install\" --> Got executed");
-                Process playwrightInstall = startPlaywrightProcess("install");
+                //System.out.println("--> mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args=\"install\" --> Got executed");
+                //playwrightSpinnerGUI.appendLog("--> mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args=\"install\" --> Got executed");
+                Process playwrightInstall = startPlaywrightProcess("install", playwrightSpinnerGUI);
                 BufferedReader stdInput1 = new BufferedReader(new InputStreamReader(playwrightInstall.getInputStream()));
                 BufferedReader stdError1 = new BufferedReader(new InputStreamReader(playwrightInstall.getErrorStream()));
                 String s1 = null;
                 while ((s1 = stdInput1.readLine()) != null) {
                     System.out.println(s1);
+                    //playwrightSpinnerGUI.appendLog(s1);
                 }
                 while ((s1 = stdError1.readLine()) != null) {
                     System.out.println(s1);
+                    //playwrightSpinnerGUI.appendLog(s1);
                 }
                 try {
                     playwrightInstall.waitFor();
                 } catch (InterruptedException ex) {
                     Logger.getLogger(TestCaseComponent.class.getName()).log(Level.SEVERE, null, ex);
+                    //playwrightSpinnerGUI.appendLog(ex.getMessage());
                 }
-                startPlaywrightProcess("codegen");
+                startPlaywrightProcess("codegen", playwrightSpinnerGUI);
                 break;
             }
         }
         System.out.println("============================== Playwright Log Ended ==============================");
+        //playwrightSpinnerGUI.appendLog("============================== Playwright Log Ended ==============================");
+
+
+        new Thread(() -> {
+            try {
+                String projectLocation = sMainFrame.getProject().getLocation();
+                launchRecorder.waitFor();
+
+                File recordingDir = new File(projectLocation + File.separator + "Recording");
+                File[] recordingFiles = recordingDir.listFiles((dir, name) -> name.startsWith("recording_") && name.endsWith(".txt"));
+
+                File latestFile = null;
+                if (recordingFiles != null && recordingFiles.length > 0) {
+                    List<File> filteredFiles = Arrays.stream(recordingFiles)
+                            .filter(file -> file.lastModified() >= INSTANCE_START_TIME)
+                            .sorted(Comparator.comparingLong(File::lastModified).reversed())
+                            .collect(Collectors.toList());
+
+                    if (!filteredFiles.isEmpty()) {
+                        latestFile = filteredFiles.get(0);
+                    }
+                }
+
+                final File recordedFile = latestFile;
+
+                SwingUtilities.invokeLater(() -> {
+                    if (recordedFile != null && recordedFile.exists()) {
+                        RecordedStepsImportDialog window = new RecordedStepsImportDialog(sMainFrame);
+                        window.setLocationRelativeTo(null);
+                        window.setVisible(true);
+                    } else {
+                        JOptionPane.showMessageDialog(
+                            null,
+                            "You have closed the Playwright Recorder without copying the recorded steps. No recording has been saved for import.",
+                            "Playwright Recorder",
+                            JOptionPane.WARNING_MESSAGE
+                        );
+                    }
+                    monitor.stopMonitoring();
+                });
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
 
     }
 
-    public void playwrightLoading() {
+    public void playwrightLoading(PlaywrightSpinner playwrightSpinnerGUI) {
 
-        PlaywrightSpinner a = new PlaywrightSpinner();
-        a.setAlwaysOnTop(true);
-        a.setVisible(true);
+        playwrightSpinnerGUI.setAlwaysOnTop(true);
+        playwrightSpinnerGUI.setVisible(true);
 
     }
 
@@ -773,11 +951,16 @@ public class TestCaseComponent extends JPanel implements ActionListener {
             TestStep tStep = getCurrentTestCase().getTestSteps().get(testCaseTable.getSelectedRow());
             String[] reusableData = tStep.getReusableData();
             if (reusableData != null) {
-                Scenario scenario = testDesign.getProject().getScenarioByName(reusableData[0]);
+                // Try reusable scenarios first, then fall back to regular scenarios
+                Scenario scenario = testDesign.getProject().getReusableScenarioByName(reusableData[0]);
+                if (scenario == null) {
+                    scenario = testDesign.getProject().getScenarioByName(reusableData[0]);
+                }
+                
                 if (scenario != null) {
                     TestCase testCase = scenario.getTestCaseByName(reusableData[1]);
                     if (testCase != null) {
-                        loadTableModelForSelection(testCase);
+                        testDesign.loadTableModelForSelection(testCase);
                     } else {
                         Notification.show("TestCase [" + reusableData[1]
                                 + "] not present in the Scenario [" + reusableData[0] + "]");
@@ -795,7 +978,9 @@ public class TestCaseComponent extends JPanel implements ActionListener {
             TestStep tStep = getCurrentTestCase().getTestSteps().get(testCaseTable.getSelectedRow());
             String[] tdFromInput = tStep.getTestDataFromInput();
             if (tdFromInput != null) {
-                testDesign.getTestDatacomp().navigateToTestData(tdFromInput[0], tdFromInput[1]);
+                if (!testDesign.getTestDatacomp().navigateToTestData(tdFromInput[0], tdFromInput[1])) {
+                    Notification.show("Test Data [" + tdFromInput[0] + ":" + tdFromInput[1] + "] not found in Test Data");
+                }
             }
         }
     }
@@ -839,7 +1024,7 @@ public class TestCaseComponent extends JPanel implements ActionListener {
             cPanel = new ConsolePanel();
             add(cPanel, BorderLayout.CENTER);
             setTitle("Console");
-            setIconImage(new ImageIcon(getClass().getResource("/ui/resources/favicon.png")).getImage());
+            AppIcon.applyTo(this);
             setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
             setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
         }
@@ -873,13 +1058,17 @@ public class TestCaseComponent extends JPanel implements ActionListener {
             JToolBar toolBar = new JToolBar();
             toolBar.setFloatable(false);
             JButton drag = new JButton("   ");
+
+            
             toolBar.add(drag);
             registerDrag(drag);
-            toolBar.add(create("Show Console", "cmd"));
+            
+            toolBar.add(create("Show Console", "console"));
             toolBar.add(create("Continue Execution", "continue"));
-            toolBar.add(create("Go to Next Step", "next"));
+            toolBar.add(create("Go to Next Step", "stepover")); 
             toolBar.add(create("Pause the Execution", "pause"));
             toolBar.add(create("Stop the Execution", "stop"));
+            
             add(toolBar);
         }
 
@@ -1002,5 +1191,4 @@ public class TestCaseComponent extends JPanel implements ActionListener {
             loadTableModelForSelection(visit());
         }
     }
-
 }

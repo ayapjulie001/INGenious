@@ -42,13 +42,14 @@ public class TestDesign {
     private CardLayout testCaseScenarioCard;
 
     private final ImpactUI impactUI;
+    
 
     public TestDesign(AppMainFrame sMainFrame) {
         this.sMainFrame = sMainFrame;
         projectTree = new ProjectTree(this);
         reusableTree = new ReusableTree(this);
         scenarioComp = new ScenarioComponent(this);
-        testcaseComp = new TestCaseComponent(this);
+        testcaseComp = new TestCaseComponent(this, this.sMainFrame);
         testDataComp = new TestDataComponent(this);
         objectRepo = new ObjectRepo(this);
         testcaseMirage = new JPanel();
@@ -66,6 +67,12 @@ public class TestDesign {
 
     public void loadTableModelForSelection(Object selectedNode) {
         if (selectedNode instanceof Scenario) {
+            // Save current test case before switching to scenario view
+            TestCase currentTestCase = testcaseComp.getCurrentTestCase();
+            if (currentTestCase != null && !currentTestCase.isSaved()) {
+                currentTestCase.save();
+            }
+            
             testCaseScenarioCard.show(testcaseMirage, "scenario");
             scenarioComp.loadTableModelForSelection(selectedNode);
         } else if (selectedNode instanceof TestCase) {

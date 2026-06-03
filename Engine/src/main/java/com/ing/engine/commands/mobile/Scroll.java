@@ -1,10 +1,10 @@
 package com.ing.engine.commands.mobile;
 
 import com.ing.engine.core.CommandControl;
-import com.ing.engine.support.Status;
-import com.ing.engine.support.methodInf.Action;
-import com.ing.engine.support.methodInf.InputType;
-import com.ing.engine.support.methodInf.ObjectType;
+import com.ing.ingenious.api.status.Status;
+import com.ing.ingenious.api.annotation.Action;
+import com.ing.ingenious.api.types.InputType;
+import com.ing.ingenious.api.types.ObjectType;
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.ios.IOSDriver;
 import java.util.HashMap;
@@ -114,7 +114,7 @@ public class Scroll extends MobileGeneral {
     @Action(object = ObjectType.MOBILE, desc ="Scroll to Text in Android", input = InputType.YES)
     public void scrollInAndroid() {
         try {
-            mDriver.findElement(AppiumBy.androidUIAutomator("new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new UiSelector().text(\"" + Data + "\"))"));
+            mDriver.findElement(AppiumBy.androidUIAutomator("new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new UiSelector().text(\"" + Data + "\").instance(0))"));
             Report.updateTestLog(Action, "Scrolled to '" + Data + "'", Status.DONE);
         } catch (Exception e) {
             Logger.getLogger(this.getClass().getName()).log(Level.OFF, null, e);
