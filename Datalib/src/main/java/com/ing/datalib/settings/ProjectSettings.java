@@ -1,16 +1,13 @@
-
 package com.ing.datalib.settings;
 
 import com.ing.datalib.component.Project;
-
 import java.io.File;
 
 /**
  *
- * 
+ *
  */
 public class ProjectSettings {
-
     private final Project sProject;
 
     private final UserDefinedSettings userDefinedSettings;
@@ -20,9 +17,9 @@ public class ProjectSettings {
     private final Capabilities capabilities;
     private final Emulators emulators;
     private final TestMgmtModule testMgmtModule;
-    private final ReportPortalSettings rpSettings;    
+    private final ReportPortalSettings rpSettings;
     private final ExtentReportSettings extentSettings;
-    private final ExecutionSettings execSettings;   
+    private final ExecutionSettings execSettings;
     private final DBProperties dbSettings;
     private final ContextOptions contextSettings;
     private final KafkaSSLConfigurations SSLConfigurations;
@@ -43,13 +40,13 @@ public class ProjectSettings {
         this.contextSettings = new ContextOptions(getLocation());
         this.SSLConfigurations = new KafkaSSLConfigurations(getLocation());
         this.lambdaTestCaps = new LambdaTestCaps(getLocation());
-        
+
         // Ensure SAP is available as default browser
         ensureSAPDefaultEmulator();
     }
-    
+
     /**
-     * Ensures SAP emulator exists for this project. 
+     * Ensures SAP emulator exists for this project.
      * Adds SAP if missing and saves configuration.
      * Creates SAP.properties file if it doesn't exist.
      */
@@ -59,7 +56,7 @@ public class ProjectSettings {
             emulators.addEmulator("SAP");
             emulators.save();
         }
-        
+
         // Ensure SAP.properties file exists
         capabilities.ensureSAPCapabilitiesExist();
     }
@@ -87,27 +84,26 @@ public class ProjectSettings {
         return sProject;
     }
 
-    
-    public DBProperties getDatabaseSettings(){
+    public DBProperties getDatabaseSettings() {
         return dbSettings;
     }
-    
-    public ReportPortalSettings getRPSettings(){
+
+    public ReportPortalSettings getRPSettings() {
         return rpSettings;
     }
-    
-    public ExtentReportSettings getExtentSettings(){
+
+    public ExtentReportSettings getExtentSettings() {
         return extentSettings;
     }
-    
-    public KafkaSSLConfigurations getKafkaSSLConfigurations(){
+
+    public KafkaSSLConfigurations getKafkaSSLConfigurations() {
         return SSLConfigurations;
     }
 
-    public ContextOptions getContextSettings(){
+    public ContextOptions getContextSettings() {
         return contextSettings;
     }
-    
+
     public DriverProperties getDriverSettings() {
         return driverSettings;
     }
@@ -135,11 +131,10 @@ public class ProjectSettings {
     public UserDefinedSettings getUserDefinedSettings() {
         return userDefinedSettings;
     }
-    
-    public LambdaTestCaps getLambdaTestCaps(){
+
+    public LambdaTestCaps getLambdaTestCaps() {
         return lambdaTestCaps;
     }
-    
 
     public void save() {
         userDefinedSettings.save();

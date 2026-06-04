@@ -1,4 +1,3 @@
-
 package com.ing.ide.main.mainui.components.testdesign.scenario;
 
 import com.ing.datalib.component.Scenario;
@@ -25,10 +24,9 @@ import javax.swing.table.DefaultTableModel;
 
 /**
  *
- * 
+ *
  */
 public class ScenarioComponent extends JPanel implements ActionListener {
-
     private final TestDesign testDesign;
 
     private final ScenarioToolBar toolBar;
@@ -63,7 +61,7 @@ public class ScenarioComponent extends JPanel implements ActionListener {
         if (getCurrentScenario() != null) {
             getCurrentScenario().save();
         }
-        
+
         Scenario scenario = (Scenario) obj;
         getScenarioTable().setModel(new DefaultTableModel());
         getScenarioTable().setModel(testDesign.getProject().getTableModelFor(scenario));
@@ -75,7 +73,7 @@ public class ScenarioComponent extends JPanel implements ActionListener {
         toolBar.changeSave(false);
         for (TestCase testCase : getCurrentScenario().getTestcasesAlone()) {
             if (!testCase.isSaved()) {
-//                toolBar.changeSave(true);
+                //                toolBar.changeSave(true);
                 break;
             }
         }
@@ -92,54 +90,74 @@ public class ScenarioComponent extends JPanel implements ActionListener {
     }
 
     private void initTableListeners() {
-        scenarioTable.setActionFor("Insert", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                insertComp();
+        scenarioTable.setActionFor(
+            "Insert",
+            new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    insertComp();
+                }
             }
-        });
-        scenarioTable.setActionFor("Add", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                addComp();
+        );
+        scenarioTable.setActionFor(
+            "Add",
+            new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    addComp();
+                }
             }
-        });
-        scenarioTable.setActionFor("Delete", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                removeComp();
+        );
+        scenarioTable.setActionFor(
+            "Delete",
+            new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    removeComp();
+                }
             }
-        });
-        scenarioTable.setActionFor("Save", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                save();
+        );
+        scenarioTable.setActionFor(
+            "Save",
+            new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    save();
+                }
             }
-        });
-        scenarioTable.setActionFor("Reload", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                reload();
+        );
+        scenarioTable.setActionFor(
+            "Reload",
+            new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    reload();
+                }
             }
-        });
-     /*   scenarioTable.setActionFor("Search", new AbstractAction() {
+        );
+        /*   scenarioTable.setActionFor("Search", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 toolBar.focusSearch();
             }
         });*/
         scenarioTable.setTransferHandler(new ScenarioDnD());
-        scenarioTable.addMouseListener(new MouseAdapter() {
+        scenarioTable.addMouseListener(
+            new MouseAdapter() {
 
-            @Override
-            public void mouseClicked(MouseEvent me) {
-                if (SwingUtilities.isLeftMouseButton(me) && me.isAltDown()) {
-                    goToSelectedReusable();
+                @Override
+                public void mouseClicked(MouseEvent me) {
+                    if (SwingUtilities.isLeftMouseButton(me) && me.isAltDown()) {
+                        goToSelectedReusable();
+                    }
                 }
             }
-
-        });
-
+        );
     }
 
     @Override
@@ -157,7 +175,7 @@ public class ScenarioComponent extends JPanel implements ActionListener {
             case "Reload":
                 reload();
                 break;
-          /*  case "Search":
+            /*  case "Search":
                 scenarioTable.searchFor(((JTextField) ae.getSource()).getText());
                 break;*/
             case "GoToNextSearch":
@@ -188,26 +206,37 @@ public class ScenarioComponent extends JPanel implements ActionListener {
                 String[] reusableData = tStep.getReusableData();
                 if (reusableData != null) {
                     // Try reusable scenarios first, then fall back to regular scenarios
-                    Scenario scenario = testDesign.getProject().getReusableScenarioByName(reusableData[0]);
+                    Scenario scenario = testDesign
+                        .getProject()
+                        .getReusableScenarioByName(reusableData[0]);
                     if (scenario == null) {
                         scenario = testDesign.getProject().getScenarioByName(reusableData[0]);
                     }
-                    
+
                     if (scenario != null) {
                         TestCase rtestCase = scenario.getTestCaseByName(reusableData[1]);
                         if (rtestCase != null) {
                             testDesign.loadTableModelForSelection(rtestCase);
                         } else {
-                            Notification.show("TestCase [" + reusableData[1]
-                                    + "] not present in the Scenario [" + reusableData[0] + "]");
+                            Notification.show(
+                                "TestCase [" +
+                                reusableData[1] +
+                                "] not present in the Scenario [" +
+                                reusableData[0] +
+                                "]"
+                            );
                         }
                     } else {
-                        Notification.show("Scenario [" + reusableData[0]
-                                + "] not present in the project");
+                        Notification.show(
+                            "Scenario [" + reusableData[0] + "] not present in the project"
+                        );
                     }
                 } else {
                     testDesign.loadTableModelForSelection(testCase);
-                    testDesign.getTestCaseComp().getTestCaseTable().changeSelection(scenarioTable.getSelectedColumn() - 1, 3, false, false);
+                    testDesign
+                        .getTestCaseComp()
+                        .getTestCaseTable()
+                        .changeSelection(scenarioTable.getSelectedColumn() - 1, 3, false, false);
                 }
             } else {
                 testDesign.loadTableModelForSelection(testCase);
@@ -242,9 +271,10 @@ public class ScenarioComponent extends JPanel implements ActionListener {
 
     private TestCase getSelectedTestCase() {
         if (scenarioTable.getSelectedRow() != -1) {
-            return getCurrentScenario().
-                    getTestCaseByName(scenarioTable.getValueAt(
-                            scenarioTable.getSelectedRow(), 0).toString());
+            return getCurrentScenario()
+                .getTestCaseByName(
+                    scenarioTable.getValueAt(scenarioTable.getSelectedRow(), 0).toString()
+                );
         }
         return null;
     }
@@ -322,5 +352,4 @@ public class ScenarioComponent extends JPanel implements ActionListener {
                 break;
         }
     }
-
 }

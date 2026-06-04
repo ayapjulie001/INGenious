@@ -1,4 +1,3 @@
-
 package com.ing.ide.main.mainui.components.testdesign.tree;
 
 import com.ing.datalib.component.Scenario;
@@ -26,7 +25,6 @@ import javax.swing.tree.TreePath;
  * Extends ProjectTree and overrides methods to handle reusable-specific operations.
  */
 public class ReusableTree extends ProjectTree {
-
     private static final Logger LOGGER = Logger.getLogger(ReusableTree.class.getName());
 
     /**
@@ -156,7 +154,7 @@ public class ReusableTree extends ProjectTree {
                     Notification.show("Scenario " + name + " Already present");
                     return false;
                 }
-            } 
+            }
             ScenarioNode scenarioNode = super.getSelectedScenarioNode();
             if (scenarioNode != null && !scenarioNode.toString().equals(name)) {
                 if (scenarioNode.getScenario().renameReusable(name)) {
@@ -176,7 +174,12 @@ public class ReusableTree extends ProjectTree {
                     super.getTestDesign().getTestCaseComp().refreshTitle();
                     return true;
                 } else {
-                    Notification.show("Testcase '" + name + "' Already present in Scenario - " + getSelectedTestCase().getScenario().getName());
+                    Notification.show(
+                        "Testcase '" +
+                        name +
+                        "' Already present in Scenario - " +
+                        getSelectedTestCase().getScenario().getName()
+                    );
                 }
             }
         }
@@ -189,8 +192,7 @@ public class ReusableTree extends ProjectTree {
      */
     @Override
     void renameScenario(Scenario scenario) {
-        getTestDesign().getProjectTree()
-                .getTreeModel().onScenarioRename(scenario);
+        getTestDesign().getProjectTree().getTreeModel().onScenarioRename(scenario);
     }
 
     /**
@@ -202,7 +204,7 @@ public class ReusableTree extends ProjectTree {
         if (!getSelectedTestCaseNodes().isEmpty()) {
             // Save ALL test cases to prevent data loss on reload
             getProject().save();
-            
+
             boolean anySuccess = false;
             for (TestCaseNode testCaseNode : getSelectedTestCaseNodes()) {
                 try {
@@ -229,7 +231,7 @@ public class ReusableTree extends ProjectTree {
     void makeAsReusableRTestCase(TestCase testCase) {
         // Save ALL test cases to prevent data loss on reload
         getProject().save();
-        
+
         try {
             getProject().moveTestCaseToTestPlan(testCase);
             getProject().reload();
@@ -252,8 +254,11 @@ public class ReusableTree extends ProjectTree {
      * Adds a new reusable scenario to the selected group.
      */
     private void addReusableScenario() {
-        ScenarioNode scNode = getTreeModel().addScenario(getSelectedGroupNode(),
-                getProject().addReusableScenario(fetchNewReusableScenarioName()));
+        ScenarioNode scNode = getTreeModel()
+            .addScenario(
+                getSelectedGroupNode(),
+                getProject().addReusableScenario(fetchNewReusableScenarioName())
+            );
         if (scNode != null) {
             selectAndScrollTo(new TreePath(scNode.getPath()));
         }
@@ -272,7 +277,9 @@ public class ReusableTree extends ProjectTree {
             TestCase testcase = scenarioNode.getScenario().addTestCase(testCaseName);
             if (testcase != null) {
                 getTestDesign().loadTableModelForSelection(testcase);
-                selectAndScrollTo(new TreePath(getTreeModel().addTestCase(scenarioNode, testcase).getPath()));
+                selectAndScrollTo(
+                    new TreePath(getTreeModel().addTestCase(scenarioNode, testcase).getPath())
+                );
             } else {
                 Notification.show("Reusable test case already exists");
             }
@@ -297,27 +304,38 @@ public class ReusableTree extends ProjectTree {
     private void deleteGroups() {
         List<GroupNode> groupNodes = getSelectedGroupNodes();
         if (!groupNodes.isEmpty()) {
+            String question =
+                "<html><body><p style='width: 200px;'>" +
+                "Are you sure want to delete the following Groups?<br>" +
+                groupNodes +
+                "</p></body></html>";
 
-            String question = "<html><body><p style='width: 200px;'>"
-                    + "Are you sure want to delete the following Groups?<br>"
-                    + groupNodes
-                    + "</p></body></html>";
+            JCheckBox confirmBox = new JCheckBox(
+                "Move Reusables inside Group to TestPlan instead of deleting"
+            );
 
-            JCheckBox confirmBox = new JCheckBox("Move Reusables inside Group to TestPlan instead of deleting");
-
-            int option = JOptionPane.showConfirmDialog(null,
-                    new Object[]{question, confirmBox},
-                    "Delete TestCase",
-                    JOptionPane.YES_NO_OPTION);
+            int option = JOptionPane.showConfirmDialog(
+                null,
+                new Object[] { question, confirmBox },
+                "Delete TestCase",
+                JOptionPane.YES_NO_OPTION
+            );
             if (option == JOptionPane.YES_OPTION) {
-                LOGGER.log(Level.INFO, "Delete Reusable Groups approved for {0}; {1}",
-                        new Object[]{groupNodes.size(), groupNodes});
+                LOGGER.log(
+                    Level.INFO,
+                    "Delete Reusable Groups approved for {0}; {1}",
+                    new Object[] { groupNodes.size(), groupNodes }
+                );
                 for (GroupNode groupNode : groupNodes) {
                     if (confirmBox.isSelected()) {
                         getTreeModel().toggleAllTestCasesFrom(groupNode);
                     } else {
-                        for (ScenarioNode scenarioNode : ScenarioNode.toList(groupNode.children())) {
-                            for (TestCaseNode testCaseNode : TestCaseNode.toList(scenarioNode.children())) {
+                        for (ScenarioNode scenarioNode : ScenarioNode.toList(
+                            groupNode.children()
+                        )) {
+                            for (TestCaseNode testCaseNode : TestCaseNode.toList(
+                                scenarioNode.children()
+                            )) {
                                 testCaseNode.getTestCase().delete();
                             }
                         }
@@ -370,8 +388,10 @@ public class ReusableTree extends ProjectTree {
     private String fetchNewReusableTestCaseName(Scenario scenario) {
         String newTestCaseName = "NewTestCase";
         for (int i = 0;; i++) {
-            if (scenario.getTestCaseByName(newTestCaseName) == null
-                    && !getProject().hasTestCaseInAnyScenario(scenario.getName(), newTestCaseName)) {
+            if (
+                scenario.getTestCaseByName(newTestCaseName) == null &&
+                !getProject().hasTestCaseInAnyScenario(scenario.getName(), newTestCaseName)
+            ) {
                 break;
             }
             newTestCaseName = "NewTestCase" + i;
@@ -471,5 +491,4 @@ public class ReusableTree extends ProjectTree {
             // deleteGroup.setEnabled(false);
         }
     }
-
 }

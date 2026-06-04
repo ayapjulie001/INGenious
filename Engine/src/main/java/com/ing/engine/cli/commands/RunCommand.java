@@ -1,14 +1,13 @@
 package com.ing.engine.cli.commands;
 
 import com.ing.engine.cli.INGeniousCLI;
+import java.io.File;
+import java.util.*;
+import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ParentCommand;
-
-import java.io.File;
-import java.util.*;
-import java.util.concurrent.Callable;
 
 /**
  * Test execution commands.
@@ -25,7 +24,6 @@ import java.util.concurrent.Callable;
     }
 )
 public class RunCommand implements Callable<Integer> {
-
     @ParentCommand
     private INGeniousCLI parent;
 
@@ -40,38 +38,49 @@ public class RunCommand implements Callable<Integer> {
      */
     @Command(name = "testcase", description = "Run a specific test case")
     public static class TestCaseRunCommand implements Callable<Integer> {
-
         @ParentCommand
         private RunCommand parent;
 
         @Parameters(index = "0", description = "Test case path (Scenario/TestCase)")
         private String testCasePath;
 
-        @Option(names = {"-p", "--project"}, description = "Project path")
+        @Option(names = { "-p", "--project" }, description = "Project path")
         private String projectPath;
 
-        @Option(names = {"-b", "--browser"}, description = "Browser to use", defaultValue = "Chrome")
+        @Option(
+            names = { "-b", "--browser" },
+            description = "Browser to use",
+            defaultValue = "Chrome"
+        )
         private String browser;
 
-        @Option(names = {"-e", "--env"}, description = "Environment name")
+        @Option(names = { "-e", "--env" }, description = "Environment name")
         private String environment;
 
-        @Option(names = {"--headless"}, description = "Run in headless mode")
+        @Option(names = { "--headless" }, description = "Run in headless mode")
         private boolean headless;
 
-        @Option(names = {"--parallel"}, description = "Number of parallel threads", defaultValue = "1")
+        @Option(
+            names = { "--parallel" },
+            description = "Number of parallel threads",
+            defaultValue = "1"
+        )
         private int parallel;
 
-        @Option(names = {"--timeout"}, description = "Default timeout in seconds", defaultValue = "30")
+        @Option(
+            names = { "--timeout" },
+            description = "Default timeout in seconds",
+            defaultValue = "30"
+        )
         private int timeout;
 
-        @Option(names = {"--dry-run"}, description = "Validate without executing")
+        @Option(names = { "--dry-run" }, description = "Validate without executing")
         private boolean dryRun;
 
         @Override
         public Integer call() {
             INGeniousCLI cli = INGeniousCLI.getInstance();
-            
+
             String path = projectPath != null ? projectPath : cli.getProjectPath();
             if (path == null || path.isEmpty()) {
                 cli.printError("Project path required. Use --project or -p flag.");
@@ -98,7 +107,7 @@ public class RunCommand implements Callable<Integer> {
             config.put("headless", headless);
             config.put("parallel", parallel);
             config.put("timeout", timeout);
-            
+
             if (environment != null) {
                 config.put("environment", environment);
             }
@@ -127,7 +136,7 @@ public class RunCommand implements Callable<Integer> {
 
         private int executeTest(Map<String, Object> config) {
             INGeniousCLI cli = INGeniousCLI.getInstance();
-            
+
             // Build arguments for Control class
             List<String> args = new ArrayList<>();
             args.add("-run");
@@ -139,12 +148,12 @@ public class RunCommand implements Callable<Integer> {
             args.add(config.get("testcase").toString());
             args.add("-browser");
             args.add(config.get("browser").toString());
-            
+
             if ((boolean) config.getOrDefault("headless", false)) {
                 args.add("-op_setHeadless");
                 args.add("true");
             }
-            
+
             try {
                 // Execute using the existing Control infrastructure
                 com.ing.engine.core.Control.main(args.toArray(new String[0]));
@@ -161,35 +170,42 @@ public class RunCommand implements Callable<Integer> {
      */
     @Command(name = "testset", description = "Run a test set")
     public static class TestSetRunCommand implements Callable<Integer> {
-
         @ParentCommand
         private RunCommand parent;
 
-        @Option(names = {"-p", "--project"}, description = "Project path")
+        @Option(names = { "-p", "--project" }, description = "Project path")
         private String projectPath;
 
-        @Option(names = {"-r", "--release"}, description = "Release name", required = true)
+        @Option(names = { "-r", "--release" }, description = "Release name", required = true)
         private String release;
 
-        @Option(names = {"-t", "--testset"}, description = "Test set name", required = true)
+        @Option(names = { "-t", "--testset" }, description = "Test set name", required = true)
         private String testset;
 
-        @Option(names = {"-b", "--browser"}, description = "Browser to use", defaultValue = "Chrome")
+        @Option(
+            names = { "-b", "--browser" },
+            description = "Browser to use",
+            defaultValue = "Chrome"
+        )
         private String browser;
 
-        @Option(names = {"--headless"}, description = "Run in headless mode")
+        @Option(names = { "--headless" }, description = "Run in headless mode")
         private boolean headless;
 
-        @Option(names = {"--parallel"}, description = "Number of parallel threads", defaultValue = "1")
+        @Option(
+            names = { "--parallel" },
+            description = "Number of parallel threads",
+            defaultValue = "1"
+        )
         private int parallel;
 
-        @Option(names = {"--dry-run"}, description = "Validate without executing")
+        @Option(names = { "--dry-run" }, description = "Validate without executing")
         private boolean dryRun;
 
         @Override
         public Integer call() {
             INGeniousCLI cli = INGeniousCLI.getInstance();
-            
+
             String path = projectPath != null ? projectPath : cli.getProjectPath();
             if (path == null || path.isEmpty()) {
                 cli.printError("Project path required.");
@@ -226,15 +242,14 @@ public class RunCommand implements Callable<Integer> {
                 args.add(browser);
                 args.add("-setThreads");
                 args.add(String.valueOf(parallel));
-                
+
                 if (headless) {
                     args.add("-op_setHeadless");
                     args.add("true");
                 }
-                
+
                 com.ing.engine.core.Control.main(args.toArray(new String[0]));
                 return 0;
-                
             } catch (Exception e) {
                 cli.printError("Execution failed: " + e.getMessage());
                 return 1;
@@ -247,40 +262,45 @@ public class RunCommand implements Callable<Integer> {
      */
     @Command(name = "tags", description = "Run tests matching tags")
     public static class TagsRunCommand implements Callable<Integer> {
-
         @ParentCommand
         private RunCommand parent;
 
         @Parameters(description = "Tag(s) to match", arity = "1..*")
         private List<String> tags;
 
-        @Option(names = {"-p", "--project"}, description = "Project path")
+        @Option(names = { "-p", "--project" }, description = "Project path")
         private String projectPath;
 
-        @Option(names = {"-b", "--browser"}, description = "Browser to use", defaultValue = "Chrome")
+        @Option(
+            names = { "-b", "--browser" },
+            description = "Browser to use",
+            defaultValue = "Chrome"
+        )
         private String browser;
 
-        @Option(names = {"--headless"}, description = "Run in headless mode")
+        @Option(names = { "--headless" }, description = "Run in headless mode")
         private boolean headless;
 
-        @Option(names = {"--and"}, description = "Match all tags (AND logic)")
+        @Option(names = { "--and" }, description = "Match all tags (AND logic)")
         private boolean matchAll;
 
-        @Option(names = {"--dry-run"}, description = "Show matching tests without running")
+        @Option(names = { "--dry-run" }, description = "Show matching tests without running")
         private boolean dryRun;
 
         @Override
         public Integer call() {
             INGeniousCLI cli = INGeniousCLI.getInstance();
-            
+
             String path = projectPath != null ? projectPath : cli.getProjectPath();
             if (path == null || path.isEmpty()) {
                 cli.printError("Project path required.");
                 return 1;
             }
 
-            String tagExpression = matchAll ? String.join(" AND ", tags) : String.join(" OR ", tags);
-            
+            String tagExpression = matchAll
+                ? String.join(" AND ", tags)
+                : String.join(" OR ", tags);
+
             cli.printInfo("Matching tests with tags: " + tagExpression);
 
             if (dryRun) {
@@ -299,15 +319,14 @@ public class RunCommand implements Callable<Integer> {
                 args.add(browser);
                 args.add("-tags");
                 args.add(String.join(",", tags));
-                
+
                 if (headless) {
                     args.add("-op_setHeadless");
                     args.add("true");
                 }
-                
+
                 com.ing.engine.core.Control.main(args.toArray(new String[0]));
                 return 0;
-                
             } catch (Exception e) {
                 cli.printError("Execution failed: " + e.getMessage());
                 return 1;
@@ -320,26 +339,25 @@ public class RunCommand implements Callable<Integer> {
      */
     @Command(name = "rerun", description = "Rerun failed tests from last execution")
     public static class RerunCommand implements Callable<Integer> {
-
         @ParentCommand
         private RunCommand parent;
 
-        @Option(names = {"-p", "--project"}, description = "Project path")
+        @Option(names = { "-p", "--project" }, description = "Project path")
         private String projectPath;
 
-        @Option(names = {"-b", "--browser"}, description = "Browser to use")
+        @Option(names = { "-b", "--browser" }, description = "Browser to use")
         private String browser;
 
-        @Option(names = {"--headless"}, description = "Run in headless mode")
+        @Option(names = { "--headless" }, description = "Run in headless mode")
         private boolean headless;
 
-        @Option(names = {"--run-id"}, description = "Specific run ID to rerun from")
+        @Option(names = { "--run-id" }, description = "Specific run ID to rerun from")
         private String runId;
 
         @Override
         public Integer call() {
             INGeniousCLI cli = INGeniousCLI.getInstance();
-            
+
             String path = projectPath != null ? projectPath : cli.getProjectPath();
             if (path == null || path.isEmpty()) {
                 cli.printError("Project path required.");
@@ -364,9 +382,13 @@ public class RunCommand implements Callable<Integer> {
 
                 // Sort by last modified to get latest
                 Arrays.sort(runs, Comparator.comparingLong(File::lastModified).reversed());
-                
-                File latestRun = runId != null 
-                    ? Arrays.stream(runs).filter(f -> f.getName().contains(runId)).findFirst().orElse(runs[0])
+
+                File latestRun = runId != null
+                    ? Arrays
+                        .stream(runs)
+                        .filter(f -> f.getName().contains(runId))
+                        .findFirst()
+                        .orElse(runs[0])
                     : runs[0];
 
                 cli.printInfo("Rerunning failed tests from: " + latestRun.getName());
@@ -377,20 +399,19 @@ public class RunCommand implements Callable<Integer> {
                 args.add(path);
                 args.add("-rerun");
                 args.add(latestRun.getAbsolutePath());
-                
+
                 if (browser != null) {
                     args.add("-browser");
                     args.add(browser);
                 }
-                
+
                 if (headless) {
                     args.add("-op_setHeadless");
                     args.add("true");
                 }
-                
+
                 com.ing.engine.core.Control.main(args.toArray(new String[0]));
                 return 0;
-                
             } catch (Exception e) {
                 cli.printError("Rerun failed: " + e.getMessage());
                 return 1;

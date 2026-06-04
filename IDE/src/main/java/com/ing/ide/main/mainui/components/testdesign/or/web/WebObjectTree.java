@@ -1,4 +1,3 @@
-
 package com.ing.ide.main.mainui.components.testdesign.or.web;
 
 import com.ing.datalib.component.Project;
@@ -59,16 +58,18 @@ public class WebObjectTree extends ObjectTree {
     }
 
     @Override
-    public void showImpactedTestCases(List<TestCase> testcases, String pageName, String objectName) {
+    public void showImpactedTestCases(
+        List<TestCase> testcases,
+        String pageName,
+        String objectName
+    ) {
         oRPanel.getTestDesign().getImpactUI().loadForObject(testcases, pageName, objectName);
     }
 
     @Override
     public ORRootInf getOR() {
         ObjectRepository repo = oRPanel.getProject().getObjectRepository();
-        return (source == ORSource.SHARED)
-                ? repo.getWebSharedOR()
-                : repo.getWebOR();
+        return (source == ORSource.SHARED) ? repo.getWebSharedOR() : repo.getWebOR();
     }
 
     @Override
@@ -92,7 +93,7 @@ public class WebObjectTree extends ObjectTree {
         PROJECT,
         SHARED
     }
-    
+
     public WebORPanel getORPanel() {
         return oRPanel;
     }

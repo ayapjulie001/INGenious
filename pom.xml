@@ -147,6 +147,25 @@
                 <artifactId>versions-maven-plugin</artifactId>
                 <version>2.18.0</version>
             </plugin>
+            <plugin>
+                <groupId>com.hubspot.maven.plugins</groupId>
+                <artifactId>prettier-maven-plugin</artifactId>
+                <version>0.22</version> <!-- Check for the latest version on Maven Central -->
+                <configuration>
+                    <!-- Optional: specific Prettier settings -->
+                    <printWidth>100</printWidth>
+                    <tabWidth>4</tabWidth>
+                    <useTabs>false</useTabs>
+                </configuration>
+                <executions>
+                    <execution>
+                    <phase>validate</phase>
+                    <goals>
+                        <goal>write</goal> <!-- Use 'check' in CI environments -->
+                    </goals>
+                    </execution>
+                </executions>
+                </plugin>
         </plugins>
     </build>
 </project>

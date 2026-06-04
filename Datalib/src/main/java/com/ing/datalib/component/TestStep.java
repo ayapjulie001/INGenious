@@ -1,4 +1,3 @@
-
 package com.ing.datalib.component;
 
 import com.ing.datalib.or.mobile.ResolvedMobileObject;
@@ -17,13 +16,17 @@ import org.apache.commons.csv.CSVRecord;
  * and breakpoint toggling.
  */
 public class TestStep {
-
     private static String BREAKPOINT = "*";
     private static String COMMENT = "//";
 
     public enum HEADERS {
-
-        Step(0), ObjectName(1), Description(2), Action(3), Input(4), Condition(5), Reference(6);
+        Step(0),
+        ObjectName(1),
+        Description(2),
+        Action(3),
+        Input(4),
+        Condition(5),
+        Reference(6);
 
         private final int index;
 
@@ -46,24 +49,28 @@ public class TestStep {
         public static int size() {
             return HEADERS.values().length;
         }
-
     }
 
     private final TestCase testCase;
 
-    List<String> stepDetails = Collections.synchronizedList(new ArrayList<String>(HEADERS.values().length) {
-        @Override
-        public String set(int index, String element) {
-            String val = super.set(index, element);
-            if (testCase != null && testCase.getTestSteps().contains(TestStep.this)) {
-                testCase.fireTableCellUpdated(testCase.getTestSteps().indexOf(TestStep.this),
-                        index);
+    List<String> stepDetails = Collections.synchronizedList(
+        new ArrayList<String>(HEADERS.values().length) {
+
+            @Override
+            public String set(int index, String element) {
+                String val = super.set(index, element);
+                if (testCase != null && testCase.getTestSteps().contains(TestStep.this)) {
+                    testCase.fireTableCellUpdated(
+                        testCase.getTestSteps().indexOf(TestStep.this),
+                        index
+                    );
+                }
+                return val;
             }
-            return val;
         }
-    });
-    
-    public List<String> getStepDetails(){
+    );
+
+    public List<String> getStepDetails() {
         return this.stepDetails;
     }
 
@@ -181,12 +188,13 @@ public class TestStep {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("TestStep - ")
-                .append(getAction())
-                .append(" | ")
-                .append(getObject())
-                .append(" | ")
-                .append(getInput());
+        builder
+            .append("TestStep - ")
+            .append(getAction())
+            .append(" | ")
+            .append(getObject())
+            .append(" | ")
+            .append(getInput());
         return builder.toString();
     }
 
@@ -210,22 +218,14 @@ public class TestStep {
 
     public TestStep asObjectStep(ResolvedWebObject rwo) {
         setObject(rwo.getObjectName());
-        setReference(
-            new ResolvedWebObject.PageRef(
-                rwo.getPageName(),
-                rwo.getScope()
-            ).qualified()
-        );
+        setReference(new ResolvedWebObject.PageRef(rwo.getPageName(), rwo.getScope()).qualified());
         return this;
     }
 
     public TestStep asObjectStep(ResolvedMobileObject rmo) {
         setObject(rmo.getObjectName());
         setReference(
-            new ResolvedMobileObject.PageRef(
-                rmo.getPageName(),
-                rmo.getScope()
-            ).qualified()
+            new ResolvedMobileObject.PageRef(rmo.getPageName(), rmo.getScope()).qualified()
         );
         return this;
     }
@@ -233,10 +233,8 @@ public class TestStep {
     public TestStep asObjectStep(ResolvedStructuredDataObject rsdo) {
         setObject(rsdo.getObjectName());
         setReference(
-            new ResolvedStructuredDataObject.PageRef(
-                rsdo.getPageName(),
-                rsdo.getScope()
-            ).qualified()
+            new ResolvedStructuredDataObject.PageRef(rsdo.getPageName(), rsdo.getScope())
+            .qualified()
         );
         return this;
     }
@@ -248,9 +246,9 @@ public class TestStep {
     }
 
     public Boolean isPageObjectStep() {
-        return !getObject().equals("Browser")
-                && !getObject().isEmpty()
-                && !getReference().isEmpty();
+        return (
+            !getObject().equals("Browser") && !getObject().isEmpty() && !getReference().isEmpty()
+        );
     }
 
     public Boolean isReusableStep() {
@@ -258,14 +256,11 @@ public class TestStep {
     }
 
     public Boolean isTestDataStep() {
-       if (getInput().startsWith("<") || getInput().startsWith("{") || getInput().startsWith("["))
-            return false;
-       else if (getInput().matches("(?!(@|=|%)).+:.+"))
-	// return getInput().matches("(?!(@|=|%)).+:.+");
-            return true; 
-       else
-            return false;
-        
+        if (
+            getInput().startsWith("<") || getInput().startsWith("{") || getInput().startsWith("[")
+        ) return false; else if (
+            getInput().matches("(?!(@|=|%)).+:.+")
+        ) return true; else return false; // return getInput().matches("(?!(@|=|%)).+:.+");
     }
 
     public Boolean isEmpty() {
@@ -315,7 +310,7 @@ public class TestStep {
     }
 
     public String[] getTestDataFromInput() {
-        if (isTestDataStep() ) {
+        if (isTestDataStep()) {
             return getInput().split(":");
         }
         return null;
@@ -323,7 +318,7 @@ public class TestStep {
 
     public String[] getPageObject() {
         if (isPageObjectStep()) {
-            return new String[]{getObject(), getReference()};
+            return new String[] { getObject(), getReference() };
         }
         return null;
     }
@@ -340,28 +335,32 @@ public class TestStep {
     public Boolean isDatabaseStep() {
         return getObject().equals("Database");
     }
-	
+
     public Boolean isWebserviceStep() {
         return getObject().equals("Webservice");
     }
-         public Boolean isBrowserStep() {
+
+    public Boolean isBrowserStep() {
         return getObject().equals("Browser");
     }
-    
+
     public Boolean isFileStep() {
         return getObject().equals("File");
     }
-    
+
     public Boolean isMessageStep() {
         return getObject().equals("Queue") || getObject().equals("Kafka");
     }
-    
+
     public Boolean isSetTextStep() {
-        return (getObject().equals("Queue") && getAction().contains("setText")) || (getObject().equals("Kafka") && getAction().contains("produceMessage"));
+        return (
+            (getObject().equals("Queue") && getAction().contains("setText")) ||
+            (getObject().equals("Kafka") && getAction().contains("produceMessage"))
+        );
     }
 
     public Boolean isWebserviceRequestStep() {
-        String requests[] = new String[]{"get", "delete", "post", "put", "patch"};
+        String requests[] = new String[] { "get", "delete", "post", "put", "patch" };
         boolean isWebserviceRequestStep = false;
         if (getObject().equals("Webservice")) {
             for (String request : requests) {
@@ -381,7 +380,7 @@ public class TestStep {
     public Boolean isWebserviceStopStep() {
         return (getObject().equals("Webservice") && getAction().contains("closeConnection"));
     }
-    
+
     public Boolean isStringOperationsStep() {
         return getObject().equals("String Operations");
     }

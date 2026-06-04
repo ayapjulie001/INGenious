@@ -1,4 +1,3 @@
-
 package com.ing.ide.main.mainui.components.testdesign.or.mobile;
 
 import com.ing.datalib.or.common.ORAttribute;
@@ -39,7 +38,6 @@ import javax.swing.table.TableColumn;
  * This component acts as the editable detail view within the Mobile OR panel.
  */
 public class MobileORTable extends JPanel implements ActionListener {
-
     private final XTable table;
 
     private final MobileORPanel mobileOR;
@@ -83,7 +81,7 @@ public class MobileORTable extends JPanel implements ActionListener {
             attrCol.setPreferredWidth(100);
             attrCol.setMinWidth(80);
             attrCol.setMaxWidth(150);
-            
+
             // Column 1: Value - takes remaining space
             TableColumn valueCol = table.getColumnModel().getColumn(1);
             valueCol.setPreferredWidth(300);
@@ -331,8 +329,10 @@ public class MobileORTable extends JPanel implements ActionListener {
         for (ORObjectInf object : selected) {
             if (object instanceof MobileORObject) {
                 if (currObj != null) {
-                    reorderAttributes(currObj.getAttributes(),
-                            ((MobileORObject) object).getAttributes());
+                    reorderAttributes(
+                        currObj.getAttributes(),
+                        ((MobileORObject) object).getAttributes()
+                    );
                 }
             }
         }
@@ -380,12 +380,19 @@ public class MobileORTable extends JPanel implements ActionListener {
     }
 
     class ToolBar extends JToolBar {
-        
         private JLabel titleLabel;
 
         public ToolBar() {
             init();
-            setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, UIManager.getColor("Separator.foreground")));
+            setBorder(
+                BorderFactory.createMatteBorder(
+                    0,
+                    0,
+                    1,
+                    0,
+                    UIManager.getColor("Separator.foreground")
+                )
+            );
         }
 
         private void init() {
@@ -393,14 +400,24 @@ public class MobileORTable extends JPanel implements ActionListener {
             setFloatable(false);
             setOpaque(false);
 
-            add(new javax.swing.Box.Filler(new java.awt.Dimension(10, 0),
+            add(
+                new javax.swing.Box.Filler(
                     new java.awt.Dimension(10, 0),
-                    new java.awt.Dimension(10, 32767)));
+                    new java.awt.Dimension(10, 0),
+                    new java.awt.Dimension(10, 32767)
+                )
+            );
             titleLabel = new JLabel("Properties");
             titleLabel.setFont(new Font("Default", Font.BOLD, 12));
             add(titleLabel);
 
-            add(new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767)));
+            add(
+                new javax.swing.Box.Filler(
+                    new java.awt.Dimension(0, 0),
+                    new java.awt.Dimension(0, 0),
+                    new java.awt.Dimension(32767, 32767)
+                )
+            );
 
             add(Utils.createButton("Add Row", "add", "Ctrl+Plus", MobileORTable.this));
             add(Utils.createButton("Delete Rows", "remove", "Ctrl+Minus", MobileORTable.this));
@@ -408,11 +425,10 @@ public class MobileORTable extends JPanel implements ActionListener {
             add(Utils.createButton("Move Rows Up", "up", "Ctrl+Up", MobileORTable.this));
             add(Utils.createButton("Move Rows Down", "down", "Ctrl+Down", MobileORTable.this));
         }
-        
+
         public void setTitleSuffix(String suffix) {
             titleLabel.setText("Properties " + suffix);
         }
-
     }
 
     class PopupMenu extends JPopupMenu {
@@ -444,6 +460,5 @@ public class MobileORTable extends JPanel implements ActionListener {
             addProp.add(Utils.createMenuItem("Add to Selected", MobileORTable.this));
             add(addProp);
         }
-
     }
 }

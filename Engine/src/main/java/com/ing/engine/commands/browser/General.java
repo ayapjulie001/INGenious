@@ -1,17 +1,16 @@
-
 package com.ing.engine.commands.browser;
 
 import com.ing.engine.core.CommandControl;
-import com.ing.ingenious.api.exception.mobile.ElementException;
-import com.ing.ingenious.api.exception.mobile.ElementException.ExceptionType;
 import com.ing.ingenious.api.contract.BrowserPluginApi;
 import com.ing.ingenious.api.contract.data.UserDataAccessApi;
 import com.ing.ingenious.api.contract.drivers.AutomationObjectApi;
 import com.ing.ingenious.api.contract.drivers.PlaywrightDriverCreationApi;
+import com.ing.ingenious.api.exception.mobile.ElementException;
+import com.ing.ingenious.api.exception.mobile.ElementException.ExceptionType;
 
 /**
  *
- * 
+ *
  */
 public class General extends Command implements BrowserPluginApi {
 
@@ -23,12 +22,14 @@ public class General extends Command implements BrowserPluginApi {
         if (isDriverAlive()) {
             return true;
         } else {
-            throw new RuntimeException("Seems like Connection with the driver is lost/driver is closed");
+            throw new RuntimeException(
+                "Seems like Connection with the driver is lost/driver is closed"
+            );
         }
     }
 
     public Boolean elementPresent() {
-        return checkIfDriverIsAlive() && Locator != null;       
+        return checkIfDriverIsAlive() && Locator != null;
     }
 
     public Boolean elementSelected() {
@@ -53,16 +54,21 @@ public class General extends Command implements BrowserPluginApi {
     }
 
     public boolean isHScrollBarPresent() {
-        return (boolean) (Page
-                .evaluate("document.documentElement.scrollWidth>document.documentElement.clientWidth;"));
+        return (boolean) (
+            Page.evaluate(
+                "document.documentElement.scrollWidth>document.documentElement.clientWidth;"
+            )
+        );
     }
 
     public boolean isvScrollBarPresent() {
-        return (boolean) (Page
-                .evaluate("document.documentElement.scrollHeight>document.documentElement.clientHeight;"));
+        return (boolean) (
+            Page.evaluate(
+                "document.documentElement.scrollHeight>document.documentElement.clientHeight;"
+            )
+        );
     }
-    
-    
+
     /**
      * Implementation of {@link CommandPluginApi#getPage()} for the API-plugin contract.
      * @return the Page object that should be cast to {@link com.microsoft.playwright.Page}
@@ -116,5 +122,4 @@ public class General extends Command implements BrowserPluginApi {
     public PlaywrightDriverCreationApi getDriver() {
         return Driver;
     }
-
 }

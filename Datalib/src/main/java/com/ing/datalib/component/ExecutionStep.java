@@ -1,4 +1,3 @@
-
 package com.ing.datalib.component;
 
 import java.util.ArrayList;
@@ -10,14 +9,19 @@ import org.apache.commons.csv.CSVRecord;
 
 /**
  *
- * 
+ *
  */
 public class ExecutionStep {
 
     public enum HEADERS {
-
-        Execute(0), TestScenario(1), TestCase(2), Iteration(3), Status(4),
-        Browser(5), BrowserVersion(6), Platform(7);
+        Execute(0),
+        TestScenario(1),
+        TestCase(2),
+        Iteration(3),
+        Status(4),
+        Browser(5),
+        BrowserVersion(6),
+        Platform(7);
 
         private final int index;
 
@@ -40,7 +44,6 @@ public class ExecutionStep {
         public static int size() {
             return HEADERS.values().length;
         }
-
     }
 
     private final TestSet testSet;
@@ -174,12 +177,13 @@ public class ExecutionStep {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("ExecutionStep - ")
-                .append(this.getTestScenarioName())
-                .append(" | ")
-                .append(this.getTestCaseName())
-                .append(" | ")
-                .append(this.getBrowser());
+        builder
+            .append("ExecutionStep - ")
+            .append(this.getTestScenarioName())
+            .append(" | ")
+            .append(this.getTestCaseName())
+            .append(" | ")
+            .append(this.getBrowser());
         return builder.toString();
     }
 
@@ -219,5 +223,4 @@ public class ExecutionStep {
     public Map<String, Object> getUserData() {
         return userData;
     }
-
 }

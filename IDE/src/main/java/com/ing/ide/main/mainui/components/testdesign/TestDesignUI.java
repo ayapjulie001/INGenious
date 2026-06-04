@@ -1,4 +1,3 @@
-
 package com.ing.ide.main.mainui.components.testdesign;
 
 import com.ing.ide.main.Main;
@@ -21,10 +20,9 @@ import javax.swing.UIManager;
 
 /**
  *
- * 
+ *
  */
 public class TestDesignUI extends JPanel {
-
     TestDesign testDesign;
 
     JSplitPane projectNReusableTreeSplitPane;
@@ -54,7 +52,8 @@ public class TestDesignUI extends JPanel {
         testPlanPanel = getTreeInPanel("Test Plan", testDesign.getProjectTree().getTree());
         projectNReusableTreeSplitPane.setTopComponent(testPlanPanel);
 
-        appReusablePanel = getRTreeInPanel("Reusable Component", testDesign.getReusableTree().getTree());
+        appReusablePanel =
+            getRTreeInPanel("Reusable Component", testDesign.getReusableTree().getTree());
         projectNReusableTreeSplitPane.setBottomComponent(appReusablePanel);
 
         testCaseNTestDataSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -79,11 +78,11 @@ public class TestDesignUI extends JPanel {
         oneThree.setRightComponent(testDesign.getObjectRepo());
 
         add(oneThree);
-        
+
         // Apply initial pane backgrounds
         applyPaneBackgrounds();
     }
-    
+
     /**
      * Applies themed backgrounds to the panes.
      * Called at init and when theme changes via adjustUI().
@@ -95,11 +94,11 @@ public class TestDesignUI extends JPanel {
         if (!Main.isDarkMode()) {
             return;
         }
-        
+
         Color sidebarColor = UIManager.getColor("ing.sidebarPane");
         Color editorColor = UIManager.getColor("ing.editorPane");
         Color dividerColor = UIManager.getColor("ing.dividerColor");
-        
+
         if (sidebarColor == null) {
             sidebarColor = UIManager.getColor("Panel.background");
         }
@@ -109,7 +108,7 @@ public class TestDesignUI extends JPanel {
         if (dividerColor == null) {
             dividerColor = UIManager.getColor("SplitPane.dividerColor");
         }
-        
+
         // Sidebar panes (dark black in dark mode)
         if (testPlanPanel != null) {
             applyBackgroundRecursively(testPlanPanel, sidebarColor, dividerColor);
@@ -117,35 +116,39 @@ public class TestDesignUI extends JPanel {
         if (appReusablePanel != null) {
             applyBackgroundRecursively(appReusablePanel, sidebarColor, dividerColor);
         }
-        
+
         // Object Repository pane (dark black in dark mode)
         applyBackgroundRecursively(testDesign.getObjectRepo(), sidebarColor, dividerColor);
-        
+
         // Test Data pane (dark black in dark mode)
         applyBackgroundRecursively(testDesign.getTestDatacomp(), sidebarColor, dividerColor);
-        
+
         // Test Steps pane (slightly lighter in dark mode)
         applyBackgroundRecursively(testDesign.getTestCaseComponent(), editorColor, dividerColor);
-        
+
         // Split pane dividers
         projectNReusableTreeSplitPane.setBackground(dividerColor);
         testCaseNTestDataSplitPane.setBackground(dividerColor);
         oneTwo.setBackground(dividerColor);
         oneThree.setBackground(dividerColor);
     }
-    
+
     /**
      * Recursively applies background color to a component and all its children.
      * Handles special cases for JScrollPane, JSplitPane, JTable, JTree, JList.
      */
-    private void applyBackgroundRecursively(java.awt.Component comp, Color bgColor, Color dividerColor) {
+    private void applyBackgroundRecursively(
+        java.awt.Component comp,
+        Color bgColor,
+        Color dividerColor
+    ) {
         if (comp == null) return;
-        
+
         // Skip FXPanelHeader (has its own styling)
         if (comp instanceof FXPanelHeader) {
             return;
         }
-        
+
         // Handle JSplitPane specially - set divider color
         if (comp instanceof JSplitPane) {
             JSplitPane split = (JSplitPane) comp;
@@ -155,7 +158,7 @@ public class TestDesignUI extends JPanel {
             applyBackgroundRecursively(split.getRightComponent(), bgColor, dividerColor);
             return;
         }
-        
+
         // Handle JScrollPane - set background on pane and viewport
         if (comp instanceof javax.swing.JScrollPane) {
             javax.swing.JScrollPane scroll = (javax.swing.JScrollPane) comp;
@@ -168,7 +171,7 @@ public class TestDesignUI extends JPanel {
             }
             return;
         }
-        
+
         // Handle JTable
         if (comp instanceof javax.swing.JTable) {
             javax.swing.JTable table = (javax.swing.JTable) comp;
@@ -178,7 +181,7 @@ public class TestDesignUI extends JPanel {
             }
             return;
         }
-        
+
         // Handle JTree
         if (comp instanceof javax.swing.JTree) {
             javax.swing.JTree tree = (javax.swing.JTree) comp;
@@ -186,23 +189,27 @@ public class TestDesignUI extends JPanel {
             // Force tree to pick up new L&F colors including selection colors
             SwingUtilities.updateComponentTreeUI(tree);
             // Also update the cell renderer if it has updateSelectionColors method
-            if (tree.getCellRenderer() instanceof com.ing.ide.main.utils.tree.TreeSelectionRenderer) {
-                ((com.ing.ide.main.utils.tree.TreeSelectionRenderer) tree.getCellRenderer()).updateSelectionColors();
+            if (
+                tree.getCellRenderer() instanceof com.ing.ide.main.utils.tree.TreeSelectionRenderer
+            ) {
+                (
+                    (com.ing.ide.main.utils.tree.TreeSelectionRenderer) tree.getCellRenderer()
+                ).updateSelectionColors();
             }
             return;
         }
-        
+
         // Handle JList
         if (comp instanceof javax.swing.JList) {
             comp.setBackground(bgColor);
             return;
         }
-        
+
         // Handle JToolBar - keep its styled background
         if (comp instanceof javax.swing.JToolBar) {
             return;
         }
-        
+
         // Handle general JPanel and Container
         if (comp instanceof java.awt.Container) {
             comp.setBackground(bgColor);
@@ -228,19 +235,38 @@ public class TestDesignUI extends JPanel {
 
         registerFont();
 
-        FXPanelHeader header = new FXPanelHeader(labelText,
-                new FXPanelHeader.HeaderAction(
-                        "Go to Previous TestCase",
-                        "upOneLevel",
-                        () -> SwingUtilities.invokeLater(() ->
-                                testDesign.getTestCaseComp().actionPerformed(
-                                        new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Up One Level")))),
-                new FXPanelHeader.HeaderAction(
-                        "Add/Remove Tags",
-                        "tag",
-                        () -> SwingUtilities.invokeLater(() ->
-                                testDesign.getProjectTree().actionPerformed(
-                                        new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Edit Tag"))))
+        FXPanelHeader header = new FXPanelHeader(
+            labelText,
+            new FXPanelHeader.HeaderAction(
+                "Go to Previous TestCase",
+                "upOneLevel",
+                () ->
+                    SwingUtilities.invokeLater(
+                        () ->
+                            testDesign
+                                .getTestCaseComp()
+                                .actionPerformed(
+                                    new ActionEvent(
+                                        this,
+                                        ActionEvent.ACTION_PERFORMED,
+                                        "Up One Level"
+                                    )
+                                )
+                    )
+            ),
+            new FXPanelHeader.HeaderAction(
+                "Add/Remove Tags",
+                "tag",
+                () ->
+                    SwingUtilities.invokeLater(
+                        () ->
+                            testDesign
+                                .getProjectTree()
+                                .actionPerformed(
+                                    new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Edit Tag")
+                                )
+                    )
+            )
         );
 
         panel.add(header, BorderLayout.NORTH);
@@ -267,8 +293,10 @@ public class TestDesignUI extends JPanel {
 
     private void registerFont() {
         try {
-            Font customFont = Font.createFont(Font.TRUETYPE_FONT,
-                    new File("resources/ui/resources/fonts/ingme_regular.ttf"));
+            Font customFont = Font.createFont(
+                Font.TRUETYPE_FONT,
+                new File("resources/ui/resources/fonts/ingme_regular.ttf")
+            );
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             ge.registerFont(customFont);
         } catch (IOException | FontFormatException e) {
@@ -283,9 +311,8 @@ public class TestDesignUI extends JPanel {
         projectNReusableTreeSplitPane.setDividerLocation(0.5);
         testCaseNTestDataSplitPane.setDividerLocation(0.5);
         testDesign.getObjectRepo().adjustUI();
-        
+
         // Reapply pane backgrounds for theme changes
         applyPaneBackgrounds();
     }
-
 }

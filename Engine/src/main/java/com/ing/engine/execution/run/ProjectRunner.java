@@ -1,4 +1,3 @@
-
 package com.ing.engine.execution.run;
 
 import com.ing.datalib.component.EnvTestData;
@@ -27,7 +26,6 @@ import java.util.logging.Logger;
  *
  */
 public class ProjectRunner implements TestRunner {
-
     Project sProject;
     static Map<String, DataIterator> resolvedIterters = new HashMap<>();
 
@@ -38,7 +36,6 @@ public class ProjectRunner implements TestRunner {
     }
 
     public static ProjectRunner load(String projLocation) {
-
         ProjectRunner runner = new ProjectRunner();
         runner.setProject(projLocation);
         initNewRun();
@@ -76,8 +73,10 @@ public class ProjectRunner implements TestRunner {
      */
     @Override
     public String runEnv() {
-        return Objects.toString(getExecSettings().getRunSettings().getTestEnv(),
-                dataProvider().defEnv());
+        return Objects.toString(
+            getExecSettings().getRunSettings().getTestEnv(),
+            dataProvider().defEnv()
+        );
     }
 
     @Override
@@ -107,8 +106,7 @@ public class ProjectRunner implements TestRunner {
     }
 
     public boolean isDebugExe() {
-        return RunManager.getGlobalSettings().isTestRun()
-                && SystemDefaults.debugMode.get();
+        return RunManager.getGlobalSettings().isTestRun() && SystemDefaults.debugMode.get();
     }
 
     @Override
@@ -148,8 +146,10 @@ public class ProjectRunner implements TestRunner {
         if (retryCount > 0) {
             System.out.println("\n Retrying Execution \n");
             for (ExecutionStep step : getTestSet().getTestSteps()) {
-                if (Boolean.valueOf(step.getExecute())
-                        && "passed".equalsIgnoreCase(step.getStatus())) {
+                if (
+                    Boolean.valueOf(step.getExecute()) &&
+                    "passed".equalsIgnoreCase(step.getStatus())
+                ) {
                     step.setExecute("false");
                 }
             }
@@ -178,61 +178,94 @@ public class ProjectRunner implements TestRunner {
         prop.putAll(SystemDefaults.EnvVars);
         if (!prop.isEmpty()) {
             /*
-            * display entries only if debug flag is set
-            */
-            System.out.println("Override with Environment Settings :\n "
-                    + (SystemDefaults.debug() ? prop.entrySet() : prop.keySet()));
+             * display entries only if debug flag is set
+             */
+            System.out.println(
+                "Override with Environment Settings :\n " +
+                (SystemDefaults.debug() ? prop.entrySet() : prop.keySet())
+            );
             /*
              * update the exe/run/user settings with CLI's Env settings
              * (case sensitive)
              */
-            prop.entrySet().stream().forEach((e) -> {
-                try {
-                    String key = e.getKey(), value = e.getValue();
-                    if (key.startsWith("run.")) {
-                        getExecSettings().getRunSettings().put(
-                                key.replace("run.", ""), value);
-                    } else if (key.startsWith("exe.")) {
-                        RunManager.getGlobalSettings().put(
-                                key.replace("exe.", ""), value);
-                    } else if (key.startsWith("user.")) {
-                        getProject().getProjectSettings().getUserDefinedSettings().put(
-                                key.replace("user.", ""), value);
-                    } else if (key.startsWith("tm.")) {
-                        getExecSettings().getTestMgmgtSettings().put(
-                                key.replace("tm.", ""), value);
-                    } else if (key.startsWith("driver.")) {
-                        getProject().getProjectSettings().getDriverSettings().put(
-                                key.replace("driver.", ""), value);
-                    } else if(key.startsWith("capability.")){
-                        String args[] = key.split("\\.");
-                        String browser = capitalizeFirstLetter(args[1]);
-                        String capability = args[2];
-                        getProject().getProjectSettings().getCapabilities().getCapabiltiesFor(browser).update(capability,value);
-                    } else if (key.startsWith("db.")) {
-                        String args[] = key.split("\\.");
-                        String db = args[1];
-                        String property = args[2];
-                        getProject().getProjectSettings().getDatabaseSettings().getDBPropertiesFor(db).put(property, value);
-                    } else if (key.startsWith("context.")) {
-                        String args[] = key.split("\\.");
-                        String context = args[1];
-                        String property = args[2];
-                        getProject().getProjectSettings().getContextSettings().getContextOptionsFor(context).put(property, value);
-                    }else if (key.startsWith("kafkaSSl.")) {
-                        String args[] = key.split("\\.");
-                        String capability = args[1];
-                        getProject().getProjectSettings().getKafkaSSLConfigurations().put(capability, value);
-                    } else if (key.startsWith("api.")) {
-                        String args[] = key.split("\\.");
-                        String api = args[1];
-                        String property = args[2];
-                        getProject().getProjectSettings().getDriverSettings().getAPIPropertiesFor(api).put(property, value);
+            prop
+                .entrySet()
+                .stream()
+                .forEach(
+                    e -> {
+                        try {
+                            String key = e.getKey(), value = e.getValue();
+                            if (key.startsWith("run.")) {
+                                getExecSettings()
+                                    .getRunSettings()
+                                    .put(key.replace("run.", ""), value);
+                            } else if (key.startsWith("exe.")) {
+                                RunManager.getGlobalSettings().put(key.replace("exe.", ""), value);
+                            } else if (key.startsWith("user.")) {
+                                getProject()
+                                    .getProjectSettings()
+                                    .getUserDefinedSettings()
+                                    .put(key.replace("user.", ""), value);
+                            } else if (key.startsWith("tm.")) {
+                                getExecSettings()
+                                    .getTestMgmgtSettings()
+                                    .put(key.replace("tm.", ""), value);
+                            } else if (key.startsWith("driver.")) {
+                                getProject()
+                                    .getProjectSettings()
+                                    .getDriverSettings()
+                                    .put(key.replace("driver.", ""), value);
+                            } else if (key.startsWith("capability.")) {
+                                String args[] = key.split("\\.");
+                                String browser = capitalizeFirstLetter(args[1]);
+                                String capability = args[2];
+                                getProject()
+                                    .getProjectSettings()
+                                    .getCapabilities()
+                                    .getCapabiltiesFor(browser)
+                                    .update(capability, value);
+                            } else if (key.startsWith("db.")) {
+                                String args[] = key.split("\\.");
+                                String db = args[1];
+                                String property = args[2];
+                                getProject()
+                                    .getProjectSettings()
+                                    .getDatabaseSettings()
+                                    .getDBPropertiesFor(db)
+                                    .put(property, value);
+                            } else if (key.startsWith("context.")) {
+                                String args[] = key.split("\\.");
+                                String context = args[1];
+                                String property = args[2];
+                                getProject()
+                                    .getProjectSettings()
+                                    .getContextSettings()
+                                    .getContextOptionsFor(context)
+                                    .put(property, value);
+                            } else if (key.startsWith("kafkaSSl.")) {
+                                String args[] = key.split("\\.");
+                                String capability = args[1];
+                                getProject()
+                                    .getProjectSettings()
+                                    .getKafkaSSLConfigurations()
+                                    .put(capability, value);
+                            } else if (key.startsWith("api.")) {
+                                String args[] = key.split("\\.");
+                                String api = args[1];
+                                String property = args[2];
+                                getProject()
+                                    .getProjectSettings()
+                                    .getDriverSettings()
+                                    .getAPIPropertiesFor(api)
+                                    .put(property, value);
+                            }
+                        } catch (Exception ex) {
+                            Logger
+                                .getLogger(ProjectRunner.class.getName())
+                                .log(Level.SEVERE, null, ex);
+                        }
                     }
-                } catch (Exception ex) {
-                    Logger.getLogger(ProjectRunner.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            });
+                );
         }
     }
 
@@ -255,5 +288,4 @@ public class ProjectRunner implements TestRunner {
         }
         return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
-
 }

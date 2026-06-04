@@ -1,4 +1,3 @@
-
 package com.ing.datalib.testdata.model;
 
 import com.ing.datalib.component.utils.SaveListener;
@@ -20,11 +19,10 @@ import javax.swing.table.TableModel;
 
 /**
  *
- * 
+ *
  * @param <T>
  */
 public abstract class AbstractDataModel<T extends List<String>> extends UndoRedoModel {
-
     private List<T> records = new ArrayList<>();
 
     private final List<String> columns = new ArrayList<>();
@@ -78,7 +76,7 @@ public abstract class AbstractDataModel<T extends List<String>> extends UndoRedo
         return true;
     }
 
-    abstract public boolean canEditOnExecution(int columnIndex);
+    public abstract boolean canEditOnExecution(int columnIndex);
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
@@ -158,7 +156,6 @@ public abstract class AbstractDataModel<T extends List<String>> extends UndoRedo
         setSaved(false);
         return true;
     }
-    
 
     public Boolean moveRowsDown(int from, int to) {
         if (to + 1 > records.size() - 1) {
@@ -409,7 +406,6 @@ public abstract class AbstractDataModel<T extends List<String>> extends UndoRedo
         }
         setSaved(true);
     }
-    
 
     public abstract Set<String> loadColumns(File location);
 
@@ -521,7 +517,6 @@ public abstract class AbstractDataModel<T extends List<String>> extends UndoRedo
     }
 
     class ModelView extends TestDataView {
-
         AbstractDataModel model;
 
         public ModelView(AbstractDataModel model) {
@@ -549,7 +544,12 @@ public abstract class AbstractDataModel<T extends List<String>> extends UndoRedo
         }
 
         @Override
-        public List<String> addRecord(String scenario, String testcase, String iteration, String subIteration) {
+        public List<String> addRecord(
+            String scenario,
+            String testcase,
+            String iteration,
+            String subIteration
+        ) {
             List<String> record = model.addRecord();
             record.set(0, scenario);
             record.set(1, testcase);
@@ -557,6 +557,5 @@ public abstract class AbstractDataModel<T extends List<String>> extends UndoRedo
             record.set(3, subIteration);
             return record;
         }
-
     }
 }

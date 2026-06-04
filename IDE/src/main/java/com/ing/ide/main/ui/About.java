@@ -1,4 +1,3 @@
-
 package com.ing.ide.main.ui;
 
 import java.io.IOException;
@@ -8,21 +7,21 @@ import java.util.logging.Logger;
 
 /**
  *
- * 
+ *
  */
 public class About {
-
-    private final static String DETAILS = "<html>\n"
-            + "	<body>\n"
-            + "			<strong>Build Version</strong>: ##bversion## \n"
-            + "			<br />\n"
-            + "			<strong>Build Date</strong>: ##bdate##\n"
-            + "			<br />\n"
-            + "			<strong>Java</strong>: ##jversion##\n"
-            + "			<br />\n"
-            + "			<strong>Installation directory</strong>: ##insdir##\n"
-            + "	</body>\n"
-            + "</html>";
+    private static final String DETAILS =
+        "<html>\n" +
+        "	<body>\n" +
+        "			<strong>Build Version</strong>: ##bversion## \n" +
+        "			<br />\n" +
+        "			<strong>Build Date</strong>: ##bdate##\n" +
+        "			<br />\n" +
+        "			<strong>Java</strong>: ##jversion##\n" +
+        "			<br />\n" +
+        "			<strong>Installation directory</strong>: ##insdir##\n" +
+        "	</body>\n" +
+        "</html>";
 
     private static Properties buildProperties;
 
@@ -37,10 +36,10 @@ public class About {
 
     public static String getDetailsAsHTML() {
         return DETAILS
-                .replace("##bversion##", getBuildVersion())
-                .replace("##bdate##", getBuildDate())
-                .replace("##jversion##", getJavaVersion())
-                .replace("##insdir##", getRoot());
+            .replace("##bversion##", getBuildVersion())
+            .replace("##bdate##", getBuildDate())
+            .replace("##jversion##", getJavaVersion())
+            .replace("##insdir##", getRoot());
     }
 
     public static String getBuildVersion() {
@@ -58,5 +57,4 @@ public class About {
     public static String getRoot() {
         return System.getProperty("user.dir");
     }
-
 }

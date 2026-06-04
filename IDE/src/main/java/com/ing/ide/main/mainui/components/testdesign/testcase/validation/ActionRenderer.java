@@ -2,10 +2,10 @@ package com.ing.ide.main.mainui.components.testdesign.testcase.validation;
 
 import com.ing.datalib.component.Scenario;
 import com.ing.datalib.component.TestStep;
-import com.ing.datalib.or.web.ResolvedWebObject;
-import com.ing.datalib.or.structureddata.ResolvedStructuredDataObject;
 import com.ing.datalib.or.mobile.ResolvedMobileObject;
 import com.ing.datalib.or.sap.ResolvedSapObject;
+import com.ing.datalib.or.structureddata.ResolvedStructuredDataObject;
+import com.ing.datalib.or.web.ResolvedWebObject;
 import com.ing.engine.support.ObjectTypeUtil;
 import com.ing.engine.support.methodInf.MethodInfoManager;
 import com.ing.ingenious.api.types.ObjectType;
@@ -21,7 +21,6 @@ import javax.swing.UIManager;
  *
  */
 public class ActionRenderer extends AbstractRenderer {
-
     final String actionNotPresent = "Action not available/Not a valid action";
     final String reusableNotPresent = "Reusable is not available in the Project";
 
@@ -108,7 +107,9 @@ public class ActionRenderer extends AbstractRenderer {
         }
 
         if (isWebObject(step)) {
-            return MethodInfoManager.getMethodListFor(ObjectType.PLAYWRIGHT, ObjectType.WEB).contains(action);
+            return MethodInfoManager
+                .getMethodListFor(ObjectType.PLAYWRIGHT, ObjectType.WEB)
+                .contains(action);
         }
 
         if (isMobileObject(step)) {
@@ -157,14 +158,16 @@ public class ActionRenderer extends AbstractRenderer {
         String pageToken = step.getReference();
         String objectName = step.getObject();
 
-        ResolvedStructuredDataObject.PageRef ref = ResolvedStructuredDataObject.PageRef.parse(pageToken);
+        ResolvedStructuredDataObject.PageRef ref = ResolvedStructuredDataObject.PageRef.parse(
+            pageToken
+        );
         ResolvedStructuredDataObject r = (ref != null && ref.name != null && ref.scope != null)
             ? repo.resolveStructuredDataObject(ref, objectName)
             : repo.resolveStructuredDataObjectWithScope(pageToken, objectName);
 
         return r != null && r.isPresent();
     }
-    
+
     private boolean isSapObject(TestStep step) {
         var repo = step.getProject().getObjectRepository();
         String pageToken = step.getReference();

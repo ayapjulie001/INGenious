@@ -1,4 +1,3 @@
-
 package com.ing.ide.main.mainui.components.testdesign.testcase.validation;
 
 import com.ing.datalib.component.TestStep;
@@ -8,7 +7,7 @@ import javax.swing.UIManager;
 
 /**
  *
- * 
+ *
  */
 public class StepRenderer extends AbstractRenderer {
 
@@ -19,7 +18,6 @@ public class StepRenderer extends AbstractRenderer {
     @Override
     public void render(JComponent comp, TestStep step, Object value) {
         comp.setForeground(getColor(step));
-        
     }
 
     private Color getColor(TestStep step) {
@@ -32,5 +30,4 @@ public class StepRenderer extends AbstractRenderer {
         }
         return UIManager.getColor("text");
     }
-
 }

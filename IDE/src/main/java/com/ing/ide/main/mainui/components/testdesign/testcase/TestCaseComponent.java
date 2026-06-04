@@ -1,11 +1,11 @@
 package com.ing.ide.main.mainui.components.testdesign.testcase;
 
-import com.ing.ide.main.playwrightrecording.RecordedStepsImportDialog;
+import static com.ing.datalib.component.TestStep.HEADERS.Description;
+
 import com.ing.datalib.component.Scenario;
 import com.ing.datalib.component.TestCase;
 import com.ing.datalib.component.TestStep;
 import com.ing.datalib.component.TestStep.HEADERS;
-import static com.ing.datalib.component.TestStep.HEADERS.Description;
 import com.ing.datalib.component.utils.SaveListener;
 import com.ing.engine.constants.SystemDefaults;
 import com.ing.engine.core.RunManager;
@@ -13,8 +13,9 @@ import com.ing.engine.support.methodInf.MethodInfoManager;
 import com.ing.ide.main.mainui.AppMainFrame;
 import com.ing.ide.main.mainui.EngineConfig;
 import com.ing.ide.main.mainui.components.testdesign.TestDesign;
-import com.ing.ide.main.playwrightrecording.PlaywrightSpinner;
 import com.ing.ide.main.playwrightrecording.ClipboardMonitor;
+import com.ing.ide.main.playwrightrecording.PlaywrightSpinner;
+import com.ing.ide.main.playwrightrecording.RecordedStepsImportDialog;
 import com.ing.ide.main.utils.AppIcon;
 import com.ing.ide.main.utils.ConsolePanel;
 import com.ing.ide.main.utils.MenuScroller;
@@ -22,8 +23,8 @@ import com.ing.ide.main.utils.Utils;
 import com.ing.ide.main.utils.keys.Keystroke;
 import com.ing.ide.main.utils.table.TableColumnManager;
 import com.ing.ide.main.utils.table.XTable;
-import com.ing.ide.util.Notification;
 import com.ing.ide.util.Canvas;
+import com.ing.ide.util.Notification;
 import com.ing.ide.util.Notification;
 import com.ing.ide.util.WindowMover;
 import java.awt.BorderLayout;
@@ -92,7 +93,6 @@ import javax.swing.table.TableCellRenderer;
  * </p>
  */
 public class TestCaseComponent extends JPanel implements ActionListener {
-
     private final TestDesign testDesign;
 
     private final TestCaseToolBar toolBar;
@@ -118,13 +118,13 @@ public class TestCaseComponent extends JPanel implements ActionListener {
     TableColumnManager tableColumnManager;
 
     private final TCHistory testCaseHistory;
-    
+
     private final AppMainFrame sMainFrame;
-    
+
     private ClipboardMonitor monitor;
-    
+
     private CompletableFuture<Void> launchPlaywrightTask;
-    
+
     public static long INSTANCE_START_TIME;
 
     public TestCaseComponent(TestDesign testDesign, AppMainFrame sMainFrame) {
@@ -158,7 +158,7 @@ public class TestCaseComponent extends JPanel implements ActionListener {
             if (currentTestCase != null && !currentTestCase.isSaved()) {
                 currentTestCase.save();
             }
-            
+
             testCaseHistory.log();
             TestCase tc = (TestCase) obj;
             tc.setSaveListener(saveListener);
@@ -167,15 +167,17 @@ public class TestCaseComponent extends JPanel implements ActionListener {
             validator.initValidations();
             changeSave(tc.isSaved());
             refreshTitle();
-            
+
             // Check if migration occurred and show notification
             int migratedCount = tc.getMigratedReferencesCount();
             if (migratedCount > 0) {
                 Notification.show(
-                    String.format("Migrated %d object reference%s to explicit scope prefix in '%s'",
+                    String.format(
+                        "Migrated %d object reference%s to explicit scope prefix in '%s'",
                         migratedCount,
                         migratedCount > 1 ? "es" : "",
-                        tc.getName())
+                        tc.getName()
+                    )
                 );
             }
         }
@@ -196,10 +198,10 @@ public class TestCaseComponent extends JPanel implements ActionListener {
         if (tcText.length() > 20) {
             tcText = tcText.substring(0, 20) + "...";
         }
-//        String toolTip
-//                = getCurrentTestCase().getScenario().getName()
-//                + " - "
-//                + getCurrentTestCase().getName();
+        //        String toolTip
+        //                = getCurrentTestCase().getScenario().getName()
+        //                + " - "
+        //                + getCurrentTestCase().getName();
         toolBar.setPlaceHolderText(scText + " - " + tcText, null);
     }
 
@@ -210,152 +212,224 @@ public class TestCaseComponent extends JPanel implements ActionListener {
     }
 
     public void loadBrowsers() {
-        toolBar.loadBrowsers(testDesign.getProject().getProjectSettings().getEmulators().getEmulatorNames());
+        toolBar.loadBrowsers(
+            testDesign.getProject().getProjectSettings().getEmulators().getEmulatorNames()
+        );
     }
 
     private void initTableListeners() {
-        testCaseTable.setActionFor("Comment", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                toggleComment();
-            }
-        });
+        testCaseTable.setActionFor(
+            "Comment",
+            new AbstractAction() {
 
-        testCaseTable.setActionFor("BreakPoint", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                toggleBreakPoint();
-            }
-        });
-
-        testCaseTable.setActionFor("Insert", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                insertRow();
-            }
-        });
-        testCaseTable.setActionFor("Add", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                addRow();
-            }
-        });
-        testCaseTable.setActionFor("Delete", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                deleteSelectedRows();
-            }
-        });
-
-        testCaseTable.setActionFor("Clear", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                clearValues();
-            }
-        });
-
-        testCaseTable.setActionFor("Replicate", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                replicateRow();
-            }
-        });
-        testCaseTable.setActionFor("Save", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                save();
-            }
-        });
-        testCaseTable.setActionFor("Reload", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                reload();
-            }
-        });
-        testCaseTable.setActionFor("Open", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                openWithSystemEditor();
-            }
-
-        });
-        testCaseTable.setActionFor("Search", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                toolBar.focusSearch();
-            }
-        });
-
-        testCaseTable.setActionFor("Copy Above", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                copyAbove();
-            }
-        });
-
-        testCaseTable.setActionFor("MoveUp", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                moveRowUp();
-            }
-        });
-        testCaseTable.setActionFor("MoveDown", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                moveRowDown();
-            }
-        });
-
-        testCaseTable.setKeyStrokeFor("RunTestCase", Keystroke.F6);
-        testCaseTable.setActionFor("RunTestCase", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                run();
-            }
-        });
-        testCaseTable.setKeyStrokeFor("DebugTestCase", Keystroke.CTRLF6);
-        testCaseTable.setActionFor("DebugTestCase", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                debug();
-            }
-        });
-
-        saveListener = new SaveListener() {
-            @Override
-            public void onSave(Boolean bln) {
-                changeSave(bln);
-            }
-        };
-
-        testCaseTable.setTransferHandler(new TestCaseTableDnD());
-        testCaseTable.addMouseListener(new MouseAdapter() {
-
-            @Override
-            public void mouseClicked(MouseEvent me) {
-
-                if (SwingUtilities.isLeftMouseButton(me) && me.isAltDown()) {
-                    goToSelectedReusable();
-                } else if (SwingUtilities.isLeftMouseButton(me) && me.isShiftDown()) {
-                    goToObject();
-                } else if (SwingUtilities.isLeftMouseButton(me)) {
-                    addLastRow();
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    toggleComment();
                 }
             }
+        );
 
-        });
+        testCaseTable.setActionFor(
+            "BreakPoint",
+            new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    toggleBreakPoint();
+                }
+            }
+        );
+
+        testCaseTable.setActionFor(
+            "Insert",
+            new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    insertRow();
+                }
+            }
+        );
+        testCaseTable.setActionFor(
+            "Add",
+            new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    addRow();
+                }
+            }
+        );
+        testCaseTable.setActionFor(
+            "Delete",
+            new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    deleteSelectedRows();
+                }
+            }
+        );
+
+        testCaseTable.setActionFor(
+            "Clear",
+            new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent ae) {
+                    clearValues();
+                }
+            }
+        );
+
+        testCaseTable.setActionFor(
+            "Replicate",
+            new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    replicateRow();
+                }
+            }
+        );
+        testCaseTable.setActionFor(
+            "Save",
+            new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    save();
+                }
+            }
+        );
+        testCaseTable.setActionFor(
+            "Reload",
+            new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    reload();
+                }
+            }
+        );
+        testCaseTable.setActionFor(
+            "Open",
+            new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    openWithSystemEditor();
+                }
+            }
+        );
+        testCaseTable.setActionFor(
+            "Search",
+            new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    toolBar.focusSearch();
+                }
+            }
+        );
+
+        testCaseTable.setActionFor(
+            "Copy Above",
+            new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    copyAbove();
+                }
+            }
+        );
+
+        testCaseTable.setActionFor(
+            "MoveUp",
+            new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    moveRowUp();
+                }
+            }
+        );
+        testCaseTable.setActionFor(
+            "MoveDown",
+            new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    moveRowDown();
+                }
+            }
+        );
+
+        testCaseTable.setKeyStrokeFor("RunTestCase", Keystroke.F6);
+        testCaseTable.setActionFor(
+            "RunTestCase",
+            new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    run();
+                }
+            }
+        );
+        testCaseTable.setKeyStrokeFor("DebugTestCase", Keystroke.CTRLF6);
+        testCaseTable.setActionFor(
+            "DebugTestCase",
+            new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    debug();
+                }
+            }
+        );
+
+        saveListener =
+            new SaveListener() {
+
+                @Override
+                public void onSave(Boolean bln) {
+                    changeSave(bln);
+                }
+            };
+
+        testCaseTable.setTransferHandler(new TestCaseTableDnD());
+        testCaseTable.addMouseListener(
+            new MouseAdapter() {
+
+                @Override
+                public void mouseClicked(MouseEvent me) {
+                    if (SwingUtilities.isLeftMouseButton(me) && me.isAltDown()) {
+                        goToSelectedReusable();
+                    } else if (SwingUtilities.isLeftMouseButton(me) && me.isShiftDown()) {
+                        goToObject();
+                    } else if (SwingUtilities.isLeftMouseButton(me)) {
+                        addLastRow();
+                    }
+                }
+            }
+        );
     }
 
     private void initRunner() {
-        runner = new Thread(() -> {
-            toolBar.setConsoleVisible(true);
-            toolBar.stopMode();
-            consoleDialog.start();
-            RunManager.getGlobalSettings().setFor(getCurrentTestCase(), toolBar.getSelectedBrowser());
-            EngineConfig.runProject(testDesign.getProject());
-            debugDialog.setVisible(false);
-            toolBar.startMode();
-        });
+        runner =
+            new Thread(
+                () -> {
+                    toolBar.setConsoleVisible(true);
+                    toolBar.stopMode();
+                    consoleDialog.start();
+                    RunManager
+                        .getGlobalSettings()
+                        .setFor(getCurrentTestCase(), toolBar.getSelectedBrowser());
+                    EngineConfig.runProject(testDesign.getProject());
+                    debugDialog.setVisible(false);
+                    toolBar.startMode();
+                }
+            );
     }
 
     private void changeSave(Boolean bln) {
@@ -366,15 +440,17 @@ public class TestCaseComponent extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent ae) {
         switch (ae.getActionCommand()) {
-            case "Record": {
-                try {
-                    record();
-                } catch (IOException ex) {
-                    Logger.getLogger(TestCaseComponent.class.getName()).log(Level.SEVERE, null, ex);
+            case "Record":
+                {
+                    try {
+                        record();
+                    } catch (IOException ex) {
+                        Logger
+                            .getLogger(TestCaseComponent.class.getName())
+                            .log(Level.SEVERE, null, ex);
+                    }
                 }
-            }
-            break;
-
+                break;
             case "Open with System Editor":
                 openWithSystemEditor();
                 break;
@@ -467,36 +543,52 @@ public class TestCaseComponent extends JPanel implements ActionListener {
         if (launchPlaywrightTask == null || launchPlaywrightTask.isDone()) {
             PlaywrightSpinner playwrightSpinnerGUI = new PlaywrightSpinner();
 
-            launchPlaywrightTask = CompletableFuture.runAsync(() -> {
-                try {
-                    launchPlaywright(playwrightSpinnerGUI);
-                } catch (IOException ex) {
-                    Logger.getLogger(TestCaseComponent.class.getName()).log(Level.SEVERE, "Error launching Playwright", ex);
-                }
-            });
-
-            CompletableFuture<Void> playwrightLoading = CompletableFuture.runAsync(() -> {
-                try {
-                    playwrightLoading(playwrightSpinnerGUI);
-                } catch (Exception ex) {
-                    Logger.getLogger(TestCaseComponent.class.getName()).log(Level.WARNING, "Error in playwright loading UI", ex);
-                }
-            });
-            CompletableFuture.allOf(launchPlaywrightTask, playwrightLoading)
-                .whenComplete((result, throwable) -> {
-                    if (throwable != null) {
-                        Logger.getLogger(TestCaseComponent.class.getName()).log(Level.SEVERE, "Playwright tasks failed", throwable);
+            launchPlaywrightTask =
+                CompletableFuture.runAsync(
+                    () -> {
+                        try {
+                            launchPlaywright(playwrightSpinnerGUI);
+                        } catch (IOException ex) {
+                            Logger
+                                .getLogger(TestCaseComponent.class.getName())
+                                .log(Level.SEVERE, "Error launching Playwright", ex);
+                        }
                     }
-                    SwingUtilities.invokeLater(() -> toolBar.enableRecordButton());
-                });
+                );
 
+            CompletableFuture<Void> playwrightLoading = CompletableFuture.runAsync(
+                () -> {
+                    try {
+                        playwrightLoading(playwrightSpinnerGUI);
+                    } catch (Exception ex) {
+                        Logger
+                            .getLogger(TestCaseComponent.class.getName())
+                            .log(Level.WARNING, "Error in playwright loading UI", ex);
+                    }
+                }
+            );
+            CompletableFuture
+                .allOf(launchPlaywrightTask, playwrightLoading)
+                .whenComplete(
+                    (result, throwable) -> {
+                        if (throwable != null) {
+                            Logger
+                                .getLogger(TestCaseComponent.class.getName())
+                                .log(Level.SEVERE, "Playwright tasks failed", throwable);
+                        }
+                        SwingUtilities.invokeLater(() -> toolBar.enableRecordButton());
+                    }
+                );
         } else {
             System.out.println("Playwright is already running. Skipping duplicate launch.");
             SwingUtilities.invokeLater(() -> toolBar.enableRecordButton());
         }
     }
 
-    public Process startPlaywrightProcess(String processName, PlaywrightSpinner playwrightSpinnerGUI) {
+    public Process startPlaywrightProcess(
+        String processName,
+        PlaywrightSpinner playwrightSpinnerGUI
+    ) {
         try {
             String osName = System.getProperty("os.name").toLowerCase();
             String classpath;
@@ -508,9 +600,14 @@ public class TestCaseComponent extends JPanel implements ActionListener {
                 if (!printDeps.exists()) {
                     new File(printDepsDir).mkdirs();
 
-                    try (InputStream in = getClass().getResourceAsStream("/Engine/winldd-1007/PrintDeps.exe")) {
+                    try (
+                        InputStream in = getClass()
+                            .getResourceAsStream("/Engine/winldd-1007/PrintDeps.exe")
+                    ) {
                         if (in == null) {
-                            throw new FileNotFoundException("PrintDeps.exe not found in resources!");
+                            throw new FileNotFoundException(
+                                "PrintDeps.exe not found in resources!"
+                            );
                         }
                         Files.copy(in, Path.of(printDepsPath), StandardCopyOption.REPLACE_EXISTING);
                     }
@@ -527,12 +624,11 @@ public class TestCaseComponent extends JPanel implements ActionListener {
             );
 
             String[] command = osName.contains("windows")
-                ? new String[]{"cmd", "/c", javaCommand}
-                : new String[]{"bash", "-l", "-c", javaCommand};
+                ? new String[] { "cmd", "/c", javaCommand }
+                : new String[] { "bash", "-l", "-c", javaCommand };
 
             Process process = Runtime.getRuntime().exec(command);
             return process;
-
         } catch (Exception ex) {
             System.out.println("Error starting Playwright process: " + ex.getMessage());
             //playwrightSpinnerGUI.appendLog(ex.getMessage());
@@ -541,25 +637,25 @@ public class TestCaseComponent extends JPanel implements ActionListener {
         return null;
     }
 
-//    public void initialization(PlaywrightSpinner playwrightSpinnerGUI){
-//        try{
-//            String[] command = new String[0];
-//            String osName = System.getProperty("os.name").toLowerCase();
-//            if (osName.contains("windows")) {
-//                // Windows command
-//                
-//                command = new String[]{"cmd", "/c", "mvn initialize -f engine/pom.xml"};
-//            } else if (osName.contains("mac")) {
-//                // Mac command
-//                command = new String[]{"bash", "-l", "-c", "mvn initialize -f engine/pom.xml"};
-//            } 
-//           Runtime.getRuntime().exec(command);
-//       }catch (Exception ex){
-//         System.out.println(ex.getMessage());
-//         //playwrightSpinnerGUI.appendLog(ex.getMessage());
-//       }
-//    }
-    
+    //    public void initialization(PlaywrightSpinner playwrightSpinnerGUI){
+    //        try{
+    //            String[] command = new String[0];
+    //            String osName = System.getProperty("os.name").toLowerCase();
+    //            if (osName.contains("windows")) {
+    //                // Windows command
+    //
+    //                command = new String[]{"cmd", "/c", "mvn initialize -f engine/pom.xml"};
+    //            } else if (osName.contains("mac")) {
+    //                // Mac command
+    //                command = new String[]{"bash", "-l", "-c", "mvn initialize -f engine/pom.xml"};
+    //            }
+    //           Runtime.getRuntime().exec(command);
+    //       }catch (Exception ex){
+    //         System.out.println(ex.getMessage());
+    //         //playwrightSpinnerGUI.appendLog(ex.getMessage());
+    //       }
+    //    }
+
     /**
      * Launches the Playwright codegen process and handles the recording workflow.
      * <p>
@@ -573,7 +669,9 @@ public class TestCaseComponent extends JPanel implements ActionListener {
      * @throws IOException if an I/O error occurs during process execution
      */
     public void launchPlaywright(PlaywrightSpinner playwrightSpinnerGUI) throws IOException {
-        System.out.println("============================== Playwright Log Started ==============================");
+        System.out.println(
+            "============================== Playwright Log Started =============================="
+        );
         //playwrightSpinnerGUI.appendLog("============================== Playwright Log Started ==============================");
         //initialization(playwrightSpinnerGUI);
         JDialog topDialog = new JDialog();
@@ -587,8 +685,12 @@ public class TestCaseComponent extends JPanel implements ActionListener {
         monitor = new ClipboardMonitor(sMainFrame);
         monitor.startMonitoring();
         Process launchRecorder = startPlaywrightProcess("codegen", playwrightSpinnerGUI);
-        BufferedReader stdInput = new BufferedReader(new InputStreamReader(launchRecorder.getInputStream()));
-        BufferedReader stdError = new BufferedReader(new InputStreamReader(launchRecorder.getErrorStream()));
+        BufferedReader stdInput = new BufferedReader(
+            new InputStreamReader(launchRecorder.getInputStream())
+        );
+        BufferedReader stdError = new BufferedReader(
+            new InputStreamReader(launchRecorder.getErrorStream())
+        );
         String s = null;
         while ((s = stdInput.readLine()) != null) {
             System.out.println(s);
@@ -596,13 +698,21 @@ public class TestCaseComponent extends JPanel implements ActionListener {
         }
         while ((s = stdError.readLine()) != null) {
             System.out.println(s);
-            if (s.contains("mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args=\"install\"")) {
+            if (
+                s.contains(
+                    "mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args=\"install\""
+                )
+            ) {
                 System.out.println("");
                 //System.out.println("--> mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args=\"install\" --> Got executed");
                 //playwrightSpinnerGUI.appendLog("--> mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args=\"install\" --> Got executed");
                 Process playwrightInstall = startPlaywrightProcess("install", playwrightSpinnerGUI);
-                BufferedReader stdInput1 = new BufferedReader(new InputStreamReader(playwrightInstall.getInputStream()));
-                BufferedReader stdError1 = new BufferedReader(new InputStreamReader(playwrightInstall.getErrorStream()));
+                BufferedReader stdInput1 = new BufferedReader(
+                    new InputStreamReader(playwrightInstall.getInputStream())
+                );
+                BufferedReader stdError1 = new BufferedReader(
+                    new InputStreamReader(playwrightInstall.getErrorStream())
+                );
                 String s1 = null;
                 while ((s1 = stdInput1.readLine()) != null) {
                     System.out.println(s1);
@@ -622,59 +732,67 @@ public class TestCaseComponent extends JPanel implements ActionListener {
                 break;
             }
         }
-        System.out.println("============================== Playwright Log Ended ==============================");
+        System.out.println(
+            "============================== Playwright Log Ended =============================="
+        );
         //playwrightSpinnerGUI.appendLog("============================== Playwright Log Ended ==============================");
 
+        new Thread(
+            () -> {
+                try {
+                    String projectLocation = sMainFrame.getProject().getLocation();
+                    launchRecorder.waitFor();
 
-        new Thread(() -> {
-            try {
-                String projectLocation = sMainFrame.getProject().getLocation();
-                launchRecorder.waitFor();
+                    File recordingDir = new File(projectLocation + File.separator + "Recording");
+                    File[] recordingFiles = recordingDir.listFiles(
+                        (dir, name) -> name.startsWith("recording_") && name.endsWith(".txt")
+                    );
 
-                File recordingDir = new File(projectLocation + File.separator + "Recording");
-                File[] recordingFiles = recordingDir.listFiles((dir, name) -> name.startsWith("recording_") && name.endsWith(".txt"));
-
-                File latestFile = null;
-                if (recordingFiles != null && recordingFiles.length > 0) {
-                    List<File> filteredFiles = Arrays.stream(recordingFiles)
+                    File latestFile = null;
+                    if (recordingFiles != null && recordingFiles.length > 0) {
+                        List<File> filteredFiles = Arrays
+                            .stream(recordingFiles)
                             .filter(file -> file.lastModified() >= INSTANCE_START_TIME)
                             .sorted(Comparator.comparingLong(File::lastModified).reversed())
                             .collect(Collectors.toList());
 
-                    if (!filteredFiles.isEmpty()) {
-                        latestFile = filteredFiles.get(0);
+                        if (!filteredFiles.isEmpty()) {
+                            latestFile = filteredFiles.get(0);
+                        }
                     }
+
+                    final File recordedFile = latestFile;
+
+                    SwingUtilities.invokeLater(
+                        () -> {
+                            if (recordedFile != null && recordedFile.exists()) {
+                                RecordedStepsImportDialog window = new RecordedStepsImportDialog(
+                                    sMainFrame
+                                );
+                                window.setLocationRelativeTo(null);
+                                window.setVisible(true);
+                            } else {
+                                JOptionPane.showMessageDialog(
+                                    null,
+                                    "You have closed the Playwright Recorder without copying the recorded steps. No recording has been saved for import.",
+                                    "Playwright Recorder",
+                                    JOptionPane.WARNING_MESSAGE
+                                );
+                            }
+                            monitor.stopMonitoring();
+                        }
+                    );
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-
-                final File recordedFile = latestFile;
-
-                SwingUtilities.invokeLater(() -> {
-                    if (recordedFile != null && recordedFile.exists()) {
-                        RecordedStepsImportDialog window = new RecordedStepsImportDialog(sMainFrame);
-                        window.setLocationRelativeTo(null);
-                        window.setVisible(true);
-                    } else {
-                        JOptionPane.showMessageDialog(
-                            null,
-                            "You have closed the Playwright Recorder without copying the recorded steps. No recording has been saved for import.",
-                            "Playwright Recorder",
-                            JOptionPane.WARNING_MESSAGE
-                        );
-                    }
-                    monitor.stopMonitoring();
-                });
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
-        }).start();
-
+        )
+        .start();
     }
 
     public void playwrightLoading(PlaywrightSpinner playwrightSpinnerGUI) {
-
         playwrightSpinnerGUI.setAlwaysOnTop(true);
         playwrightSpinnerGUI.setVisible(true);
-
     }
 
     private void stopCellEditing() {
@@ -709,8 +827,10 @@ public class TestCaseComponent extends JPanel implements ActionListener {
 
     public TestStep insertRowBelow() {
         stopCellEditing();
-        if (testCaseTable.getSelectedRow() != -1
-                && testCaseTable.getSelectedRow() + 1 < testCaseTable.getRowCount()) {
+        if (
+            testCaseTable.getSelectedRow() != -1 &&
+            testCaseTable.getSelectedRow() + 1 < testCaseTable.getRowCount()
+        ) {
             return getCurrentTestCase().addNewStepAt(testCaseTable.getSelectedRow() + 1);
         } else {
             return getCurrentTestCase().addNewStep();
@@ -720,8 +840,9 @@ public class TestCaseComponent extends JPanel implements ActionListener {
     private void addLastRow() {
         int row = testCaseTable.getSelectedRow();
         int column = testCaseTable.getSelectedColumn();
-        if (row == testCaseTable.getRowCount() - 1
-                && column == testCaseTable.getColumnCount() - 1) {
+        if (
+            row == testCaseTable.getRowCount() - 1 && column == testCaseTable.getColumnCount() - 1
+        ) {
             addRow();
         }
     }
@@ -776,16 +897,16 @@ public class TestCaseComponent extends JPanel implements ActionListener {
     private void clearValues() {
         stopCellEditing();
         if (testCaseTable.getSelectedRowCount() > 0) {
-            getCurrentTestCase().clearValues(
-                    testCaseTable.getSelectedRows(),
-                    testCaseTable.getSelectedColumns());
+            getCurrentTestCase()
+                .clearValues(testCaseTable.getSelectedRows(), testCaseTable.getSelectedColumns());
         }
     }
 
     private void deleteSelectedRows() {
         stopCellEditing();
         if (testCaseTable.getSelectedRows().length > 0) {
-            getCurrentTestCase().removeSteps(Utils.getReverseSorted(testCaseTable.getSelectedRows()));
+            getCurrentTestCase()
+                .removeSteps(Utils.getReverseSorted(testCaseTable.getSelectedRows()));
         }
     }
 
@@ -843,9 +964,7 @@ public class TestCaseComponent extends JPanel implements ActionListener {
     private void populateDescription() {
         int i = 0;
         for (TestStep testStep : getCurrentTestCase().getTestSteps()) {
-
-            if (!testStep.getAction().isEmpty()
-                    && testStep.getDescription().isEmpty()) {
+            if (!testStep.getAction().isEmpty() && testStep.getDescription().isEmpty()) {
                 String desc = MethodInfoManager.getDescriptionFor(testStep.getAction());
                 testCaseTable.setValueAt(desc, i, Description.getIndex());
             }
@@ -881,8 +1000,7 @@ public class TestCaseComponent extends JPanel implements ActionListener {
             int to = testCaseTable.getSelectedRows()[testCaseTable.getSelectedRowCount() - 1];
             String name = JOptionPane.showInputDialog("Enter the Reusable Name");
             if (name != null && !name.trim().isEmpty()) {
-                TestCase reusable = getCurrentTestCase().
-                        createAsReusable(name, from, to);
+                TestCase reusable = getCurrentTestCase().createAsReusable(name, from, to);
                 if (reusable != null) {
                     testDesign.getReusableTree().getTreeModel().addTestCase(reusable);
                 } else {
@@ -948,26 +1066,36 @@ public class TestCaseComponent extends JPanel implements ActionListener {
 
     private void goToSelectedReusable() {
         if (testCaseTable.getSelectedRow() != -1) {
-            TestStep tStep = getCurrentTestCase().getTestSteps().get(testCaseTable.getSelectedRow());
+            TestStep tStep = getCurrentTestCase()
+                .getTestSteps()
+                .get(testCaseTable.getSelectedRow());
             String[] reusableData = tStep.getReusableData();
             if (reusableData != null) {
                 // Try reusable scenarios first, then fall back to regular scenarios
-                Scenario scenario = testDesign.getProject().getReusableScenarioByName(reusableData[0]);
+                Scenario scenario = testDesign
+                    .getProject()
+                    .getReusableScenarioByName(reusableData[0]);
                 if (scenario == null) {
                     scenario = testDesign.getProject().getScenarioByName(reusableData[0]);
                 }
-                
+
                 if (scenario != null) {
                     TestCase testCase = scenario.getTestCaseByName(reusableData[1]);
                     if (testCase != null) {
                         testDesign.loadTableModelForSelection(testCase);
                     } else {
-                        Notification.show("TestCase [" + reusableData[1]
-                                + "] not present in the Scenario [" + reusableData[0] + "]");
+                        Notification.show(
+                            "TestCase [" +
+                            reusableData[1] +
+                            "] not present in the Scenario [" +
+                            reusableData[0] +
+                            "]"
+                        );
                     }
                 } else {
-                    Notification.show("Scenario [" + reusableData[0]
-                            + "] not present in the project");
+                    Notification.show(
+                        "Scenario [" + reusableData[0] + "] not present in the project"
+                    );
                 }
             }
         }
@@ -975,11 +1103,21 @@ public class TestCaseComponent extends JPanel implements ActionListener {
 
     private void goToTestData() {
         if (testCaseTable.getSelectedRow() != -1) {
-            TestStep tStep = getCurrentTestCase().getTestSteps().get(testCaseTable.getSelectedRow());
+            TestStep tStep = getCurrentTestCase()
+                .getTestSteps()
+                .get(testCaseTable.getSelectedRow());
             String[] tdFromInput = tStep.getTestDataFromInput();
             if (tdFromInput != null) {
-                if (!testDesign.getTestDatacomp().navigateToTestData(tdFromInput[0], tdFromInput[1])) {
-                    Notification.show("Test Data [" + tdFromInput[0] + ":" + tdFromInput[1] + "] not found in Test Data");
+                if (
+                    !testDesign.getTestDatacomp().navigateToTestData(tdFromInput[0], tdFromInput[1])
+                ) {
+                    Notification.show(
+                        "Test Data [" +
+                        tdFromInput[0] +
+                        ":" +
+                        tdFromInput[1] +
+                        "] not found in Test Data"
+                    );
                 }
             }
         }
@@ -987,7 +1125,9 @@ public class TestCaseComponent extends JPanel implements ActionListener {
 
     private void goToObject() {
         if (testCaseTable.getSelectedRow() != -1) {
-            TestStep tStep = getCurrentTestCase().getTestSteps().get(testCaseTable.getSelectedRow());
+            TestStep tStep = getCurrentTestCase()
+                .getTestSteps()
+                .get(testCaseTable.getSelectedRow());
             String[] objectPage = tStep.getPageObject();
             if (objectPage != null) {
                 if (!testDesign.getObjectRepo().navigateToObject(objectPage[0], objectPage[1])) {
@@ -1014,7 +1154,6 @@ public class TestCaseComponent extends JPanel implements ActionListener {
     }
 
     class ConsoleDialog extends JDialog {
-
         private final ConsolePanel cPanel;
 
         public ConsoleDialog() {
@@ -1043,7 +1182,6 @@ public class TestCaseComponent extends JPanel implements ActionListener {
         public void start() {
             cPanel.start();
         }
-
     }
 
     class DebugDialog extends JDialog implements ActionListener {
@@ -1059,16 +1197,15 @@ public class TestCaseComponent extends JPanel implements ActionListener {
             toolBar.setFloatable(false);
             JButton drag = new JButton("   ");
 
-            
             toolBar.add(drag);
             registerDrag(drag);
-            
+
             toolBar.add(create("Show Console", "console"));
             toolBar.add(create("Continue Execution", "continue"));
-            toolBar.add(create("Go to Next Step", "stepover")); 
+            toolBar.add(create("Go to Next Step", "stepover"));
             toolBar.add(create("Pause the Execution", "pause"));
             toolBar.add(create("Stop the Execution", "stop"));
-            
+
             add(toolBar);
         }
 
@@ -1115,14 +1252,11 @@ public class TestCaseComponent extends JPanel implements ActionListener {
                 case "Stop the Execution":
                     stopExecution();
                     break;
-
             }
         }
-
     }
 
     class TCHistory extends JMenu implements ActionListener {
-
         private final LinkedList<String> historyList = new LinkedList<>();
 
         private final int max = 20;
@@ -1136,9 +1270,10 @@ public class TestCaseComponent extends JPanel implements ActionListener {
 
         public void log() {
             if (getCurrentTestCase() != null) {
-                String val = getCurrentTestCase().getScenario().getName()
-                        + ":"
-                        + getCurrentTestCase().getName();
+                String val =
+                    getCurrentTestCase().getScenario().getName() +
+                    ":" +
+                    getCurrentTestCase().getName();
                 log(val);
             }
         }

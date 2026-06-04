@@ -1,14 +1,13 @@
 package com.ing.engine.cli.commands;
 
 import com.ing.engine.cli.INGeniousCLI;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.Callable;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
-
-import java.io.*;
-import java.util.*;
-import java.util.concurrent.Callable;
 
 /**
  * Interactive shell command for REPL-style interaction.
@@ -16,21 +15,20 @@ import java.util.concurrent.Callable;
  */
 @Command(
     name = "shell",
-    aliases = {"interactive", "repl"},
+    aliases = { "interactive", "repl" },
     description = "Start interactive shell session"
 )
 public class ShellCommand implements Callable<Integer> {
-
     @ParentCommand
     private INGeniousCLI parent;
 
-    @Option(names = {"-p", "--project"}, description = "Default project to work with")
+    @Option(names = { "-p", "--project" }, description = "Default project to work with")
     private String projectPath;
 
-    @Option(names = {"--no-banner"}, description = "Don't show the welcome banner")
+    @Option(names = { "--no-banner" }, description = "Don't show the welcome banner")
     private boolean noBanner;
 
-    @Option(names = {"--history"}, description = "History file path")
+    @Option(names = { "--history" }, description = "History file path")
     private String historyFile;
 
     private final Map<String, String> variables = new HashMap<>();
@@ -39,7 +37,7 @@ public class ShellCommand implements Callable<Integer> {
     @Override
     public Integer call() {
         INGeniousCLI cli = INGeniousCLI.getInstance();
-        
+
         if (!noBanner) {
             printBanner();
         }
@@ -65,34 +63,41 @@ public class ShellCommand implements Callable<Integer> {
             // Use reflection to load JLine to avoid hard dependency
             Class<?> terminalBuilderClass = Class.forName("org.jline.terminal.TerminalBuilder");
             Class<?> lineReaderBuilderClass = Class.forName("org.jline.reader.LineReaderBuilder");
-            
+
             Object terminal = terminalBuilderClass.getMethod("terminal").invoke(null);
             Object lineReaderBuilder = lineReaderBuilderClass.getMethod("builder").invoke(null);
-            lineReaderBuilder = lineReaderBuilder.getClass()
-                .getMethod("terminal", Class.forName("org.jline.terminal.Terminal"))
-                .invoke(lineReaderBuilder, terminal);
-            
+            lineReaderBuilder =
+                lineReaderBuilder
+                    .getClass()
+                    .getMethod("terminal", Class.forName("org.jline.terminal.Terminal"))
+                    .invoke(lineReaderBuilder, terminal);
+
             // Set up completer
             Object completer = createCompleter();
             if (completer != null) {
-                lineReaderBuilder = lineReaderBuilder.getClass()
-                    .getMethod("completer", Class.forName("org.jline.reader.Completer"))
-                    .invoke(lineReaderBuilder, completer);
+                lineReaderBuilder =
+                    lineReaderBuilder
+                        .getClass()
+                        .getMethod("completer", Class.forName("org.jline.reader.Completer"))
+                        .invoke(lineReaderBuilder, completer);
             }
-            
-            Object reader = lineReaderBuilder.getClass().getMethod("build").invoke(lineReaderBuilder);
-            
+
+            Object reader = lineReaderBuilder
+                .getClass()
+                .getMethod("build")
+                .invoke(lineReaderBuilder);
+
             // Read loop
             while (running) {
                 try {
-                    String line = (String) reader.getClass()
+                    String line = (String) reader
+                        .getClass()
                         .getMethod("readLine", String.class)
                         .invoke(reader, getPrompt());
-                    
+
                     if (line == null) break;
-                    
+
                     processCommand(line.trim());
-                    
                 } catch (Exception e) {
                     if (e.getClass().getSimpleName().equals("EndOfFileException")) {
                         break;
@@ -104,9 +109,8 @@ public class ShellCommand implements Callable<Integer> {
                     throw e;
                 }
             }
-            
+
             return 0;
-            
         } catch (ClassNotFoundException e) {
             // JLine not available, fall back to basic
             return runBasicShell();
@@ -118,64 +122,82 @@ public class ShellCommand implements Callable<Integer> {
 
     private int runBasicShell() {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        
+
         while (running) {
             try {
                 System.out.print(getPrompt());
                 System.out.flush();
-                
+
                 String line = reader.readLine();
                 if (line == null) break;
-                
+
                 processCommand(line.trim());
-                
             } catch (IOException e) {
                 INGeniousCLI.getInstance().printError("Read error: " + e.getMessage());
                 break;
             }
         }
-        
+
         return 0;
     }
 
     private Object createCompleter() {
         try {
-            Class<?> stringCompleterClass = Class.forName("org.jline.reader.impl.completer.StringsCompleter");
-            Class<?> aggregateCompleterClass = Class.forName("org.jline.reader.impl.completer.AggregateCompleter");
-            
+            Class<?> stringCompleterClass = Class.forName(
+                "org.jline.reader.impl.completer.StringsCompleter"
+            );
+            Class<?> aggregateCompleterClass = Class.forName(
+                "org.jline.reader.impl.completer.AggregateCompleter"
+            );
+
             // Create completers for commands and subcommands
             List<String> commands = Arrays.asList(
-                "help", "exit", "quit", "clear",
-                "project", "scenario", "testcase", "run", "action",
-                "config", "report", "status", "history",
-                "set", "get", "alias", "env"
+                "help",
+                "exit",
+                "quit",
+                "clear",
+                "project",
+                "scenario",
+                "testcase",
+                "run",
+                "action",
+                "config",
+                "report",
+                "status",
+                "history",
+                "set",
+                "get",
+                "alias",
+                "env"
             );
-            
-            Object stringCompleter = stringCompleterClass.getConstructor(Collection.class).newInstance(commands);
-            
-            return aggregateCompleterClass.getConstructor(Class.forName("org.jline.reader.Completer[]"))
-                .newInstance(new Object[]{new Object[]{stringCompleter}});
-            
+
+            Object stringCompleter = stringCompleterClass
+                .getConstructor(Collection.class)
+                .newInstance(commands);
+
+            return aggregateCompleterClass
+                .getConstructor(Class.forName("org.jline.reader.Completer[]"))
+                .newInstance(new Object[] { new Object[] { stringCompleter } });
         } catch (Exception e) {
             return null;
         }
     }
 
     private String getPrompt() {
-        String projectName = variables.containsKey("project") 
-            ? new File(variables.get("project")).getName() 
+        String projectName = variables.containsKey("project")
+            ? new File(variables.get("project")).getName()
             : "~";
         return "ingenious:" + projectName + "> ";
     }
 
     private void processCommand(String input) {
         if (input.isEmpty()) return;
-        
+
         INGeniousCLI cli = INGeniousCLI.getInstance();
-        
+
         // Expand variables
         input = expandVariables(input);
-        
+
         // Parse command
         String[] parts = input.split("\\s+", 2);
         String command = parts[0].toLowerCase();
@@ -188,76 +210,59 @@ public class ShellCommand implements Callable<Integer> {
                 running = false;
                 System.out.println("Goodbye!");
                 break;
-
             case "help":
             case "?":
                 printHelp(args);
                 break;
-
             case "clear":
             case "cls":
                 clearScreen();
                 break;
-
             case "set":
                 handleSet(args);
                 break;
-
             case "get":
                 handleGet(args);
                 break;
-
             case "env":
                 printVariables();
                 break;
-
             case "project":
                 handleProjectCommand(args);
                 break;
-
             case "scenario":
                 handleScenarioCommand(args);
                 break;
-
             case "testcase":
             case "tc":
                 handleTestCaseCommand(args);
                 break;
-
             case "run":
                 handleRunCommand(args);
                 break;
-
             case "action":
             case "actions":
                 handleActionCommand(args);
                 break;
-
             case "config":
                 handleConfigCommand(args);
                 break;
-
             case "report":
                 handleReportCommand(args);
                 break;
-
             case "status":
                 printStatus();
                 break;
-
             case "history":
                 handleHistoryCommand(args);
                 break;
-
             case "cd":
                 handleCd(args);
                 break;
-
             case "ls":
             case "list":
                 handleList(args);
                 break;
-
             default:
                 // Try to execute as full CLI command
                 executeCliCommand(input);
@@ -333,7 +338,7 @@ public class ShellCommand implements Callable<Integer> {
     private void handleScenarioCommand(String args) {
         String project = variables.get("project");
         String prefix = project != null ? "--project " + project + " " : "";
-        
+
         if (args.isEmpty() || args.equals("list")) {
             executeCliCommand("scenario list " + prefix);
         } else if (args.startsWith("info ")) {
@@ -346,7 +351,7 @@ public class ShellCommand implements Callable<Integer> {
     private void handleTestCaseCommand(String args) {
         String project = variables.get("project");
         String prefix = project != null ? "--project " + project + " " : "";
-        
+
         if (args.isEmpty() || args.equals("list")) {
             executeCliCommand("testcase list " + prefix);
         } else if (args.startsWith("show ")) {
@@ -354,14 +359,16 @@ public class ShellCommand implements Callable<Integer> {
         } else if (args.startsWith("create ")) {
             executeCliCommand("testcase create " + prefix + args.substring(7));
         } else {
-            System.out.println("Usage: testcase [list|show <Scenario/TestCase>|create <Scenario/TestCase>]");
+            System.out.println(
+                "Usage: testcase [list|show <Scenario/TestCase>|create <Scenario/TestCase>]"
+            );
         }
     }
 
     private void handleRunCommand(String args) {
         String project = variables.get("project");
         String prefix = project != null ? "--project " + project + " " : "";
-        
+
         if (args.isEmpty()) {
             System.out.println("Usage: run <Scenario/TestCase> [--browser Chrome]");
         } else {
@@ -386,7 +393,7 @@ public class ShellCommand implements Callable<Integer> {
     private void handleConfigCommand(String args) {
         String project = variables.get("project");
         String prefix = project != null ? "--project " + project + " " : "";
-        
+
         if (args.isEmpty() || args.equals("show")) {
             executeCliCommand("config show " + prefix);
         } else if (args.startsWith("get ")) {
@@ -401,7 +408,7 @@ public class ShellCommand implements Callable<Integer> {
     private void handleReportCommand(String args) {
         String project = variables.get("project");
         String prefix = project != null ? "--project " + project + " " : "";
-        
+
         if (args.isEmpty() || args.equals("latest")) {
             executeCliCommand("report latest " + prefix);
         } else if (args.equals("history")) {
@@ -465,7 +472,7 @@ public class ShellCommand implements Callable<Integer> {
             // Parse and execute via Picocli
             String[] args = command.trim().split("\\s+");
             int result = new CommandLine(new INGeniousCLI()).execute(args);
-            
+
             if (result != 0) {
                 System.out.println("Command returned: " + result);
             }
@@ -487,19 +494,167 @@ public class ShellCommand implements Callable<Integer> {
         String white = "\u001b[38;2;255;255;255m";
         String reset = "\u001b[0m";
         String bold = "\u001b[1m";
-        
+
         System.out.println();
-        System.out.println(purple + "    ██╗" + brightPurple + "███╗   ██╗" + purple + " ██████╗ " + brightPurple + "███████╗" + purple + "███╗   ██╗" + brightPurple + "██╗" + purple + " ██████╗ " + brightPurple + "██╗   ██╗" + purple + "███████╗" + reset);
-        System.out.println(purple + "    ██║" + brightPurple + "████╗  ██║" + purple + "██╔════╝ " + brightPurple + "██╔════╝" + purple + "████╗  ██║" + brightPurple + "██║" + purple + "██╔═══██╗" + brightPurple + "██║   ██║" + purple + "██╔════╝" + reset);
-        System.out.println(brightPurple + "    ██║" + lightPurple + "██╔██╗ ██║" + brightPurple + "██║  ███╗" + lightPurple + "█████╗  " + brightPurple + "██╔██╗ ██║" + lightPurple + "██║" + brightPurple + "██║   ██║" + lightPurple + "██║   ██║" + brightPurple + "███████╗" + reset);
-        System.out.println(brightPurple + "    ██║" + purple + "██║╚██╗██║" + brightPurple + "██║   ██║" + purple + "██╔══╝  " + brightPurple + "██║╚██╗██║" + purple + "██║" + brightPurple + "██║   ██║" + purple + "██║   ██║" + brightPurple + "╚════██║" + reset);
-        System.out.println(lightPurple + "    ██║" + brightPurple + "██║ ╚████║" + lightPurple + "╚██████╔╝" + brightPurple + "███████╗" + lightPurple + "██║ ╚████║" + brightPurple + "██║" + lightPurple + "╚██████╔╝" + brightPurple + "╚██████╔╝" + lightPurple + "███████║" + reset);
-        System.out.println(purple + "    ╚═╝" + lightPurple + "╚═╝  ╚═══╝" + purple + " ╚═════╝ " + lightPurple + "╚══════╝" + purple + "╚═╝  ╚═══╝" + lightPurple + "╚═╝" + purple + " ╚═════╝ " + lightPurple + " ╚═════╝ " + purple + "╚══════╝" + reset);
+        System.out.println(
+            purple +
+            "    ██╗" +
+            brightPurple +
+            "███╗   ██╗" +
+            purple +
+            " ██████╗ " +
+            brightPurple +
+            "███████╗" +
+            purple +
+            "███╗   ██╗" +
+            brightPurple +
+            "██╗" +
+            purple +
+            " ██████╗ " +
+            brightPurple +
+            "██╗   ██╗" +
+            purple +
+            "███████╗" +
+            reset
+        );
+        System.out.println(
+            purple +
+            "    ██║" +
+            brightPurple +
+            "████╗  ██║" +
+            purple +
+            "██╔════╝ " +
+            brightPurple +
+            "██╔════╝" +
+            purple +
+            "████╗  ██║" +
+            brightPurple +
+            "██║" +
+            purple +
+            "██╔═══██╗" +
+            brightPurple +
+            "██║   ██║" +
+            purple +
+            "██╔════╝" +
+            reset
+        );
+        System.out.println(
+            brightPurple +
+            "    ██║" +
+            lightPurple +
+            "██╔██╗ ██║" +
+            brightPurple +
+            "██║  ███╗" +
+            lightPurple +
+            "█████╗  " +
+            brightPurple +
+            "██╔██╗ ██║" +
+            lightPurple +
+            "██║" +
+            brightPurple +
+            "██║   ██║" +
+            lightPurple +
+            "██║   ██║" +
+            brightPurple +
+            "███████╗" +
+            reset
+        );
+        System.out.println(
+            brightPurple +
+            "    ██║" +
+            purple +
+            "██║╚██╗██║" +
+            brightPurple +
+            "██║   ██║" +
+            purple +
+            "██╔══╝  " +
+            brightPurple +
+            "██║╚██╗██║" +
+            purple +
+            "██║" +
+            brightPurple +
+            "██║   ██║" +
+            purple +
+            "██║   ██║" +
+            brightPurple +
+            "╚════██║" +
+            reset
+        );
+        System.out.println(
+            lightPurple +
+            "    ██║" +
+            brightPurple +
+            "██║ ╚████║" +
+            lightPurple +
+            "╚██████╔╝" +
+            brightPurple +
+            "███████╗" +
+            lightPurple +
+            "██║ ╚████║" +
+            brightPurple +
+            "██║" +
+            lightPurple +
+            "╚██████╔╝" +
+            brightPurple +
+            "╚██████╔╝" +
+            lightPurple +
+            "███████║" +
+            reset
+        );
+        System.out.println(
+            purple +
+            "    ╚═╝" +
+            lightPurple +
+            "╚═╝  ╚═══╝" +
+            purple +
+            " ╚═════╝ " +
+            lightPurple +
+            "╚══════╝" +
+            purple +
+            "╚═╝  ╚═══╝" +
+            lightPurple +
+            "╚═╝" +
+            purple +
+            " ╚═════╝ " +
+            lightPurple +
+            " ╚═════╝ " +
+            purple +
+            "╚══════╝" +
+            reset
+        );
         System.out.println();
-        System.out.println(bold + purple + "    ╔══════════════════════════════════════════════════════════════════════╗" + reset);
-        System.out.println(bold + purple + "    ║" + white + "       ✦  T E S T   A U T O M A T I O N   F R A M E W O R K  ✦        " + purple + "║" + reset);
-        System.out.println(bold + purple + "    ║" + lightPurple + "                     Interactive Shell v2.3.1                       " + purple + "║" + reset);
-        System.out.println(bold + purple + "    ╚══════════════════════════════════════════════════════════════════════╝" + reset);
+        System.out.println(
+            bold +
+            purple +
+            "    ╔══════════════════════════════════════════════════════════════════════╗" +
+            reset
+        );
+        System.out.println(
+            bold +
+            purple +
+            "    ║" +
+            white +
+            "       ✦  T E S T   A U T O M A T I O N   F R A M E W O R K  ✦        " +
+            purple +
+            "║" +
+            reset
+        );
+        System.out.println(
+            bold +
+            purple +
+            "    ║" +
+            lightPurple +
+            "                     Interactive Shell v2.3.1                       " +
+            purple +
+            "║" +
+            reset
+        );
+        System.out.println(
+            bold +
+            purple +
+            "    ╚══════════════════════════════════════════════════════════════════════╝" +
+            reset
+        );
         System.out.println();
     }
 
@@ -551,7 +706,6 @@ public class ShellCommand implements Callable<Integer> {
                     System.out.println("Variables:");
                     System.out.println("  $project will be used if set");
                     break;
-                    
                 case "action":
                 case "actions":
                     System.out.println("action - Discover available test actions");
@@ -562,7 +716,6 @@ public class ShellCommand implements Callable<Integer> {
                     System.out.println("  action info <name>    Get action details");
                     System.out.println("  action categories     List categories");
                     break;
-                    
                 case "testcase":
                 case "tc":
                     System.out.println("testcase - Manage test cases");
@@ -574,7 +727,6 @@ public class ShellCommand implements Callable<Integer> {
                     System.out.println();
                     System.out.println("Path format: Scenario/TestCase");
                     break;
-                    
                 default:
                     System.out.println("No help available for: " + topic);
             }

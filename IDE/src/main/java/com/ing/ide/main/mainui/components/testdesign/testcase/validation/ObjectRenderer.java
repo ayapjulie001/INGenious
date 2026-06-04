@@ -2,11 +2,10 @@ package com.ing.ide.main.mainui.components.testdesign.testcase.validation;
 
 import com.ing.datalib.component.TestStep;
 import com.ing.datalib.or.ObjectRepository;
-import com.ing.datalib.or.web.ResolvedWebObject;
-import com.ing.datalib.or.structureddata.ResolvedStructuredDataObject;
 import com.ing.datalib.or.mobile.ResolvedMobileObject;
 import com.ing.datalib.or.sap.ResolvedSapObject;
-
+import com.ing.datalib.or.structureddata.ResolvedStructuredDataObject;
+import com.ing.datalib.or.web.ResolvedWebObject;
 import com.ing.engine.support.ObjectTypeUtil;
 import java.awt.Color;
 import java.awt.Font;
@@ -60,32 +59,46 @@ public class ObjectRenderer extends AbstractRenderer {
         var repo = step.getProject().getObjectRepository();
         String pageToken = step.getReference();
         String objectName = step.getObject();
-        
+
         ResolvedWebObject.PageRef wref = ResolvedWebObject.PageRef.parse(pageToken);
-        if ((wref != null && wref.name != null && wref.scope != null) && (repo.resolveWebObject(wref, objectName) != null)
-                || (repo.resolveWebObjectWithScope(pageToken, objectName) != null)) {
+        if (
+            (wref != null && wref.name != null && wref.scope != null) &&
+            (repo.resolveWebObject(wref, objectName) != null) ||
+            (repo.resolveWebObjectWithScope(pageToken, objectName) != null)
+        ) {
             return true;
         }
-        
+
         ResolvedMobileObject.PageRef mref = ResolvedMobileObject.PageRef.parse(pageToken);
-        if ((mref != null && mref.name != null && mref.scope != null) && (repo.resolveMobileObject(mref, objectName) != null)
-                || (repo.resolveMobileObjectWithScope(pageToken, objectName) != null )) {
+        if (
+            (mref != null && mref.name != null && mref.scope != null) &&
+            (repo.resolveMobileObject(mref, objectName) != null) ||
+            (repo.resolveMobileObjectWithScope(pageToken, objectName) != null)
+        ) {
             return true;
         }
-        
-        ResolvedStructuredDataObject.PageRef aref = ResolvedStructuredDataObject.PageRef.parse(pageToken);
-        if ((aref != null && aref.name != null && aref.scope != null) && (repo.resolveStructuredDataObject(aref, objectName) != null)
-                || (repo.resolveStructuredDataObjectWithScope(pageToken, objectName) != null )) {
+
+        ResolvedStructuredDataObject.PageRef aref = ResolvedStructuredDataObject.PageRef.parse(
+            pageToken
+        );
+        if (
+            (aref != null && aref.name != null && aref.scope != null) &&
+            (repo.resolveStructuredDataObject(aref, objectName) != null) ||
+            (repo.resolveStructuredDataObjectWithScope(pageToken, objectName) != null)
+        ) {
             return true;
         }
-        
+
         // Check SAP OR
         ResolvedSapObject.PageRef sref = ResolvedSapObject.PageRef.parse(pageToken);
-        if ((sref != null && sref.name != null && sref.scope != null) && (repo.resolveSapObject(sref, objectName) != null)
-                || (repo.resolveSapObjectWithScope(pageToken, objectName) != null)) {
+        if (
+            (sref != null && sref.name != null && sref.scope != null) &&
+            (repo.resolveSapObject(sref, objectName) != null) ||
+            (repo.resolveSapObjectWithScope(pageToken, objectName) != null)
+        ) {
             return true;
         }
-        
+
         return false;
     }
 

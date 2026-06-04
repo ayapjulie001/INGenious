@@ -1,6 +1,6 @@
-
 package com.ing.ide.main.mainui;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ing.datalib.component.Project;
 import com.ing.datalib.component.Release;
 import com.ing.datalib.component.Scenario;
@@ -21,9 +21,9 @@ import com.ing.ide.main.fx.FXDashBoard;
 import com.ing.ide.main.fx.FXMenuBar;
 import com.ing.ide.main.fx.FXStatusBar;
 import com.ing.ide.main.fx.FXToolBar;
+import com.ing.ide.main.mainui.components.apitester.APITester;
 import com.ing.ide.main.mainui.components.testdesign.TestDesign;
 import com.ing.ide.main.mainui.components.testexecution.TestExecution;
-import com.ing.ide.main.mainui.components.apitester.APITester;
 import com.ing.ide.main.shr.SHR;
 import com.ing.ide.main.ui.About;
 import com.ing.ide.main.ui.FXStartUp;
@@ -35,7 +35,6 @@ import com.ing.ide.settings.AppSettings;
 import com.ing.ide.util.Notification;
 import com.ing.ide.util.SystemInfo;
 import com.ing.ide.util.Utility;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.event.MouseAdapter;
@@ -64,7 +63,6 @@ import javax.swing.UIManager;
 import org.apache.commons.codec.binary.Base64;
 
 public class AppMainFrame extends JFrame {
-
     private final SlideShow slideShow;
 
     private final SimpleDock docker;
@@ -104,7 +102,7 @@ public class AppMainFrame extends JFrame {
     private final LoaderScreen loader;
 
     private QUIT_TYPE quitType = QUIT_TYPE.NORMAL;
-    
+
     private enum QUIT_TYPE {
         NORMAL,
         FORCE,
@@ -122,11 +120,11 @@ public class AppMainFrame extends JFrame {
         recentItems = new RecentItems(this);
         startUp = new FXStartUp(this);
         progressed(25);
-        
+
         toolBar = new AppToolBar(null);
         sActionListener = new AppActionListener(this, toolBar);
         toolBar.setActionListener(sActionListener);
-        
+
         slideShow = new SlideShow();
         docker = new SimpleDock(this);
         progressed(35);
@@ -142,7 +140,7 @@ public class AppMainFrame extends JFrame {
         spyHealReco = new SHR(this);
         progressed(70);
         menuBar = new AppMenuBar(sActionListener);
-       // toolBar = new AppToolBar(sActionListener);
+        // toolBar = new AppToolBar(sActionListener);
         stepMap = new StepMap();
         loader = new LoaderScreen();
         progressed(75);
@@ -172,22 +170,25 @@ public class AppMainFrame extends JFrame {
         add(simpleFiller(), BorderLayout.WEST);
         dashBoard.load();
         loader.setFrame(this);
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent we) {
-                if (iCanQuit()) {                    
-                    // Close StoryWriter editor if open
-                    if (sActionListener != null) {
-                        sActionListener.closeBddEditorIfOpen();
-                    }
-                    setDefaultCloseOperation(AppMainFrame.EXIT_ON_CLOSE);
-                    dispose();
-                    if (quitType == QUIT_TYPE.RESTART) {
-                        doRestart();
+        addWindowListener(
+            new WindowAdapter() {
+
+                @Override
+                public void windowClosing(WindowEvent we) {
+                    if (iCanQuit()) {
+                        // Close StoryWriter editor if open
+                        if (sActionListener != null) {
+                            sActionListener.closeBddEditorIfOpen();
+                        }
+                        setDefaultCloseOperation(AppMainFrame.EXIT_ON_CLOSE);
+                        dispose();
+                        if (quitType == QUIT_TYPE.RESTART) {
+                            doRestart();
+                        }
                     }
                 }
             }
-        });
+        );
         progressed(90);
     }
 
@@ -199,9 +200,7 @@ public class AppMainFrame extends JFrame {
         }
     }
 
-    public void onProgressed(int val) {
-
-    }
+    public void onProgressed(int val) {}
 
     private JPanel simpleFiller() {
         JPanel filler = new JPanel();
@@ -214,17 +213,20 @@ public class AppMainFrame extends JFrame {
             filler.setBackground(UIManager.getColor("Panel.background"));
         }
 
-        filler.addMouseListener(new MouseAdapter() {
+        filler.addMouseListener(
+            new MouseAdapter() {
 
-            @Override
-            public void mouseEntered(MouseEvent me) {
-                setGlassPane(docker);
-                SwingUtilities.invokeLater(() -> {
-                    getGlassPane().setVisible(true);
-                });
+                @Override
+                public void mouseEntered(MouseEvent me) {
+                    setGlassPane(docker);
+                    SwingUtilities.invokeLater(
+                        () -> {
+                            getGlassPane().setVisible(true);
+                        }
+                    );
+                }
             }
-
-        });
+        );
         return filler;
     }
 
@@ -259,10 +261,10 @@ public class AppMainFrame extends JFrame {
             fxMenuBar.setMultiEnvironment(isMulti);
             fxStatusBar.setProjectName(sProject.getName());
         }
-        
+
         // Initialize Recent Projects menu
         fxMenuBar.updateRecentProjects(recentItems.getRECENT_ITEMS());
-        
+
         fxStatusBar.setCurrentView("Test Design");
 
         revalidate();
@@ -343,9 +345,9 @@ public class AppMainFrame extends JFrame {
         return dashBoardManager;
     }
 
-   public SHR getSpyHealReco() {
-       return spyHealReco;
-   }
+    public SHR getSpyHealReco() {
+        return spyHealReco;
+    }
 
     public RecentItems getRecentItems() {
         return recentItems;
@@ -381,28 +383,35 @@ public class AppMainFrame extends JFrame {
 
     public void loadProject(final String location) {
         beforeProjectChange();
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                sProject = new Project(location);
-                if (sProject.getInfo().getVersion() == null) {
-                    migrate(sProject);
-                    Notification.show("Project Migration is done");
-                    Logger.getLogger(AppMainFrame.class.getName()).log(Level.INFO, "Migration is Done ");
+        SwingUtilities.invokeLater(
+            new Runnable() {
+
+                @Override
+                public void run() {
+                    sProject = new Project(location);
+                    if (sProject.getInfo().getVersion() == null) {
+                        migrate(sProject);
+                        Notification.show("Project Migration is done");
+                        Logger
+                            .getLogger(AppMainFrame.class.getName())
+                            .log(Level.INFO, "Migration is Done ");
+                    }
+                    load();
+                    afterProjectChange();
                 }
-                load();
-                afterProjectChange();
             }
-        });
+        );
     }
 
     private boolean migrate(Project project) {
         final String _Enc = " Enc";
         boolean isMigrted = true;
         try {
-
             //Updating new TM Properties
-            List<TestMgModule> modules = project.getProjectSettings().getTestMgmtModule().getModules();
+            List<TestMgModule> modules = project
+                .getProjectSettings()
+                .getTestMgmtModule()
+                .getModules();
             for (TestMgModule module : modules) {
                 List<Option> options = module.getOptions();
                 for (Option option : options) {
@@ -423,70 +432,110 @@ public class AppMainFrame extends JFrame {
             }
 
             ObjectMapper objMapper = new ObjectMapper();
-            List<TestMgModule> modules13 = objMapper.readValue(FileScanner.getResourceString("TMModules.json"),
-                    objMapper.getTypeFactory().constructCollectionType(List.class, TestMgModule.class));
-            modules13.forEach((module) -> {
-                String modulename = module.getModule();
-                if (modulename.equals("qTestManager") || modulename.equals("JiraCloud") || modulename.equals("TestRail")) {
-                    Logger.getLogger(AppMainFrame.class.getName()).
-                            log(Level.INFO, "Adding 1.3 TM Module {0}  ", new Object[]{module.getModule()});
-                    project.getProjectSettings().getTestMgmtModule().putValues(module.getModule(), module.getOptions());
+            List<TestMgModule> modules13 = objMapper.readValue(
+                FileScanner.getResourceString("TMModules.json"),
+                objMapper.getTypeFactory().constructCollectionType(List.class, TestMgModule.class)
+            );
+            modules13.forEach(
+                module -> {
+                    String modulename = module.getModule();
+                    if (
+                        modulename.equals("qTestManager") ||
+                        modulename.equals("JiraCloud") ||
+                        modulename.equals("TestRail")
+                    ) {
+                        Logger
+                            .getLogger(AppMainFrame.class.getName())
+                            .log(
+                                Level.INFO,
+                                "Adding 1.3 TM Module {0}  ",
+                                new Object[] { module.getModule() }
+                            );
+                        project
+                            .getProjectSettings()
+                            .getTestMgmtModule()
+                            .putValues(module.getModule(), module.getOptions());
+                    }
                 }
-            });
-            Logger.getLogger(AppMainFrame.class.getName()).log(Level.INFO, "Test Management settings are copied ");
+            );
+            Logger
+                .getLogger(AppMainFrame.class.getName())
+                .log(Level.INFO, "Test Management settings are copied ");
 
             //Modify Encoding to Encryption in TestData and GlobalData
             Set<String> envs = project.getTestData().getEnvironments();
-            envs.forEach((environments) -> {
-                TestData testDataFor = project.getTestData().getTestDataFor(environments);
-                GlobalDataModel gbData = testDataFor.getGlobalData();
-                gbData.load();
-                int row_size = gbData.getRowCount();
-                int col_size = gbData.getColumnCount();
+            envs.forEach(
+                environments -> {
+                    TestData testDataFor = project.getTestData().getTestDataFor(environments);
+                    GlobalDataModel gbData = testDataFor.getGlobalData();
+                    gbData.load();
+                    int row_size = gbData.getRowCount();
+                    int col_size = gbData.getColumnCount();
 
-                for (int row = 0; row < row_size; row++) {
-                    for (int col = 0; col < col_size; col++) {
-                        if (col == 0) {
-                            continue;
-                        }
-                        String value = (String) gbData.getValueAt(row, col);
-                        if (value != null && !value.trim().isEmpty()) {
-                            if (value.endsWith(_Enc)) {
-                                value = value.substring(0, value.lastIndexOf(_Enc));
-                                Logger.getLogger(AppMainFrame.class.getName()).
-                                        log(Level.INFO, "Migrating the {0} Environment {1} Global Data in the {2} row and {3} column", new Object[]{environments, gbData.getName(), row, col});
-                                enableEncrypt(value, gbData, row, col);
-                            }
-                        }
-                    }
-                }
-                gbData.saveChanges();
-                List<TestDataModel> testDataList = testDataFor.getTestDataList();
-                for (TestDataModel model : testDataList) {
-                    model.load();
-                    row_size = model.getRowCount();
-                    col_size = model.getColumnCount();
                     for (int row = 0; row < row_size; row++) {
                         for (int col = 0; col < col_size; col++) {
-                            if (col < 4) {
+                            if (col == 0) {
                                 continue;
                             }
-                            String value = (String) model.getValueAt(row, col);
+                            String value = (String) gbData.getValueAt(row, col);
                             if (value != null && !value.trim().isEmpty()) {
                                 if (value.endsWith(_Enc)) {
                                     value = value.substring(0, value.lastIndexOf(_Enc));
-                                    Logger.getLogger(AppMainFrame.class.getName()).
-                                            log(Level.INFO, "Migrating the {0} Environment and {1} Test Data in the {2} row and {3} column", new Object[]{environments, model.getName(), row, col});
-                                    enableEncrypt(value, model, row, col);
+                                    Logger
+                                        .getLogger(AppMainFrame.class.getName())
+                                        .log(
+                                            Level.INFO,
+                                            "Migrating the {0} Environment {1} Global Data in the {2} row and {3} column",
+                                            new Object[] {
+                                                environments,
+                                                gbData.getName(),
+                                                row,
+                                                col
+                                            }
+                                        );
+                                    enableEncrypt(value, gbData, row, col);
                                 }
                             }
                         }
                     }
-                    model.saveChanges();
+                    gbData.saveChanges();
+                    List<TestDataModel> testDataList = testDataFor.getTestDataList();
+                    for (TestDataModel model : testDataList) {
+                        model.load();
+                        row_size = model.getRowCount();
+                        col_size = model.getColumnCount();
+                        for (int row = 0; row < row_size; row++) {
+                            for (int col = 0; col < col_size; col++) {
+                                if (col < 4) {
+                                    continue;
+                                }
+                                String value = (String) model.getValueAt(row, col);
+                                if (value != null && !value.trim().isEmpty()) {
+                                    if (value.endsWith(_Enc)) {
+                                        value = value.substring(0, value.lastIndexOf(_Enc));
+                                        Logger
+                                            .getLogger(AppMainFrame.class.getName())
+                                            .log(
+                                                Level.INFO,
+                                                "Migrating the {0} Environment and {1} Test Data in the {2} row and {3} column",
+                                                new Object[] {
+                                                    environments,
+                                                    model.getName(),
+                                                    row,
+                                                    col
+                                                }
+                                            );
+                                        enableEncrypt(value, model, row, col);
+                                    }
+                                }
+                            }
+                        }
+                        model.saveChanges();
+                    }
                 }
-            });
+            );
 
-            //Migrating Encrypted Actions 
+            //Migrating Encrypted Actions
             List<Scenario> scenarios = project.getScenarios();
             for (Scenario scenario : scenarios) {
                 List<TestCase> cases = scenario.getTestCases();
@@ -506,13 +555,25 @@ public class AppMainFrame extends JFrame {
                         String encrypted = new String(encoded);
                         if (key.equals("proxyPassword")) {
                             encrypted = Utility.encrypt(new String(encoded));
-                            Logger.getLogger(AppMainFrame.class.getName()).log(Level.INFO, "Migrating the Driver Settings Key {0} and Value {1}", new Object[]{key, encrypted});
+                            Logger
+                                .getLogger(AppMainFrame.class.getName())
+                                .log(
+                                    Level.INFO,
+                                    "Migrating the Driver Settings Key {0} and Value {1}",
+                                    new Object[] { key, encrypted }
+                                );
                         }
                         project.getProjectSettings().getDriverSettings().put(key, encrypted);
                     } else {
                         if (key.equals("proxyPassword")) {
                             String encrypted = Utility.encrypt(property);
-                            Logger.getLogger(AppMainFrame.class.getName()).log(Level.INFO, "Migrating the Driver Settings Key {0} and Value {1}", new Object[]{key, encrypted});
+                            Logger
+                                .getLogger(AppMainFrame.class.getName())
+                                .log(
+                                    Level.INFO,
+                                    "Migrating the Driver Settings Key {0} and Value {1}",
+                                    new Object[] { key, encrypted }
+                                );
                             project.getProjectSettings().getDriverSettings().put(key, encrypted);
                         }
                     }
@@ -524,25 +585,61 @@ public class AppMainFrame extends JFrame {
             for (Release release : releases) {
                 List<TestSet> testsets = release.getTestSets();
                 for (TestSet testset : testsets) {
-                    Enumeration<Object> keys1 = project.getProjectSettings().getExecSettings(release.getName(), testset.getName()).getTestMgmgtSettings().keys();
+                    Enumeration<Object> keys1 = project
+                        .getProjectSettings()
+                        .getExecSettings(release.getName(), testset.getName())
+                        .getTestMgmgtSettings()
+                        .keys();
                     Iterator<Object> keysls = keys1.asIterator();
                     while (keysls.hasNext()) {
                         String key = (String) keysls.next();
-                        String property = project.getProjectSettings().getExecSettings(release.getName(), testset.getName()).getTestMgmgtSettings().getProperty(key);
+                        String property = project
+                            .getProjectSettings()
+                            .getExecSettings(release.getName(), testset.getName())
+                            .getTestMgmgtSettings()
+                            .getProperty(key);
                         if (property != null && !property.isEmpty()) {
                             if (property.contains("TMENC:")) {
                                 property = property.replaceFirst("TMENC:", "");
                                 byte[] encoded = Base64.decodeBase64(property);
                                 String encrypt = TMIntegration.encrypt(new String(encoded));
-                                Logger.getLogger(AppMainFrame.class.getName()).
-                                        log(Level.INFO, "Migrating the Execution Settings of {0} Release ->  {1} Testset . Key {2} and Value {3}", new Object[]{release.getName(), testset.getName(), key, encrypt});
-                                project.getProjectSettings().getExecSettings(release.getName(), testset.getName()).getTestMgmgtSettings().put(key, encrypt);
+                                Logger
+                                    .getLogger(AppMainFrame.class.getName())
+                                    .log(
+                                        Level.INFO,
+                                        "Migrating the Execution Settings of {0} Release ->  {1} Testset . Key {2} and Value {3}",
+                                        new Object[] {
+                                            release.getName(),
+                                            testset.getName(),
+                                            key,
+                                            encrypt
+                                        }
+                                    );
+                                project
+                                    .getProjectSettings()
+                                    .getExecSettings(release.getName(), testset.getName())
+                                    .getTestMgmgtSettings()
+                                    .put(key, encrypt);
                             } else {
                                 if (key.toLowerCase().contains("passw")) {
                                     String encrypt = TMIntegration.encrypt(property);
-                                    Logger.getLogger(AppMainFrame.class.getName()).
-                                            log(Level.INFO, "Migrating the Execution Settings of {0} Release ->  {1} Testset . Key {2} and Value {3}", new Object[]{release.getName(), testset.getName(), key, encrypt});
-                                    project.getProjectSettings().getExecSettings(release.getName(), testset.getName()).getTestMgmgtSettings().put(key, encrypt);
+                                    Logger
+                                        .getLogger(AppMainFrame.class.getName())
+                                        .log(
+                                            Level.INFO,
+                                            "Migrating the Execution Settings of {0} Release ->  {1} Testset . Key {2} and Value {3}",
+                                            new Object[] {
+                                                release.getName(),
+                                                testset.getName(),
+                                                key,
+                                                encrypt
+                                            }
+                                        );
+                                    project
+                                        .getProjectSettings()
+                                        .getExecSettings(release.getName(), testset.getName())
+                                        .getTestMgmgtSettings()
+                                        .put(key, encrypt);
                                 }
                             }
                         }
@@ -551,42 +648,77 @@ public class AppMainFrame extends JFrame {
             }
 
             //Migarting Test Management settings at Design level
-            Enumeration<Object> keys1 = project.getProjectSettings().getExecSettings().getTestMgmgtSettings().keys();
+            Enumeration<Object> keys1 = project
+                .getProjectSettings()
+                .getExecSettings()
+                .getTestMgmgtSettings()
+                .keys();
             Iterator<Object> keysls = keys1.asIterator();
             while (keysls.hasNext()) {
                 String key = (String) keysls.next();
-                String property = project.getProjectSettings().getExecSettings().getTestMgmgtSettings().getProperty(key);
+                String property = project
+                    .getProjectSettings()
+                    .getExecSettings()
+                    .getTestMgmgtSettings()
+                    .getProperty(key);
                 if (property != null && !property.isEmpty()) {
                     if (property.contains("TMENC:")) {
                         property = property.replaceFirst("TMENC:", "");
                         byte[] encoded = Base64.decodeBase64(property);
                         String encrypt = TMIntegration.encrypt(new String(encoded));
-                        Logger.getLogger(AppMainFrame.class.getName()).log(Level.INFO, "Migrating the Execution Settings Key {0} and Value {1}", new Object[]{key, encrypt});
-                        project.getProjectSettings().getExecSettings().getTestMgmgtSettings().put(key, encrypt);
+                        Logger
+                            .getLogger(AppMainFrame.class.getName())
+                            .log(
+                                Level.INFO,
+                                "Migrating the Execution Settings Key {0} and Value {1}",
+                                new Object[] { key, encrypt }
+                            );
+                        project
+                            .getProjectSettings()
+                            .getExecSettings()
+                            .getTestMgmgtSettings()
+                            .put(key, encrypt);
                     } else {
                         if (key.toLowerCase().contains("passw")) {
                             String encrypt = TMIntegration.encrypt(property);
-                            Logger.getLogger(AppMainFrame.class.getName()).log(Level.INFO, "Migrating the Execution Settings Key {0} and Value {1}", new Object[]{key, encrypt});
-                            project.getProjectSettings().getExecSettings().getTestMgmgtSettings().put(key, encrypt);
+                            Logger
+                                .getLogger(AppMainFrame.class.getName())
+                                .log(
+                                    Level.INFO,
+                                    "Migrating the Execution Settings Key {0} and Value {1}",
+                                    new Object[] { key, encrypt }
+                                );
+                            project
+                                .getProjectSettings()
+                                .getExecSettings()
+                                .getTestMgmgtSettings()
+                                .put(key, encrypt);
                         }
                     }
                 }
             }
         } catch (Exception ex) {
             Notification.show("Project Migration is not successful. Refer logs");
-            Logger.getLogger(AppMainFrame.class.getName()).log(Level.SEVERE, "Migration is not successful", ex.getMessage());
+            Logger
+                .getLogger(AppMainFrame.class.getName())
+                .log(Level.SEVERE, "Migration is not successful", ex.getMessage());
             return false;
         }
 
-        project.getInfo()
-                .setVersion(About.getBuildVersion());
+        project.getInfo().setVersion(About.getBuildVersion());
         project.save();
         return isMigrted;
     }
 
     private void TMEncrypt(String value, TestMgModule module, Option option) {
         String encrypt = TMIntegration.encrypt(value);
-        Logger.getLogger(AppMainFrame.class.getName()).log(Level.INFO, "Migrating the {0} TM Module. Property {1} value {2} ", new Object[]{module.getModule(), option.getName(), encrypt});
+        Logger
+            .getLogger(AppMainFrame.class.getName())
+            .log(
+                Level.INFO,
+                "Migrating the {0} TM Module. Property {1} value {2} ",
+                new Object[] { module.getModule(), option.getName(), encrypt }
+            );
         option.setValue(encrypt);
     }
 
@@ -603,7 +735,17 @@ public class AppMainFrame extends JFrame {
                         byte[] decode = Base64.decodeBase64(input);
                         String encrypted = Utility.encrypt(new String(decode));
                         step.setInput("@" + encrypted);
-                        Logger.getLogger(AppMainFrame.class.getName()).log(Level.INFO, "Encrypting the value in {0}_{1} -> Data in the step {2} ", new Object[]{tcase.getScenario().getName(), tcase.getName(), step});
+                        Logger
+                            .getLogger(AppMainFrame.class.getName())
+                            .log(
+                                Level.INFO,
+                                "Encrypting the value in {0}_{1} -> Data in the step {2} ",
+                                new Object[] {
+                                    tcase.getScenario().getName(),
+                                    tcase.getName(),
+                                    step
+                                }
+                            );
                     }
                 }
             }
@@ -614,17 +756,18 @@ public class AppMainFrame extends JFrame {
         byte[] decode = Base64.decodeBase64(value);
         String encrypted = Utility.encrypt(new String(decode));
         model.setValueAt(encrypted, row, col);
-
     }
 
     public void createProject(final String name, final String location, final String testDatatype) {
         beforeProjectChange();
-        SwingUtilities.invokeLater(() -> {
-            sProject = new Project(name, location, testDatatype).createProject();
-            load();
-            afterProjectChange();
-            saveLoadedProject();
-        });
+        SwingUtilities.invokeLater(
+            () -> {
+                sProject = new Project(name, location, testDatatype).createProject();
+                load();
+                afterProjectChange();
+                saveLoadedProject();
+            }
+        );
     }
 
     public void saveLoadedProject() {
@@ -647,7 +790,7 @@ public class AppMainFrame extends JFrame {
             Notification.show("Project [" + sProject.getName() + "] Saved");
         }
     }
-    
+
     public void autoSave() {
         if (sProject != null) {
             saveLoadedProject();
@@ -656,7 +799,6 @@ public class AppMainFrame extends JFrame {
 
     public Project getProject() {
         return sProject;
-
     }
 
     public Boolean renameProject(String newProjName) {
@@ -688,7 +830,7 @@ public class AppMainFrame extends JFrame {
         dashBoard.loadTree();
         dashBoardManager.onProjectChanged();
         apiTester.loadData();
-        apiTester.registerSlideChangeListener();  // Register to listen for panel switches
+        apiTester.registerSlideChangeListener(); // Register to listen for panel switches
         sActionListener.afterProjectChange();
         setTitle(sProject.getName() + " - " + getAppTitle());
         // Sync multi-environment state to both Swing and FX menus
@@ -708,13 +850,14 @@ public class AppMainFrame extends JFrame {
     public void adjustUI() {
         testDesign.getTestDesignUI().adjustUI();
         testExecution.getTestExecutionUI().adjustUI();
-
     }
 
     public void quit() {
-        SwingUtilities.invokeLater(() -> {
-            dispatchEvent(new WindowEvent(AppMainFrame.this, WindowEvent.WINDOW_CLOSING));
-        });
+        SwingUtilities.invokeLater(
+            () -> {
+                dispatchEvent(new WindowEvent(AppMainFrame.this, WindowEvent.WINDOW_CLOSING));
+            }
+        );
     }
 
     public void forceQuit() {
@@ -723,9 +866,11 @@ public class AppMainFrame extends JFrame {
     }
 
     private Boolean iCanQuit() {
-        return iCanQuit(quitType == QUIT_TYPE.FORCE
+        return iCanQuit(
+            quitType == QUIT_TYPE.FORCE
                 ? JOptionPane.YES_NO_OPTION
-                : JOptionPane.YES_NO_CANCEL_OPTION);
+                : JOptionPane.YES_NO_CANCEL_OPTION
+        );
     }
 
     private Boolean iCanQuit(int optionType) {
@@ -733,7 +878,7 @@ public class AppMainFrame extends JFrame {
         if (sProject != null) {
             // Use styled quit confirmation dialog
             option = QuitConfirmationDialog.showConfirmation(this, optionType);
-            
+
             if (option == JOptionPane.YES_OPTION) {
                 saveLoadedProject();
             }
@@ -742,7 +887,7 @@ public class AppMainFrame extends JFrame {
             return false;
         } else {
             recentItems.save();
-//            spyHealReco.stopServerIfAny();
+            //            spyHealReco.stopServerIfAny();
             dashBoardManager.stopServer();
             Main.finish();
             return true;
@@ -764,7 +909,7 @@ public class AppMainFrame extends JFrame {
             }
         }
     }
-    
+
     public AppActionListener getsActionListener() {
         return sActionListener;
     }

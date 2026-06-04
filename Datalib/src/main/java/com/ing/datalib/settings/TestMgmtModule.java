@@ -1,10 +1,9 @@
-
 package com.ing.datalib.settings;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ing.datalib.settings.testmgmt.Option;
 import com.ing.datalib.settings.testmgmt.TestMgModule;
 import com.ing.datalib.util.data.FileScanner;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,10 +16,9 @@ import java.util.logging.Logger;
 
 /**
  *
- * 
+ *
  */
 public class TestMgmtModule {
-
     private List<TestMgModule> modules;
 
     private String location;
@@ -38,11 +36,21 @@ public class TestMgmtModule {
         File modulesFile = new File(getLocation());
         try {
             if (modulesFile.exists()) {
-                modules = objMapper.readValue(modulesFile,
-                        objMapper.getTypeFactory().constructCollectionType(List.class, TestMgModule.class));
+                modules =
+                    objMapper.readValue(
+                        modulesFile,
+                        objMapper
+                            .getTypeFactory()
+                            .constructCollectionType(List.class, TestMgModule.class)
+                    );
             } else {
-                modules = objMapper.readValue(FileScanner.getResourceString("TMModules.json"),
-                        objMapper.getTypeFactory().constructCollectionType(List.class, TestMgModule.class));
+                modules =
+                    objMapper.readValue(
+                        FileScanner.getResourceString("TMModules.json"),
+                        objMapper
+                            .getTypeFactory()
+                            .constructCollectionType(List.class, TestMgModule.class)
+                    );
             }
         } catch (IOException ex) {
             Logger.getLogger(TestMgmtModule.class.getName()).log(Level.SEVERE, null, ex);

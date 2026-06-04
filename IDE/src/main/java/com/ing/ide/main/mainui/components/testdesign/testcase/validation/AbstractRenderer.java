@@ -1,4 +1,3 @@
-
 package com.ing.ide.main.mainui.components.testdesign.testcase.validation;
 
 import com.ing.datalib.component.TestCase;
@@ -11,11 +10,10 @@ import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.border.CompoundBorder;
+import javax.swing.table.DefaultTableCellRenderer;
 
 public abstract class AbstractRenderer extends DefaultTableCellRenderer {
-
     private static final String EMPTY_REQUIRED_ERROR_KEY = "ing.emptyRequiredError";
 
     private final Border errorBorder = BorderFactory.createLineBorder(Color.RED, 1);
@@ -27,9 +25,22 @@ public abstract class AbstractRenderer extends DefaultTableCellRenderer {
     }
 
     @Override
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+    public Component getTableCellRendererComponent(
+        JTable table,
+        Object value,
+        boolean isSelected,
+        boolean hasFocus,
+        int row,
+        int col
+    ) {
         JComponent comp = (JComponent) super.getTableCellRendererComponent(
-                table, value, isSelected, hasFocus, row, col);
+            table,
+            value,
+            isSelected,
+            hasFocus,
+            row,
+            col
+        );
         if (getTestCase(table) != null) {
             TestStep step = getTestCase(table).getTestSteps().get(row);
             if (!isSelected) {
@@ -60,35 +71,35 @@ public abstract class AbstractRenderer extends DefaultTableCellRenderer {
         comp.setForeground(c != null ? c : Color.RED);
         comp.setToolTipText(notPresent);
     }
-	
+
     protected void setWebserviceRequest(JComponent comp) {
         comp.putClientProperty(EMPTY_REQUIRED_ERROR_KEY, Boolean.FALSE);
         comp.setBorder(null);
         Color c = UIManager.getColor("ing.webserviceRequestForeground");
-        comp.setForeground(c != null ? c : new Color(0,204,0));
+        comp.setForeground(c != null ? c : new Color(0, 204, 0));
     }
-    
+
     protected void setText(JComponent comp) {
         comp.putClientProperty(EMPTY_REQUIRED_ERROR_KEY, Boolean.FALSE);
         comp.setBorder(null);
         Color c = UIManager.getColor("ing.webserviceRequestForeground");
-        comp.setForeground(c != null ? c : new Color(0,204,0));
+        comp.setForeground(c != null ? c : new Color(0, 204, 0));
     }
-    
+
     protected void setWebserviceStart(JComponent comp) {
         comp.putClientProperty(EMPTY_REQUIRED_ERROR_KEY, Boolean.FALSE);
         comp.setBorder(null);
         Color c = UIManager.getColor("ing.webserviceStartForeground");
         comp.setForeground(c != null ? c : Color.BLUE);
     }
-    
+
     protected void setWebserviceStop(JComponent comp) {
         comp.putClientProperty(EMPTY_REQUIRED_ERROR_KEY, Boolean.FALSE);
         comp.setBorder(null);
         Color c = UIManager.getColor("ing.webserviceStopForeground");
-        comp.setForeground(c != null ? c : new Color(153,102,0));
+        comp.setForeground(c != null ? c : new Color(153, 102, 0));
     }
-    
+
     protected void setReusable(JComponent comp) {
         comp.putClientProperty(EMPTY_REQUIRED_ERROR_KEY, Boolean.FALSE);
         comp.setBorder(null);
@@ -103,7 +114,7 @@ public abstract class AbstractRenderer extends DefaultTableCellRenderer {
         comp.setForeground(new Color(119, 36, 255));
         comp.setToolTipText(null);
     }
-	
+
     protected void setDefault(JComponent comp) {
         comp.putClientProperty(EMPTY_REQUIRED_ERROR_KEY, Boolean.FALSE);
         comp.setBorder(null);
@@ -116,7 +127,9 @@ public abstract class AbstractRenderer extends DefaultTableCellRenderer {
     }
 
     protected boolean isPristineStep(TestStep step) {
-        return isEmpty(step.getObject()) && isEmpty(step.getAction()) && isEmpty(step.getReference());
+        return (
+            isEmpty(step.getObject()) && isEmpty(step.getAction()) && isEmpty(step.getReference())
+        );
     }
 
     protected TestCase getTestCase(JTable table) {
@@ -125,5 +138,4 @@ public abstract class AbstractRenderer extends DefaultTableCellRenderer {
         }
         return null;
     }
-
 }
