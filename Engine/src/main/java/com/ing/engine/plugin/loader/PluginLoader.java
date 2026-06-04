@@ -137,6 +137,6 @@ public class PluginLoader {
                 }
             }
         }
-        throw new IllegalStateException("No Plugin-Entry-Classes attribute found in manifest");
+        throw new IllegalStateException("No pluginEntryClasses attribute found in manifest");
     }
 }
