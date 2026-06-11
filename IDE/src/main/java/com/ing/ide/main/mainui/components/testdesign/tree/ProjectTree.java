@@ -311,17 +311,30 @@ public class ProjectTree implements ActionListener {
                     setIcons(IconSettings.getIconSettings().getReusableFolder());
                 } else if (value instanceof ScenarioNode) {
                     setIcons(IconSettings.getIconSettings().getTestPlanScenario());
+                    // setText(withScopeBadge(value));
                 } else if (value instanceof TestCaseNode) {
                     if (ProjectTree.this instanceof ReusableTree) {
                         setIcons(IconSettings.getIconSettings().getReusableTestCase());
                     } else {
                         setIcons(IconSettings.getIconSettings().getTestPlanTestCase());
                     }
+                    // setText(withScopeBadge(value));
                 } else {
                     setIcons(IconSettings.getIconSettings().getTestPlanRoot());
                 }
                 return c;
             }
+
+            // private String withScopeBadge(Object value) {
+            //     String nodeText = value == null ? "" : value.toString();
+            //     if (ProjectTree.this instanceof SharedReusableTree) {
+            //         return "[Shared] " + nodeText;
+            //     }
+            //     if (ProjectTree.this instanceof ReusableTree) {
+            //         return "[Project] " + nodeText;
+            //     }
+            //     return nodeText;
+            // }
 
             void setIcons(Icon icon) {
                 setLeafIcon(icon);
@@ -419,8 +432,11 @@ public class ProjectTree implements ActionListener {
             case "Edit Tag":
                 editTag();
                 break;
-            case "Make As Reusable/TestCase":
+            case "Make As TestCase", "Make As Project Reusable":
                 makeAsReusableRTestCase();
+                break;
+            case "Make As Shared Reusable":
+                moveTestCaseToSharedReusable();
                 break;
             case "Details":
                 showDetails();
@@ -457,21 +473,28 @@ public class ProjectTree implements ActionListener {
      * Adds a new scenario to the project.
      */
     private void addScenario() {
-        ScenarioNode scNode = treeModel.addScenario(
-            getSelectedGroupNode(),
-            testDesign.getProject().addScenario(fetchNewScenarioName())
-        );
+        String scenarioName = fetchNewScenarioName();
+        Scenario scenario = testDesign.getProject().addScenario(scenarioName);
+        if (scenario == null) {
+            Notification.showWarning(
+                "Scenario '" + scenarioName + "' already exists in another scope (Test Plan, Reusable, or Shared Reusable).");
+            return;
+        }
+        ScenarioNode scNode = treeModel.addScenario(getSelectedGroupNode(), scenario);
         selectAndScrollTo(new TreePath(scNode.getPath()));
     }
 
     /**
-     * Generates a unique name for a new scenario.
+     * Generates a unique name for a new scenario checking all scopes.
      * @return unique scenario name
      */
     private String fetchNewScenarioName() {
         String newScenarioName = "NewScenario";
         for (int i = 0;; i++) {
-            if (testDesign.getProject().getScenarioByName(newScenarioName) == null) {
+            // Check if scenario exists in any scope
+            if (testDesign.getProject().getScenarioByName(newScenarioName) == null &&
+                testDesign.getProject().getReusableScenarioByName(newScenarioName) == null &&
+                testDesign.getProject().getSharedReusableScenarioByName(newScenarioName) == null) {
                 break;
             }
             newScenarioName = "NewScenario" + i;
@@ -503,10 +526,8 @@ public class ProjectTree implements ActionListener {
     private String fetchNewTestCaseName(Scenario scenario) {
         String newTestCaseName = "NewTestCase";
         for (int i = 0;; i++) {
-            if (
-                scenario.getTestCaseByName(newTestCaseName) == null &&
-                !getProject().hasTestCaseInAnyScenario(scenario.getName(), newTestCaseName)
-            ) {
+            if (scenario.getTestCaseByName(newTestCaseName) == null 
+                    && !getProject().testCaseExistsInAnyScope(newTestCaseName)) {
                 break;
             }
             newTestCaseName = "NewTestCase" + i;
@@ -806,14 +827,20 @@ public class ProjectTree implements ActionListener {
      * Shows error notifications for failures and reloads both trees on success.
      */
     protected void makeAsReusableRTestCase() {
+        if (getSelectedTestCaseNodes().isEmpty()) {
+            Notification.showWarning("Select at least one test case to make as Project Reusable.");
+            return;
+        }
         if (!getSelectedTestCaseNodes().isEmpty()) {
             // Save ALL test cases to prevent data loss on reload
             getProject().save();
 
             boolean anySuccess = false;
+            int impactedUpdates = 0;
             for (TestCaseNode testCaseNode : getSelectedTestCaseNodes()) {
                 try {
                     getProject().moveTestCaseToReusable(testCaseNode.getTestCase());
+                    impactedUpdates += getProject().getAndResetLastImpactedReusableReferenceUpdates();
                     anySuccess = true;
                 } catch (TestCaseConversionException e) {
                     Notification.show(e.getMessage());
@@ -824,6 +851,9 @@ public class ProjectTree implements ActionListener {
                 getProject().save();
                 load();
                 getTestDesign().getReusableTree().load();
+                showImpactedReferenceNotification("Moved to Project Reusable", impactedUpdates);
+            } else {
+                Notification.showWarning("No test cases were moved to Project Reusable.");
             }
         }
     }
@@ -834,6 +864,49 @@ public class ProjectTree implements ActionListener {
      */
     void makeAsReusableRTestCase(TestCase testCase) {
         getTestDesign().getReusableTree().getTreeModel().addTestCase(testCase);
+    }
+
+    /**
+     * Moves selected test case(s) from Test Plan to Shared Reusable Components.
+     */
+    private void moveTestCaseToSharedReusable() {
+        if (getSelectedTestCaseNodes().isEmpty()) {
+            Notification.showWarning("Select at least one test case to make as Shared Reusable.");
+            return;
+        }
+        if (!getSelectedTestCaseNodes().isEmpty()) {
+            // Save ALL test cases to prevent data loss on reload
+            getProject().save();
+            
+            boolean anySuccess = false;
+            int impactedUpdates = 0;
+            for (TestCaseNode testCaseNode : getSelectedTestCaseNodes()) {
+                try {
+                    getProject().moveTestCaseToSharedReusable(testCaseNode.getTestCase());
+                    impactedUpdates += getProject().getAndResetLastImpactedReusableReferenceUpdates();
+                    anySuccess = true;
+                } catch (TestCaseConversionException e) {
+                    Notification.show(e.getMessage());
+                }
+            }
+            if (anySuccess) {
+                getProject().reload();
+                getProject().save();
+                load();
+                getTestDesign().getSharedReusableTree().load();
+                showImpactedReferenceNotification("Moved to Shared Reusable", impactedUpdates);
+            } else {
+                Notification.showWarning("No test cases were moved to Shared Reusable.");
+            }
+        }
+    }
+
+    protected void showImpactedReferenceNotification(String operationName, int impactedUpdates) {
+        if (impactedUpdates > 0) {
+            Notification.showSuccess(operationName + " completed. All impacted test cases have been updated (" + impactedUpdates + ").");
+        } else {
+            Notification.showSuccess(operationName + " completed. No impacted test case references required updates.");
+        }
     }
 
     /**
@@ -1104,7 +1177,9 @@ public class ProjectTree implements ActionListener {
         protected JMenuItem renameTestCase;
         protected JMenuItem deleteTestCase;
 
-        protected JMenuItem toggleReusable;
+        protected JMenuItem toggleTestCase;
+        protected JMenuItem toggleSharedReusable;
+        protected JMenuItem toggleProjectReusable;
 
         protected JMenuItem impactAnalysis;
 
@@ -1140,8 +1215,15 @@ public class ProjectTree implements ActionListener {
             menu.setFont(UIManager.getFont("TableMenu.font"));
             menu.add(create("Manual Testcase", null));
             add(menu);
-            add(toggleReusable = create("Make As Reusable/TestCase", null));
-            toggleReusable.setText("Make As Reusable");
+            add(toggleTestCase = create("Make As TestCase", null));
+            toggleTestCase.setText("Make As TestCase");
+            toggleTestCase.setVisible(false);
+            add(toggleProjectReusable = create("Make As Project Reusable", null));
+            toggleProjectReusable.setText("Make As Project Reusable");
+            toggleProjectReusable.setVisible(true);
+            add(toggleSharedReusable = create("Make As Shared Reusable", null));
+            toggleSharedReusable.setText("Make As Shared Reusable");
+            toggleSharedReusable.setVisible(true);
             addSeparator();
             setCCP();
             addSeparator();
@@ -1166,7 +1248,9 @@ public class ProjectTree implements ActionListener {
             addScenario.setEnabled(false);
             renameTestCase.setEnabled(false);
             deleteTestCase.setEnabled(false);
-            toggleReusable.setEnabled(false);
+            toggleTestCase.setEnabled(false);
+            toggleSharedReusable.setEnabled(false);
+            toggleProjectReusable.setEnabled(false);
 
             impactAnalysis.setEnabled(false);
             getCmdSyntax.setEnabled(false);
@@ -1193,7 +1277,9 @@ public class ProjectTree implements ActionListener {
 
             renameTestCase.setEnabled(true);
             deleteTestCase.setEnabled(true);
-            toggleReusable.setEnabled(true);
+            toggleTestCase.setEnabled(true);
+            toggleSharedReusable.setEnabled(true);
+            toggleProjectReusable.setEnabled(true);
 
             impactAnalysis.setEnabled(true);
 
@@ -1221,7 +1307,9 @@ public class ProjectTree implements ActionListener {
             addTestCase.setEnabled(false);
             renameTestCase.setEnabled(false);
             deleteTestCase.setEnabled(false);
-            toggleReusable.setEnabled(false);
+            toggleTestCase.setEnabled(false);
+            toggleSharedReusable.setEnabled(false);
+            toggleProjectReusable.setEnabled(false);
 
             impactAnalysis.setEnabled(false);
             getCmdSyntax.setEnabled(false);
