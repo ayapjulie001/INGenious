@@ -32,9 +32,9 @@ import com.ing.ide.main.utils.table.autosuggest.ComboSeparatorsRenderer;
 import com.ing.ide.main.utils.table.autosuggest.InputAutoSuggestCellEditor;
 import com.ing.ide.main.utils.table.autosuggest.InputMainAutoSuggest;
 import com.ing.ingenious.api.types.ObjectType;
+import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -100,96 +100,118 @@ public class TestCaseAutoSuggest {
             }
         );
 
-        actionAutoSuggest = new ActionAutoSuggest()
-                .withOnHide(stopEditingOnFocusLost());
-        
+        actionAutoSuggest = new ActionAutoSuggest().withOnHide(stopEditingOnFocusLost());
+
         // Phase 5.4: Add custom renderer for scope prefix display with separators
         actionAutoSuggest.setRenderer(
-                new ComboSeparatorsRenderer(actionAutoSuggest.getRenderer()) {
-                    @Override
-                    protected void customizeListItemComponent(java.awt.Component comp, JList list, Object value, int index,
-                            boolean isSelected, boolean cellHasFocus) {
-                        if (!(comp instanceof javax.swing.JLabel) || value == null) {
-                            return;
-                        }
-                        javax.swing.JLabel lbl = (javax.swing.JLabel) comp;
-                        String raw = value.toString();
-                        lbl.setText(removeScopePrefix(raw));
-                        if (raw.startsWith("[Shared]")) {
-                            // Keep shared items readable on hover/selection by using shared-specific shades.
-                            if (isSelected) {
-                                lbl.setOpaque(true);
-                                lbl.setBackground(new Color(213, 238, 220));
-                                lbl.setForeground(new Color(0, 83, 0));
-                            } else {
-                                lbl.setForeground(new Color(0, 128, 0));
-                            }
-                        } else if (raw.startsWith("[Project]")) {
-                            if (isSelected) {
-                                lbl.setOpaque(true);
-                            }
-                            lbl.setForeground(Color.BLACK);
-                        }
-                    }
+            new ComboSeparatorsRenderer(actionAutoSuggest.getRenderer()) {
 
-                    @Override
-                    protected boolean addHeaderBefore(JList list, Object value, int index) {
-                        if (value == null) {
-                            return false;
+                @Override
+                protected void customizeListItemComponent(
+                    java.awt.Component comp,
+                    JList list,
+                    Object value,
+                    int index,
+                    boolean isSelected,
+                    boolean cellHasFocus
+                ) {
+                    if (!(comp instanceof javax.swing.JLabel) || value == null) {
+                        return;
+                    }
+                    javax.swing.JLabel lbl = (javax.swing.JLabel) comp;
+                    String raw = value.toString();
+                    lbl.setText(removeScopePrefix(raw));
+                    if (raw.startsWith("[Shared]")) {
+                        // Keep shared items readable on hover/selection by using shared-specific shades.
+                        if (isSelected) {
+                            lbl.setOpaque(true);
+                            lbl.setBackground(new Color(213, 238, 220));
+                            lbl.setForeground(new Color(0, 83, 0));
+                        } else {
+                            lbl.setForeground(new Color(0, 128, 0));
                         }
-                        String current = value.toString();
-                        if (current.startsWith("[Project]")) {
-                            return index == 0 || !Objects.toString(list.getModel().getElementAt(index - 1), "").startsWith("[Project]");
+                    } else if (raw.startsWith("[Project]")) {
+                        if (isSelected) {
+                            lbl.setOpaque(true);
                         }
-                        if (current.startsWith("[Shared]")) {
-                            return index == 0 || !Objects.toString(list.getModel().getElementAt(index - 1), "").startsWith("[Shared]");
-                        }
+                        lbl.setForeground(Color.BLACK);
+                    }
+                }
+
+                @Override
+                protected boolean addHeaderBefore(JList list, Object value, int index) {
+                    if (value == null) {
                         return false;
                     }
+                    String current = value.toString();
+                    if (current.startsWith("[Project]")) {
+                        return (
+                            index == 0 ||
+                            !Objects
+                                .toString(list.getModel().getElementAt(index - 1), "")
+                                .startsWith("[Project]")
+                        );
+                    }
+                    if (current.startsWith("[Shared]")) {
+                        return (
+                            index == 0 ||
+                            !Objects
+                                .toString(list.getModel().getElementAt(index - 1), "")
+                                .startsWith("[Shared]")
+                        );
+                    }
+                    return false;
+                }
 
-                    @Override
-                    protected String getHeaderLabel(JList list, Object value, int index) {
-                        if (value == null) {
-                            return "";
-                        }
-                        String current = value.toString();
-                        if (current.startsWith("[Project]")) {
-                            return "Project Reusables";
-                        }
-                        if (current.startsWith("[Shared]")) {
-                            return "Shared Reusables";
-                        }
+                @Override
+                protected String getHeaderLabel(JList list, Object value, int index) {
+                    if (value == null) {
                         return "";
                     }
-
-                    @Override
-                    protected Color getHeaderForeground(JList list, Object value, int index, java.awt.Component comp) {
-                        if (value == null) {
-                            return Color.DARK_GRAY;
-                        }
-                        String current = value.toString();
-                        if (current.startsWith("[Shared]")) {
-                            return new Color(0, 128, 0);
-                        }
-                        return Color.BLACK;
+                    String current = value.toString();
+                    if (current.startsWith("[Project]")) {
+                        return "Project Reusables";
                     }
-
-                    @Override
-                    protected boolean addSeparatorAfter(JList list, Object value, int index) {
-                        if (value == null) return false;
-                        String val = value.toString();
-                        // Add separator after last [Project] item before [Shared] items
-                        if (index < list.getModel().getSize() - 1) {
-                            Object nextValue = list.getModel().getElementAt(index + 1);
-                            if (nextValue != null) {
-                                String current = val;
-                                String next = nextValue.toString();
-                                return current.startsWith("[Project]") && next.startsWith("[Shared]");
-                            }
-                        }
-                        return false;
+                    if (current.startsWith("[Shared]")) {
+                        return "Shared Reusables";
                     }
-                });
+                    return "";
+                }
+
+                @Override
+                protected Color getHeaderForeground(
+                    JList list,
+                    Object value,
+                    int index,
+                    java.awt.Component comp
+                ) {
+                    if (value == null) {
+                        return Color.DARK_GRAY;
+                    }
+                    String current = value.toString();
+                    if (current.startsWith("[Shared]")) {
+                        return new Color(0, 128, 0);
+                    }
+                    return Color.BLACK;
+                }
+
+                @Override
+                protected boolean addSeparatorAfter(JList list, Object value, int index) {
+                    if (value == null) return false;
+                    String val = value.toString();
+                    // Add separator after last [Project] item before [Shared] items
+                    if (index < list.getModel().getSize() - 1) {
+                        Object nextValue = list.getModel().getElementAt(index + 1);
+                        if (nextValue != null) {
+                            String current = val;
+                            String next = nextValue.toString();
+                            return current.startsWith("[Project]") && next.startsWith("[Shared]");
+                        }
+                    }
+                    return false;
+                }
+            }
+        );
 
         inputAutoSuggest =
             (InputAutoSuggest) new InputAutoSuggest().withOnHide(stopEditingOnFocusLost());
@@ -443,8 +465,15 @@ public class TestCaseAutoSuggest {
                 if (selected.startsWith("[Project]") || selected.startsWith("[Shared]")) {
                     String scopeToken = selected.startsWith("[Shared]") ? "[Shared]" : "[Project]";
                     String actionValue = removeScopePrefix(selected);
-                    if (table.getSelectedRow() >= 0 && "Execute".equalsIgnoreCase(Objects.toString(
-                            table.getValueAt(table.getSelectedRow(), ObjectName.getIndex()), ""))) {
+                    if (
+                        table.getSelectedRow() >= 0 &&
+                        "Execute".equalsIgnoreCase(
+                                Objects.toString(
+                                    table.getValueAt(table.getSelectedRow(), ObjectName.getIndex()),
+                                    ""
+                                )
+                            )
+                    ) {
                         table.setValueAt(scopeToken, table.getSelectedRow(), Reference.getIndex());
                     }
                     super.setSelectedItem(actionValue);
@@ -513,21 +542,21 @@ public class TestCaseAutoSuggest {
 
         private List<String> getReusables() {
             List<String> reusableList = new ArrayList<>();
-            
+
             // Add [Project] scoped reusables
             for (Scenario scenario : sProject.getReusableScenarios()) {
                 for (TestCase testCase : scenario.getTestCases()) {
                     reusableList.add("[Project] " + scenario.getName() + ":" + testCase.getName());
                 }
             }
-            
+
             // Add [Shared] scoped reusables
             for (Scenario scenario : sProject.getSharedScenarios()) {
                 for (TestCase testCase : scenario.getTestCases()) {
                     reusableList.add("[Shared] " + scenario.getName() + ":" + testCase.getName());
                 }
             }
-            
+
             return reusableList;
         }
 
@@ -815,7 +844,7 @@ public class TestCaseAutoSuggest {
         public void mouseClicked(MouseEvent me) {
             boolean isInputclicked = table.columnAtPoint(me.getPoint()) == Input.getIndex();
             boolean isActionClicked = table.columnAtPoint(me.getPoint()) == Action.getIndex();
-            
+
             if (me.isAltDown()) {
                 if (table.rowAtPoint(me.getPoint()) != -1 && getTestCase(table) != null) {
                     TestStep step = getTestCase(table)
@@ -859,11 +888,9 @@ public class TestCaseAutoSuggest {
                     }
                 }
             }
-            
             // Double-click on reusable steps allows editing; navigation is disabled
             // Use context menu "Go To Reusable" for navigation instead
         }
-        
     }
 
     private String removeScopePrefix(String text) {

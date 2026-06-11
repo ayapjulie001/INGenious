@@ -15,7 +15,6 @@ import javax.swing.tree.TreeNode;
  * Displays all shared reusable scenarios and test cases with [Shared] scope indicators.
  */
 public class SharedReusableNode extends CommonNode {
-
     private static final String DEFAULT_GROUP = "Shared Components";
 
     Project project;
@@ -30,8 +29,9 @@ public class SharedReusableNode extends CommonNode {
         GroupNode groupNode = addGroupIfNotPresent(DEFAULT_GROUP);
         for (Scenario scenario : project.getSharedScenarios()) {
             for (TestCase testCase : scenario.getTestCases()) {
-                groupNode.addScenarioIfNotPresent(testCase.getScenario())
-                        .addTestCaseIfNotPresent(testCase);
+                groupNode
+                    .addScenarioIfNotPresent(testCase.getScenario())
+                    .addTestCaseIfNotPresent(testCase);
             }
         }
     }

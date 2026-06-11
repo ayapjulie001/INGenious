@@ -94,8 +94,10 @@ public class ReferenceRenderer extends AbstractRenderer {
                     setEmpty(comp);
                 }
             } else if (step.isPageObjectStep() && !step.isReusableStep()) {
-                if (isObjectPresent(step)) setDefault(comp);
-                else setNotPresent(comp, objNotPresent);
+                if (isObjectPresent(step)) setDefault(comp); else setNotPresent(
+                    comp,
+                    objNotPresent
+                );
             } else {
                 setDefault(comp);
             }

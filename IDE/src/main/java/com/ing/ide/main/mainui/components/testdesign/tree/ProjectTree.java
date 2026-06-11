@@ -432,7 +432,10 @@ public class ProjectTree implements ActionListener {
             case "Edit Tag":
                 editTag();
                 break;
-            case "Make As TestCase", "Make As Project Reusable":
+            case "Make As TestCase":
+                makeAsReusableRTestCase();
+                break;
+            case "Make As Project Reusable":
                 makeAsReusableRTestCase();
                 break;
             case "Make As Shared Reusable":
@@ -477,7 +480,10 @@ public class ProjectTree implements ActionListener {
         Scenario scenario = testDesign.getProject().addScenario(scenarioName);
         if (scenario == null) {
             Notification.showWarning(
-                "Scenario '" + scenarioName + "' already exists in another scope (Test Plan, Reusable, or Shared Reusable).");
+                "Scenario '" +
+                scenarioName +
+                "' already exists in another scope (Test Plan, Reusable, or Shared Reusable)."
+            );
             return;
         }
         ScenarioNode scNode = treeModel.addScenario(getSelectedGroupNode(), scenario);
@@ -492,9 +498,11 @@ public class ProjectTree implements ActionListener {
         String newScenarioName = "NewScenario";
         for (int i = 0;; i++) {
             // Check if scenario exists in any scope
-            if (testDesign.getProject().getScenarioByName(newScenarioName) == null &&
+            if (
+                testDesign.getProject().getScenarioByName(newScenarioName) == null &&
                 testDesign.getProject().getReusableScenarioByName(newScenarioName) == null &&
-                testDesign.getProject().getSharedReusableScenarioByName(newScenarioName) == null) {
+                testDesign.getProject().getSharedReusableScenarioByName(newScenarioName) == null
+            ) {
                 break;
             }
             newScenarioName = "NewScenario" + i;
@@ -526,8 +534,10 @@ public class ProjectTree implements ActionListener {
     private String fetchNewTestCaseName(Scenario scenario) {
         String newTestCaseName = "NewTestCase";
         for (int i = 0;; i++) {
-            if (scenario.getTestCaseByName(newTestCaseName) == null 
-                    && !getProject().testCaseExistsInAnyScope(newTestCaseName)) {
+            if (
+                scenario.getTestCaseByName(newTestCaseName) == null &&
+                !getProject().testCaseExistsInAnyScope(newTestCaseName)
+            ) {
                 break;
             }
             newTestCaseName = "NewTestCase" + i;
@@ -840,7 +850,8 @@ public class ProjectTree implements ActionListener {
             for (TestCaseNode testCaseNode : getSelectedTestCaseNodes()) {
                 try {
                     getProject().moveTestCaseToReusable(testCaseNode.getTestCase());
-                    impactedUpdates += getProject().getAndResetLastImpactedReusableReferenceUpdates();
+                    impactedUpdates +=
+                        getProject().getAndResetLastImpactedReusableReferenceUpdates();
                     anySuccess = true;
                 } catch (TestCaseConversionException e) {
                     Notification.show(e.getMessage());
@@ -877,13 +888,14 @@ public class ProjectTree implements ActionListener {
         if (!getSelectedTestCaseNodes().isEmpty()) {
             // Save ALL test cases to prevent data loss on reload
             getProject().save();
-            
+
             boolean anySuccess = false;
             int impactedUpdates = 0;
             for (TestCaseNode testCaseNode : getSelectedTestCaseNodes()) {
                 try {
                     getProject().moveTestCaseToSharedReusable(testCaseNode.getTestCase());
-                    impactedUpdates += getProject().getAndResetLastImpactedReusableReferenceUpdates();
+                    impactedUpdates +=
+                        getProject().getAndResetLastImpactedReusableReferenceUpdates();
                     anySuccess = true;
                 } catch (TestCaseConversionException e) {
                     Notification.show(e.getMessage());
@@ -903,9 +915,16 @@ public class ProjectTree implements ActionListener {
 
     protected void showImpactedReferenceNotification(String operationName, int impactedUpdates) {
         if (impactedUpdates > 0) {
-            Notification.showSuccess(operationName + " completed. All impacted test cases have been updated (" + impactedUpdates + ").");
+            Notification.showSuccess(
+                operationName +
+                " completed. All impacted test cases have been updated (" +
+                impactedUpdates +
+                ")."
+            );
         } else {
-            Notification.showSuccess(operationName + " completed. No impacted test case references required updates.");
+            Notification.showSuccess(
+                operationName + " completed. No impacted test case references required updates."
+            );
         }
     }
 

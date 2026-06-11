@@ -210,21 +210,43 @@ public class ScenarioComponent extends JPanel implements ActionListener {
                     try {
                         ref = tStep.getEffectiveReusableRef();
                     } catch (IllegalArgumentException ex) {
-                        ref = new ReusableRef(ReusableRef.Scope.UNSCOPED, reusableData[0], reusableData[1]);
+                        ref =
+                            new ReusableRef(
+                                ReusableRef.Scope.UNSCOPED,
+                                reusableData[0],
+                                reusableData[1]
+                            );
                     }
                     if (ref == null) {
-                        ref = new ReusableRef(ReusableRef.Scope.UNSCOPED, reusableData[0], reusableData[1]);
+                        ref =
+                            new ReusableRef(
+                                ReusableRef.Scope.UNSCOPED,
+                                reusableData[0],
+                                reusableData[1]
+                            );
                     }
 
                     Scenario scenario = null;
                     if (ref.getScope() == ReusableRef.Scope.PROJECT) {
-                        scenario = testDesign.getProject().getReusableScenarioByName(ref.getScenarioName());
+                        scenario =
+                            testDesign
+                                .getProject()
+                                .getReusableScenarioByName(ref.getScenarioName());
                     } else if (ref.getScope() == ReusableRef.Scope.SHARED) {
-                        scenario = testDesign.getProject().getSharedReusableScenarioByName(ref.getScenarioName());
+                        scenario =
+                            testDesign
+                                .getProject()
+                                .getSharedReusableScenarioByName(ref.getScenarioName());
                     } else {
-                        scenario = testDesign.getProject().getReusableScenarioByName(ref.getScenarioName());
+                        scenario =
+                            testDesign
+                                .getProject()
+                                .getReusableScenarioByName(ref.getScenarioName());
                         if (scenario == null) {
-                            scenario = testDesign.getProject().getSharedReusableScenarioByName(ref.getScenarioName());
+                            scenario =
+                                testDesign
+                                    .getProject()
+                                    .getSharedReusableScenarioByName(ref.getScenarioName());
                         }
                     }
 
@@ -233,12 +255,20 @@ public class ScenarioComponent extends JPanel implements ActionListener {
                         if (rtestCase != null) {
                             testDesign.loadTableModelForSelection(rtestCase);
                         } else {
-                            Notification.show("TestCase [" + ref.getTestCaseName()
-                                    + "] not present in the Scenario [" + ref.getScenarioName() + "]");
+                            Notification.show(
+                                "TestCase [" +
+                                ref.getTestCaseName() +
+                                "] not present in the Scenario [" +
+                                ref.getScenarioName() +
+                                "]"
+                            );
                         }
                     } else {
-                        Notification.show("Scenario [" + ref.getScenarioName()
-                                + "] not present in selected reusable scope");
+                        Notification.show(
+                            "Scenario [" +
+                            ref.getScenarioName() +
+                            "] not present in selected reusable scope"
+                        );
                     }
                 } else {
                     testDesign.loadTableModelForSelection(testCase);

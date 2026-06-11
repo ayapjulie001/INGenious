@@ -1,7 +1,7 @@
 package com.ing.engine.execution.resolver;
 
-import com.ing.datalib.component.Scenario;
 import com.ing.datalib.component.ReusableRef;
+import com.ing.datalib.component.Scenario;
 
 /**
  * Interface for resolving reusable component references during test execution.
@@ -14,7 +14,6 @@ import com.ing.datalib.component.ReusableRef;
  * </p>
  */
 public interface ExecutionResolver {
-
     /**
      * Result of a reusable reference resolution attempt.
      */

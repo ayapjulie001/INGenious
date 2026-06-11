@@ -12,7 +12,6 @@ import java.util.logging.Logger;
  * Mirrors ReusableTreeModel but loads from shared reusable components directory.
  */
 public class SharedReusableTreeModel extends ProjectTreeModel {
-
     private static final Logger LOGGER = Logger.getLogger(SharedReusableTreeModel.class.getName());
     private static final String DEFAULT_GROUP = "Shared Components";
 
@@ -48,7 +47,11 @@ public class SharedReusableTreeModel extends ProjectTreeModel {
                 try {
                     project.moveTestCaseToTestPlan(testCaseNode.getTestCase());
                 } catch (TestCaseConversionException e) {
-                    LOGGER.log(Level.WARNING, "Failed to move test case to test plan: " + e.getMessage(), e);
+                    LOGGER.log(
+                        Level.WARNING,
+                        "Failed to move test case to test plan: " + e.getMessage(),
+                        e
+                    );
                 }
             }
         }

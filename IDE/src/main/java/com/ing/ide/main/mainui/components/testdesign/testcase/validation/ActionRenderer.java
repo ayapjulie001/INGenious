@@ -1,8 +1,8 @@
 package com.ing.ide.main.mainui.components.testdesign.testcase.validation;
 
+import com.ing.datalib.component.ReusableRef;
 import com.ing.datalib.component.Scenario;
 import com.ing.datalib.component.TestStep;
-import com.ing.datalib.component.ReusableRef;
 import com.ing.datalib.or.mobile.ResolvedMobileObject;
 import com.ing.datalib.or.sap.ResolvedSapObject;
 import com.ing.datalib.or.structureddata.ResolvedStructuredDataObject;
@@ -85,15 +85,23 @@ public class ActionRenderer extends AbstractRenderer {
         String scenarioName = ref.getScenarioName();
         String testCaseName = ref.getTestCaseName();
 
-        if (ref.getScope() == ReusableRef.Scope.PROJECT || ref.getScope() == ReusableRef.Scope.UNSCOPED) {
+        if (
+            ref.getScope() == ReusableRef.Scope.PROJECT ||
+            ref.getScope() == ReusableRef.Scope.UNSCOPED
+        ) {
             Scenario scenario = step.getProject().getReusableScenarioByName(scenarioName);
             if (scenario != null && scenario.getTestCaseByName(testCaseName) != null) {
                 return true;
             }
         }
 
-        if (ref.getScope() == ReusableRef.Scope.SHARED || ref.getScope() == ReusableRef.Scope.UNSCOPED) {
-            Scenario sharedScenario = step.getProject().getSharedReusableScenarioByName(scenarioName);
+        if (
+            ref.getScope() == ReusableRef.Scope.SHARED ||
+            ref.getScope() == ReusableRef.Scope.UNSCOPED
+        ) {
+            Scenario sharedScenario = step
+                .getProject()
+                .getSharedReusableScenarioByName(scenarioName);
             if (sharedScenario != null && sharedScenario.getTestCaseByName(testCaseName) != null) {
                 return true;
             }
@@ -211,7 +219,7 @@ public class ActionRenderer extends AbstractRenderer {
     /**
      * Gets the scope-aware error message for reusable validation.
      * If the reference is scoped (e.g., [PROJECT] or [SHARED]), includes scope in the message.
-     * 
+     *
      * @param refString the reusable reference string
      * @return appropriate error message with scope information if applicable
      */

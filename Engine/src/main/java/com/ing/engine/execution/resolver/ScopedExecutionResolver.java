@@ -16,7 +16,6 @@ import java.util.logging.Logger;
  * </p>
  */
 public class ScopedExecutionResolver implements ExecutionResolver {
-
     private static final Logger LOGGER = Logger.getLogger(ScopedExecutionResolver.class.getName());
 
     private final Project currentProject;
@@ -48,14 +47,11 @@ public class ScopedExecutionResolver implements ExecutionResolver {
         switch (ref.getScope()) {
             case PROJECT:
                 return resolveProjectScoped(scenarioName, testCaseName, currentProjectName);
-
             case SHARED:
                 return resolveSharedScoped(scenarioName, testCaseName);
-
             case UNSCOPED:
                 // Legacy format: project-first fallback
                 return resolveUnscopedWithFallback(scenarioName, testCaseName);
-
             default:
                 return new ResolutionResult("Unknown scope: " + ref.getScope());
         }
@@ -67,13 +63,17 @@ public class ScopedExecutionResolver implements ExecutionResolver {
      * Blocks if attempting to reference a different project's reusable.
      * </p>
      */
-    private ResolutionResult resolveProjectScoped(String scenarioName, String testCaseName,
-                                                   String currentProjectName) {
+    private ResolutionResult resolveProjectScoped(
+        String scenarioName,
+        String testCaseName,
+        String currentProjectName
+    ) {
         // Validate cross-project boundary: project-scoped references must be from same project
         if (currentProjectName != null && !currentProjectName.equals(currentProject.getName())) {
             String error = String.format(
                 "Cross-project reference not allowed: cannot reference [Project] reusable from project '%s' while executing in '%s'",
-                currentProject.getName(), currentProjectName
+                currentProject.getName(),
+                currentProjectName
             );
             LOGGER.log(Level.WARNING, error);
             return new ResolutionResult(error);
@@ -128,7 +128,11 @@ public class ScopedExecutionResolver implements ExecutionResolver {
         // Step 1: Try project reusables first
         Scenario scenario = currentProject.getReusableScenarioByName(scenarioName);
         if (scenario != null) {
-            LOGGER.fine("Resolved unscoped '" + scenarioName + "' to [Project] reusable (project-first fallback)");
+            LOGGER.fine(
+                "Resolved unscoped '" +
+                scenarioName +
+                "' to [Project] reusable (project-first fallback)"
+            );
             return new ResolutionResult(scenario, ReusableRef.Scope.PROJECT);
         }
 

@@ -217,7 +217,8 @@ public class ReusableTree extends ProjectTree {
             for (TestCaseNode testCaseNode : getSelectedTestCaseNodes()) {
                 try {
                     getProject().moveTestCaseToTestPlan(testCaseNode.getTestCase());
-                    impactedUpdates += getProject().getAndResetLastImpactedReusableReferenceUpdates();
+                    impactedUpdates +=
+                        getProject().getAndResetLastImpactedReusableReferenceUpdates();
                     anySuccess = true;
                 } catch (TestCaseConversionException e) {
                     Notification.show(e.getMessage());
@@ -272,7 +273,10 @@ public class ReusableTree extends ProjectTree {
         Scenario scenario = getProject().addReusableScenario(scenarioName);
         if (scenario == null) {
             Notification.showWarning(
-                "Scenario '" + scenarioName + "' already exists in another scope (Test Plan, Reusable, or Shared Reusable).");
+                "Scenario '" +
+                scenarioName +
+                "' already exists in another scope (Test Plan, Reusable, or Shared Reusable)."
+            );
             return;
         }
         ScenarioNode scNode = getTreeModel().addScenario(getSelectedGroupNode(), scenario);
@@ -390,9 +394,11 @@ public class ReusableTree extends ProjectTree {
         String newScenarioName = "NewScenario";
         for (int i = 0;; i++) {
             // Check if scenario exists in Reusable scope
-            if (getProject().getReusableScenarioByName(newScenarioName) == null &&
+            if (
+                getProject().getReusableScenarioByName(newScenarioName) == null &&
                 getProject().getScenarioByName(newScenarioName) == null &&
-                getProject().getSharedReusableScenarioByName(newScenarioName) == null) {
+                getProject().getSharedReusableScenarioByName(newScenarioName) == null
+            ) {
                 break;
             }
             newScenarioName = "NewScenario" + i;
@@ -408,8 +414,10 @@ public class ReusableTree extends ProjectTree {
     private String fetchNewReusableTestCaseName(Scenario scenario) {
         String newTestCaseName = "NewTestCase";
         for (int i = 0;; i++) {
-            if (scenario.getTestCaseByName(newTestCaseName) == null
-                    && !getProject().testCaseExistsInAnyScope(newTestCaseName)) {
+            if (
+                scenario.getTestCaseByName(newTestCaseName) == null &&
+                !getProject().testCaseExistsInAnyScope(newTestCaseName)
+            ) {
                 break;
             }
             newTestCaseName = "NewTestCase" + i;
@@ -431,14 +439,18 @@ public class ReusableTree extends ProjectTree {
     private void moveToSharedReusable() {
         List<TestCase> selected = collectSelectedReusableTestCases();
         if (selected.isEmpty()) {
-            Notification.showWarning("Select at least one reusable test case to make as Shared Reusable.");
+            Notification.showWarning(
+                "Select at least one reusable test case to make as Shared Reusable."
+            );
             return;
         }
 
-        int option = JOptionPane.showConfirmDialog(null,
-                "Move selected reusable test case(s) to Shared Reusable Components?",
-                "Make As Shared Reusable",
-                JOptionPane.YES_NO_OPTION);
+        int option = JOptionPane.showConfirmDialog(
+            null,
+            "Move selected reusable test case(s) to Shared Reusable Components?",
+            "Make As Shared Reusable",
+            JOptionPane.YES_NO_OPTION
+        );
         if (option != JOptionPane.YES_OPTION) {
             return;
         }

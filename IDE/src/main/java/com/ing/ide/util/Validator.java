@@ -4,11 +4,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Validator {
+    private static final String EXCLUDE_LIST = "\\S*[,|#|$|{|}|^|\\[|\\]|%]\\S*";
 
-  private static final String EXCLUDE_LIST = "\\S*[,|#|$|{|}|^|\\[|\\]|%]\\S*";
-  
-  // Stricter list for reusable component names: blocks comma, dot, colon, brackets, percent, hash
-  private static final String REUSABLE_EXCLUDE_LIST = "\\S*[,|\\.|:|\\[|\\]|%|#]\\S*";
+    // Stricter list for reusable component names: blocks comma, dot, colon, brackets, percent, hash
+    private static final String REUSABLE_EXCLUDE_LIST = "\\S*[,|\\.|:|\\[|\\]|%|#]\\S*";
 
     public static boolean isValidName(String text) {
         Pattern pattern = Pattern.compile(

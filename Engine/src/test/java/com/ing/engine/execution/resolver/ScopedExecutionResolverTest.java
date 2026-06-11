@@ -1,16 +1,15 @@
 package com.ing.engine.execution.resolver;
 
+import static org.testng.Assert.*;
+
 import com.ing.datalib.component.Project;
 import com.ing.datalib.component.ReusableRef;
 import com.ing.datalib.component.Scenario;
 import com.ing.datalib.component.Scenario.Source;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.testng.Assert.*;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
  * Unit tests for ScopedExecutionResolver.
@@ -46,17 +45,19 @@ public class ScopedExecutionResolverTest {
         }
 
         Scenario getReusableScenarioByName(String name) {
-            return reusableScenarios.stream()
-                    .filter(s -> s.getName().equalsIgnoreCase(name))
-                    .findFirst()
-                    .orElse(null);
+            return reusableScenarios
+                .stream()
+                .filter(s -> s.getName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(null);
         }
 
         Scenario getSharedReusableScenarioByName(String name) {
-            return sharedScenarios.stream()
-                    .filter(s -> s.getName().equalsIgnoreCase(name))
-                    .findFirst()
-                    .orElse(null);
+            return sharedScenarios
+                .stream()
+                .filter(s -> s.getName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(null);
         }
     }
 
@@ -87,23 +88,26 @@ public class ScopedExecutionResolverTest {
             switch (ref.getScope()) {
                 case PROJECT:
                     return resolveProjectScoped(scenarioName, currentProjectName);
-
                 case SHARED:
                     return resolveSharedScoped(scenarioName);
-
                 case UNSCOPED:
                     return resolveUnscopedWithFallback(scenarioName);
-
                 default:
                     return new ResolutionResult("Unknown scope: " + ref.getScope());
             }
         }
 
-        private ResolutionResult resolveProjectScoped(String scenarioName, String currentProjectName) {
+        private ResolutionResult resolveProjectScoped(
+            String scenarioName,
+            String currentProjectName
+        ) {
             if (currentProjectName != null && !currentProjectName.equals(project.getName())) {
                 return new ResolutionResult(
                     "Cross-project reference not allowed: cannot reference [Project] reusable from project '" +
-                    project.getName() + "' while executing in '" + currentProjectName + "'"
+                    project.getName() +
+                    "' while executing in '" +
+                    currentProjectName +
+                    "'"
                 );
             }
 
@@ -142,7 +146,9 @@ public class ScopedExecutionResolverTest {
             }
 
             return new ResolutionResult(
-                "Reusable scenario '" + scenarioName + "' not found in project or shared reusables (unscoped legacy reference)"
+                "Reusable scenario '" +
+                scenarioName +
+                "' not found in project or shared reusables (unscoped legacy reference)"
             );
         }
     }
@@ -240,7 +246,10 @@ public class ScopedExecutionResolverTest {
         ExecutionResolver.ResolutionResult result = testResolver.resolve(refString, "ProjectA");
 
         // Assert: Should NOT find it because [Shared] scope searches only shared reusables
-        assertFalse(result.isSuccess(), "Should not find project reusable when searching [Shared] scope");
+        assertFalse(
+            result.isSuccess(),
+            "Should not find project reusable when searching [Shared] scope"
+        );
     }
 
     // ============ UNSCOPED FALLBACK TESTS ============
@@ -256,7 +265,11 @@ public class ScopedExecutionResolverTest {
         // Assert: Should find in project scope
         assertTrue(result.isSuccess(), "Should resolve unscoped reference from project scope");
         assertEquals(result.getResolvedScenario(), projectScenarioA);
-        assertEquals(result.getResolvedScope(), ReusableRef.Scope.PROJECT, "Should resolve to PROJECT scope");
+        assertEquals(
+            result.getResolvedScope(),
+            ReusableRef.Scope.PROJECT,
+            "Should resolve to PROJECT scope"
+        );
     }
 
     @Test
@@ -270,16 +283,28 @@ public class ScopedExecutionResolverTest {
         // Assert: Should fallback to shared scope
         assertTrue(result.isSuccess(), "Should fallback to shared scope for unscoped reference");
         assertEquals(result.getResolvedScenario(), sharedScenarioA);
-        assertEquals(result.getResolvedScope(), ReusableRef.Scope.SHARED, "Should resolve to SHARED via fallback");
+        assertEquals(
+            result.getResolvedScope(),
+            ReusableRef.Scope.SHARED,
+            "Should resolve to SHARED via fallback"
+        );
     }
 
     @Test
     public void testResolveUnscopedReference_ProjectFirst() {
         // Arrange: Create a scenario with same name in both scopes
-        Scenario projectConflict = new Scenario(null, "ConflictScenario", Source.REUSABLE_COMPONENTS);
+        Scenario projectConflict = new Scenario(
+            null,
+            "ConflictScenario",
+            Source.REUSABLE_COMPONENTS
+        );
         testProjectA.getReusableScenarios().add(projectConflict);
 
-        Scenario sharedConflict = new Scenario(null, "ConflictScenario", Source.SHARED_REUSABLE_COMPONENTS);
+        Scenario sharedConflict = new Scenario(
+            null,
+            "ConflictScenario",
+            Source.SHARED_REUSABLE_COMPONENTS
+        );
         testProjectA.getSharedScenarios().add(sharedConflict);
 
         String refString = "ConflictScenario:TestCase";
@@ -289,7 +314,11 @@ public class ScopedExecutionResolverTest {
 
         // Assert: Should prefer project scope
         assertTrue(result.isSuccess(), "Should resolve conflict scenario");
-        assertEquals(result.getResolvedScenario(), projectConflict, "Should prefer project scope for conflicts");
+        assertEquals(
+            result.getResolvedScenario(),
+            projectConflict,
+            "Should prefer project scope for conflicts"
+        );
         assertEquals(result.getResolvedScope(), ReusableRef.Scope.PROJECT);
     }
 
@@ -318,7 +347,10 @@ public class ScopedExecutionResolverTest {
 
         // Assert: Should block cross-project [Project] reference
         assertFalse(result.isSuccess(), "Should block cross-project [Project] scoped reference");
-        assertTrue(result.getErrorMessage().contains("Cross-project"), "Should mention cross-project in error");
+        assertTrue(
+            result.getErrorMessage().contains("Cross-project"),
+            "Should mention cross-project in error"
+        );
     }
 
     @Test
@@ -359,7 +391,10 @@ public class ScopedExecutionResolverTest {
 
         // Assert
         assertFalse(result.isSuccess(), "Should fail on invalid format");
-        assertTrue(result.getErrorMessage().contains("Invalid") || result.getErrorMessage().contains("format"));
+        assertTrue(
+            result.getErrorMessage().contains("Invalid") ||
+            result.getErrorMessage().contains("format")
+        );
     }
 
     @Test
@@ -379,7 +414,7 @@ public class ScopedExecutionResolverTest {
         // Arrange
         ReusableRef ref = new ReusableRef(
             ReusableRef.Scope.PROJECT,
-            "ProjectScenarioA", 
+            "ProjectScenarioA",
             "TestCase"
         );
 
@@ -394,11 +429,7 @@ public class ScopedExecutionResolverTest {
     @Test
     public void testResolveParsedRef_SharedScoped() {
         // Arrange
-        ReusableRef ref = new ReusableRef(
-            ReusableRef.Scope.SHARED,
-            "SharedScenarioA",
-            "TestCase"
-        );
+        ReusableRef ref = new ReusableRef(ReusableRef.Scope.SHARED, "SharedScenarioA", "TestCase");
 
         // Act
         ExecutionResolver.ResolutionResult result = testResolver.resolve(ref, "ProjectA");
@@ -422,7 +453,11 @@ public class ScopedExecutionResolverTest {
 
         // Assert
         assertTrue(result.isSuccess(), "Should resolve unscoped from parsed ReusableRef");
-        assertEquals(result.getResolvedScope(), ReusableRef.Scope.PROJECT, "Should resolve to project scope");
+        assertEquals(
+            result.getResolvedScope(),
+            ReusableRef.Scope.PROJECT,
+            "Should resolve to project scope"
+        );
     }
 
     @Test
@@ -463,15 +498,17 @@ public class ScopedExecutionResolverTest {
     public void testCaseInsensitiveScopeKeywords() {
         // Arrange: Test case-insensitive scope keywords (if ReusableRef supports them)
         try {
-            String refString = "[project] ProjectScenarioA:TestCase";  // lowercase
+            String refString = "[project] ProjectScenarioA:TestCase"; // lowercase
 
             // Act
             ExecutionResolver.ResolutionResult result = testResolver.resolve(refString, "ProjectA");
 
             // Assert: Case-insensitive scope should work (ReusableRef handles this)
             // If this fails, ReusableRef.parse() needs case-insensitive support
-            assertTrue(result.isSuccess() || !result.getErrorMessage().contains("Unknown scope"),
-                "Should handle case-insensitive scope or fail gracefully");
+            assertTrue(
+                result.isSuccess() || !result.getErrorMessage().contains("Unknown scope"),
+                "Should handle case-insensitive scope or fail gracefully"
+            );
         } catch (Exception e) {
             // Expected if ReusableRef is case-sensitive by design
             assertTrue(true, "Case sensitivity is acceptable design");

@@ -176,12 +176,12 @@ public class TestCaseTableDnD extends TransferHandler {
         if (!testCaseDnD.getTestCaseList().isEmpty()) {
             TestCase testCase = (TestCase) table.getModel();
             testCase.startGroupEdit();
-            testCase.removeSteps(new int[]{row});
+            testCase.removeSteps(new int[] { row });
             int insertRow = row;
             for (TestCaseNode testCaseNode : testCaseDnD.getTestCaseList()) {
                 String scopeToken = getReusableScopeToken(testCaseNode);
-                String reusable = testCaseNode.getParent().toString() + ":"
-                        + testCaseNode.toString();
+                String reusable =
+                    testCaseNode.getParent().toString() + ":" + testCaseNode.toString();
                 testCase.addReusableStep(insertRow, reusable);
                 testCase.setValueAt(scopeToken, insertRow, HEADERS.Reference.getIndex());
                 insertRow++;
@@ -191,9 +191,11 @@ public class TestCaseTableDnD extends TransferHandler {
     }
 
     private String getReusableScopeToken(TestCaseNode testCaseNode) {
-        if (testCaseNode == null
-                || testCaseNode.getTestCase() == null
-                || testCaseNode.getTestCase().getScenario() == null) {
+        if (
+            testCaseNode == null ||
+            testCaseNode.getTestCase() == null ||
+            testCaseNode.getTestCase().getScenario() == null
+        ) {
             return "[Project]";
         }
 

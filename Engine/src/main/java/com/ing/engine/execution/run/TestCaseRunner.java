@@ -62,7 +62,7 @@ public class TestCaseRunner {
     private boolean breakSubIterationFlag = false;
 
     // Scope metadata for reusable resolution context
-    private ReusableRef.Scope resolvedReusableScope = null;  // PROJECT, SHARED, or null if not reusable
+    private ReusableRef.Scope resolvedReusableScope = null; // PROJECT, SHARED, or null if not reusable
 
     //<editor-fold defaultstate="collapsed" desc="_init_">
     public TestCaseRunner(ProjectRunner exe, String scenario, String testCase) {
@@ -245,7 +245,8 @@ public class TestCaseRunner {
     public boolean isProjectReusable() {
         return resolvedReusableScope == ReusableRef.Scope.PROJECT;
     }
-//</editor-fold>
+
+    //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="internal apis">
     private boolean canRunStep(int currStep) {

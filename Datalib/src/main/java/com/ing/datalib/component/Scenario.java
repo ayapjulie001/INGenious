@@ -682,7 +682,7 @@ public class Scenario extends DataModel {
 
         return false;
     }
-    
+
     /**
      * Renames this shared reusable scenario.
      * @param newName new scenario name
@@ -696,10 +696,10 @@ public class Scenario extends DataModel {
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     /**
      * Deletes this scenario from disk and removes it from the project.
      * @return true if successful, false otherwise

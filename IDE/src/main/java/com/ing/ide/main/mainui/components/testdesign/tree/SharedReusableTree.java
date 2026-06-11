@@ -5,8 +5,8 @@ import com.ing.datalib.component.TestCase;
 import com.ing.datalib.exception.TestCaseConversionException;
 import com.ing.ide.main.mainui.components.testdesign.TestDesign;
 import com.ing.ide.main.mainui.components.testdesign.tree.model.GroupNode;
-import com.ing.ide.main.mainui.components.testdesign.tree.model.SharedReusableTreeModel;
 import com.ing.ide.main.mainui.components.testdesign.tree.model.ScenarioNode;
+import com.ing.ide.main.mainui.components.testdesign.tree.model.SharedReusableTreeModel;
 import com.ing.ide.main.mainui.components.testdesign.tree.model.TestCaseNode;
 import com.ing.ide.util.Notification;
 import com.ing.ide.util.Validator;
@@ -19,14 +19,12 @@ import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.tree.TreePath;
 
-
 /**
  * UI tree component for displaying and managing Shared Reusable Components scenarios and test cases.
  * Extends ProjectTree and overrides methods to handle shared reusable-specific operations.
  * Displays components with [Shared] scope indicator in the UI.
  */
 public class SharedReusableTree extends ProjectTree {
-
     private static final Logger LOGGER = Logger.getLogger(SharedReusableTree.class.getName());
 
     /**
@@ -111,11 +109,13 @@ public class SharedReusableTree extends ProjectTree {
     protected void onDeleteAction() {
         deleteGroups();
         if (!getSelectedTestCaseNodes().isEmpty() || !getSelectedScenarioNodes().isEmpty()) {
-            int warning = JOptionPane.showConfirmDialog(null,
-                    "Warning: You are deleting Shared Reusable component(s). Continue?",
-                    "Shared Reusable Delete Warning",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.WARNING_MESSAGE);
+            int warning = JOptionPane.showConfirmDialog(
+                null,
+                "Warning: You are deleting Shared Reusable component(s). Continue?",
+                "Shared Reusable Delete Warning",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+            );
             if (warning != JOptionPane.YES_OPTION) {
                 return;
             }
@@ -161,7 +161,7 @@ public class SharedReusableTree extends ProjectTree {
                     Notification.show("Scenario " + name + " Already present");
                     return false;
                 }
-            } 
+            }
             ScenarioNode scenarioNode = super.getSelectedScenarioNode();
             if (scenarioNode != null && !scenarioNode.toString().equals(name)) {
                 if (scenarioNode.getScenario().renameSharedReusable(name)) {
@@ -181,7 +181,12 @@ public class SharedReusableTree extends ProjectTree {
                     super.getTestDesign().getTestCaseComp().refreshTitle();
                     return true;
                 } else {
-                    Notification.show("Testcase '" + name + "' Already present in Scenario - " + getSelectedTestCase().getScenario().getName());
+                    Notification.show(
+                        "Testcase '" +
+                        name +
+                        "' Already present in Scenario - " +
+                        getSelectedTestCase().getScenario().getName()
+                    );
                 }
             }
         }
@@ -194,8 +199,7 @@ public class SharedReusableTree extends ProjectTree {
      */
     @Override
     void renameScenario(Scenario scenario) {
-        getTestDesign().getProjectTree()
-                .getTreeModel().onScenarioRename(scenario);
+        getTestDesign().getProjectTree().getTreeModel().onScenarioRename(scenario);
     }
 
     /**
@@ -205,27 +209,32 @@ public class SharedReusableTree extends ProjectTree {
     @Override
     protected void makeAsReusableRTestCase() {
         if (getSelectedTestCaseNodes().isEmpty()) {
-            Notification.showWarning("Select at least one shared reusable test case to make as TestCase.");
+            Notification.showWarning(
+                "Select at least one shared reusable test case to make as TestCase."
+            );
             return;
         }
         if (!getSelectedTestCaseNodes().isEmpty()) {
-            int option = JOptionPane.showConfirmDialog(null,
-                    "Move selected Shared Reusable test case(s) to Test Plan?",
-                    "Make As TestCase",
-                    JOptionPane.YES_NO_OPTION);
+            int option = JOptionPane.showConfirmDialog(
+                null,
+                "Move selected Shared Reusable test case(s) to Test Plan?",
+                "Make As TestCase",
+                JOptionPane.YES_NO_OPTION
+            );
             if (option != JOptionPane.YES_OPTION) {
                 return;
             }
 
             // Save ALL test cases to prevent data loss on reload
             getProject().save();
-            
+
             boolean anySuccess = false;
             int impactedUpdates = 0;
             for (TestCaseNode testCaseNode : getSelectedTestCaseNodes()) {
                 try {
                     getProject().moveTestCaseToTestPlan(testCaseNode.getTestCase());
-                    impactedUpdates += getProject().getAndResetLastImpactedReusableReferenceUpdates();
+                    impactedUpdates +=
+                        getProject().getAndResetLastImpactedReusableReferenceUpdates();
                     anySuccess = true;
                 } catch (TestCaseConversionException e) {
                     Notification.show(e.getMessage());
@@ -249,17 +258,19 @@ public class SharedReusableTree extends ProjectTree {
      */
     @Override
     void makeAsReusableRTestCase(TestCase testCase) {
-        int option = JOptionPane.showConfirmDialog(null,
-                "Move selected Shared Reusable test case to Test Plan?",
-                "Make As TestCase",
-                JOptionPane.YES_NO_OPTION);
+        int option = JOptionPane.showConfirmDialog(
+            null,
+            "Move selected Shared Reusable test case to Test Plan?",
+            "Make As TestCase",
+            JOptionPane.YES_NO_OPTION
+        );
         if (option != JOptionPane.YES_OPTION) {
             return;
         }
 
         // Save ALL test cases to prevent data loss on reload
         getProject().save();
-        
+
         try {
             getProject().moveTestCaseToTestPlan(testCase);
             int impactedUpdates = getProject().getAndResetLastImpactedReusableReferenceUpdates();
@@ -281,7 +292,10 @@ public class SharedReusableTree extends ProjectTree {
         Scenario scenario = getProject().addSharedReusableScenario(scenarioName);
         if (scenario == null) {
             Notification.showWarning(
-                "Scenario '" + scenarioName + "' already exists in another scope (Test Plan, Reusable, or Shared Reusable).");
+                "Scenario '" +
+                scenarioName +
+                "' already exists in another scope (Test Plan, Reusable, or Shared Reusable)."
+            );
             return;
         }
         ScenarioNode scNode = getTreeModel().addScenario(getSelectedGroupNode(), scenario);
@@ -300,7 +314,9 @@ public class SharedReusableTree extends ProjectTree {
             TestCase testcase = scenarioNode.getScenario().addTestCase(testCaseName);
             if (testcase != null) {
                 getTestDesign().loadTableModelForSelection(testcase);
-                selectAndScrollTo(new TreePath(getTreeModel().addTestCase(scenarioNode, testcase).getPath()));
+                selectAndScrollTo(
+                    new TreePath(getTreeModel().addTestCase(scenarioNode, testcase).getPath())
+                );
             } else {
                 Notification.show("Shared reusable test case already exists");
             }
@@ -325,27 +341,43 @@ public class SharedReusableTree extends ProjectTree {
     private void deleteGroups() {
         List<GroupNode> groupNodes = getSelectedGroupNodes();
         if (!groupNodes.isEmpty()) {
-            String groupNodes_str = groupNodes.stream().map(g -> g.toString()).reduce((a, b) -> a + "\n" + b).get();
-            String question = "<html><body><p style='width: 200px;'>"
-                    + "Are you sure want to delete the following Groups?<br>"
-                    + groupNodes_str
-                    + "</p></body></html>";
+            String groupNodes_str = groupNodes
+                .stream()
+                .map(g -> g.toString())
+                .reduce((a, b) -> a + "\n" + b)
+                .get();
+            String question =
+                "<html><body><p style='width: 200px;'>" +
+                "Are you sure want to delete the following Groups?<br>" +
+                groupNodes_str +
+                "</p></body></html>";
 
-            JCheckBox confirmBox = new JCheckBox("Move Shared Reusables inside Group to TestPlan instead of deleting");
+            JCheckBox confirmBox = new JCheckBox(
+                "Move Shared Reusables inside Group to TestPlan instead of deleting"
+            );
 
-            int option = JOptionPane.showConfirmDialog(null,
-                    new Object[]{question, confirmBox},
-                    "Delete TestCase",
-                    JOptionPane.YES_NO_OPTION);
+            int option = JOptionPane.showConfirmDialog(
+                null,
+                new Object[] { question, confirmBox },
+                "Delete TestCase",
+                JOptionPane.YES_NO_OPTION
+            );
             if (option == JOptionPane.YES_OPTION) {
-                LOGGER.log(Level.INFO, "Delete Shared Reusable Groups approved for {0}; {1}",
-                        new Object[]{groupNodes.size(), groupNodes_str});
+                LOGGER.log(
+                    Level.INFO,
+                    "Delete Shared Reusable Groups approved for {0}; {1}",
+                    new Object[] { groupNodes.size(), groupNodes_str }
+                );
                 for (GroupNode groupNode : groupNodes) {
                     if (confirmBox.isSelected()) {
                         getTreeModel().toggleAllTestCasesFrom(groupNode);
                     } else {
-                        for (ScenarioNode scenarioNode : ScenarioNode.toList(groupNode.children())) {
-                            for (TestCaseNode testCaseNode : TestCaseNode.toList(scenarioNode.children())) {
+                        for (ScenarioNode scenarioNode : ScenarioNode.toList(
+                            groupNode.children()
+                        )) {
+                            for (TestCaseNode testCaseNode : TestCaseNode.toList(
+                                scenarioNode.children()
+                            )) {
                                 testCaseNode.getTestCase().delete();
                             }
                         }
@@ -368,9 +400,11 @@ public class SharedReusableTree extends ProjectTree {
         String newScenarioName = "NewSharedScenario";
         for (int i = 0;; i++) {
             // Check if scenario exists in any scope
-            if (getProject().getScenarioByName(newScenarioName) == null &&
+            if (
+                getProject().getScenarioByName(newScenarioName) == null &&
                 getProject().getReusableScenarioByName(newScenarioName) == null &&
-                getProject().getSharedReusableScenarioByName(newScenarioName) == null) {
+                getProject().getSharedReusableScenarioByName(newScenarioName) == null
+            ) {
                 break;
             }
             newScenarioName = "NewSharedScenario" + i;
@@ -386,8 +420,10 @@ public class SharedReusableTree extends ProjectTree {
     private String fetchNewSharedReusableTestCaseName(Scenario scenario) {
         String newTestCaseName = "NewSharedTestCase";
         for (int i = 0;; i++) {
-            if (scenario.getTestCaseByName(newTestCaseName) == null
-                    && !getProject().testCaseExistsInAnyScope(newTestCaseName)) {
+            if (
+                scenario.getTestCaseByName(newTestCaseName) == null &&
+                !getProject().testCaseExistsInAnyScope(newTestCaseName)
+            ) {
                 break;
             }
             newTestCaseName = "NewSharedTestCase" + i;
@@ -409,15 +445,19 @@ public class SharedReusableTree extends ProjectTree {
     private void moveToProjectReusable() {
         List<TestCase> selected = collectSelectedSharedReusableTestCases();
         if (selected.isEmpty()) {
-            Notification.showWarning("Select at least one shared reusable test case to make as Project Reusable.");
+            Notification.showWarning(
+                "Select at least one shared reusable test case to make as Project Reusable."
+            );
             return;
         }
 
-        int warning = JOptionPane.showConfirmDialog(null,
-                "Move selected Shared Reusable test case(s) to Project Reusable Components?",
-                "Move to Project Reusable",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE);
+        int warning = JOptionPane.showConfirmDialog(
+            null,
+            "Move selected Shared Reusable test case(s) to Project Reusable Components?",
+            "Move to Project Reusable",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE
+        );
         if (warning != JOptionPane.YES_OPTION) {
             return;
         }
@@ -440,7 +480,9 @@ public class SharedReusableTree extends ProjectTree {
             getTestDesign().getSharedReusableTree().load();
             showImpactedReferenceNotification("Moved to Project Reusable", impactedUpdates);
         } else {
-            Notification.showWarning("No shared reusable test cases were moved to Project Reusable.");
+            Notification.showWarning(
+                "No shared reusable test cases were moved to Project Reusable."
+            );
         }
     }
 
@@ -467,6 +509,7 @@ public class SharedReusableTree extends ProjectTree {
      * Context menu for the shared reusable tree with group-specific actions and [Shared] scope indicator.
      */
     class SharedReusablePopupMenu extends ProjectPopupMenu {
+
         /**
          * Constructs a new SharedReusablePopupMenu and initializes menu items.
          */

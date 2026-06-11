@@ -7,13 +7,13 @@ import com.ing.datalib.component.Scenario;
 import com.ing.datalib.component.TestCase;
 import com.ing.ide.main.mainui.components.testdesign.tree.model.GroupNode;
 import com.ing.ide.main.mainui.components.testdesign.tree.model.ProjectTreeModel;
+import com.ing.ide.main.mainui.components.testdesign.tree.model.ReusableNode;
 import com.ing.ide.main.mainui.components.testdesign.tree.model.ScenarioNode;
 import com.ing.ide.main.mainui.components.testdesign.tree.model.SharedReusableNode;
 import com.ing.ide.main.mainui.components.testdesign.tree.model.TestCaseNode;
-import com.ing.ide.main.mainui.components.testdesign.tree.model.ReusableNode;
 import com.ing.ide.main.mainui.components.testdesign.tree.model.TestPlanNode;
-import com.ing.ide.util.Notification;
 import com.ing.ide.main.utils.dnd.TransferableNode;
+import com.ing.ide.util.Notification;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -103,11 +103,15 @@ public class ProjectDnD extends TransferHandler {
         return false;
     }
 
-    private Boolean importTestCases(List<TestCaseNode> testCaseNodes,
-            TransferHandler.TransferSupport ts) {
+    private Boolean importTestCases(
+        List<TestCaseNode> testCaseNodes,
+        TransferHandler.TransferSupport ts
+    ) {
         Boolean shouldCut = ts.isDrop() ? ts.getDropAction() == MOVE : clipboardCutInProgress;
         if (shouldCut && isMoveFromTestPlanOrProjectToShared()) {
-            Notification.showWarning("Cut/Move from Test Plan or Project Reusable to Shared Reusable is not allowed. Use 'Make As Shared Reusable' instead.");
+            Notification.showWarning(
+                "Cut/Move from Test Plan or Project Reusable to Shared Reusable is not allowed. Use 'Make As Shared Reusable' instead."
+            );
             return false;
         }
         if (shouldCut) {
@@ -118,7 +122,9 @@ public class ProjectDnD extends TransferHandler {
             }
         }
         if (shouldCut && isRestrictedMoveToSharedTree()) {
-            Notification.showWarning("Move-paste into Shared Reusables is not supported from Test Plan or Project Reusables. Use 'Make As Shared Reusable' instead.");
+            Notification.showWarning(
+                "Move-paste into Shared Reusables is not supported from Test Plan or Project Reusables. Use 'Make As Shared Reusable' instead."
+            );
             return false;
         }
         Object destObject = getDestinationObject(ts);
@@ -144,11 +150,15 @@ public class ProjectDnD extends TransferHandler {
         return null;
     }
 
-    private Boolean importScenarios(List<ScenarioNode> scenarioNodes,
-            TransferHandler.TransferSupport ts) {
+    private Boolean importScenarios(
+        List<ScenarioNode> scenarioNodes,
+        TransferHandler.TransferSupport ts
+    ) {
         Boolean shouldCut = ts.isDrop() ? ts.getDropAction() == MOVE : clipboardCutInProgress;
         if (shouldCut && isMoveFromTestPlanOrProjectToShared()) {
-            Notification.showWarning("Cut/Move from Test Plan or Project Reusable to Shared Reusable is not allowed. Use 'Make As Shared Reusable' instead.");
+            Notification.showWarning(
+                "Cut/Move from Test Plan or Project Reusable to Shared Reusable is not allowed. Use 'Make As Shared Reusable' instead."
+            );
             return false;
         }
         if (shouldCut) {
@@ -189,23 +199,30 @@ public class ProjectDnD extends TransferHandler {
     }
 
     @Override
-    public void exportToClipboard(JComponent comp, Clipboard clip, int action) throws IllegalStateException {
+    public void exportToClipboard(JComponent comp, Clipboard clip, int action)
+        throws IllegalStateException {
         // Keyboard/menu Cut uses clipboard export path; preserve MOVE intent for paste guards.
         isCut = action == MOVE;
         clipboardCutInProgress = action == MOVE;
         super.exportToClipboard(comp, clip, action);
     }
 
-    private void copySelectedTestCases(List<TestCaseNode> testCaseNodes,
-            ScenarioNode dropscenario, Boolean isCut) {
+    private void copySelectedTestCases(
+        List<TestCaseNode> testCaseNodes,
+        ScenarioNode dropscenario,
+        Boolean isCut
+    ) {
         int skipped = 0;
         for (TestCaseNode testCaseNode : testCaseNodes) {
             Scenario scenario = testCaseNode.getTestCase().getScenario();
             TestCase testCase = testCaseNode.getTestCase();
             testCase.loadTableModel();
             if (isCut) {
-                if (testCase.equals(dropscenario.getScenario()
-                        .getTestCaseByName(testCaseNode.toString()))) {
+                if (
+                    testCase.equals(
+                        dropscenario.getScenario().getTestCaseByName(testCaseNode.toString())
+                    )
+                ) {
                     skipped++;
                     continue;
                 }
@@ -215,21 +232,31 @@ public class ProjectDnD extends TransferHandler {
                 // For move/cut, preserve original name by removing source first.
                 // This avoids transient cross-scope uniqueness conflicts while moving.
                 scenario.removeTestCase(testCase);
-                newTestCaseNode = addTestCase(dropscenario.getScenario(), testCaseNode.toString(), false);
+                newTestCaseNode =
+                    addTestCase(dropscenario.getScenario(), testCaseNode.toString(), false);
                 if (newTestCaseNode == null || newTestCaseNode.getTestCase() == null) {
                     scenario.getTestCases().add(testCase);
-                    Logger.getLogger(ProjectDnD.class.getName()).log(Level.WARNING,
+                    Logger
+                        .getLogger(ProjectDnD.class.getName())
+                        .log(
+                            Level.WARNING,
                             "Skipping move for test case ''{0}'' into scenario ''{1}'' due to naming collision or creation failure",
-                            new Object[]{testCaseNode.toString(), dropscenario.toString()});
+                            new Object[] { testCaseNode.toString(), dropscenario.toString() }
+                        );
                     skipped++;
                     continue;
                 }
             } else {
-                newTestCaseNode = addTestCase(dropscenario.getScenario(), testCaseNode.toString(), true);
+                newTestCaseNode =
+                    addTestCase(dropscenario.getScenario(), testCaseNode.toString(), true);
                 if (newTestCaseNode == null || newTestCaseNode.getTestCase() == null) {
-                    Logger.getLogger(ProjectDnD.class.getName()).log(Level.WARNING,
+                    Logger
+                        .getLogger(ProjectDnD.class.getName())
+                        .log(
+                            Level.WARNING,
                             "Skipping copy for test case ''{0}'' into scenario ''{1}'' due to naming collision or creation failure",
-                            new Object[]{testCaseNode.toString(), dropscenario.toString()});
+                            new Object[] { testCaseNode.toString(), dropscenario.toString() }
+                        );
                     skipped++;
                     continue;
                 }
@@ -251,8 +278,11 @@ public class ProjectDnD extends TransferHandler {
         showSkippedPasteNotification(skipped);
     }
 
-    private void copySelectedTestCases(List<TestCaseNode> testCaseNodes,
-            GroupNode dropGroup, Boolean isCut) {
+    private void copySelectedTestCases(
+        List<TestCaseNode> testCaseNodes,
+        GroupNode dropGroup,
+        Boolean isCut
+    ) {
         int skipped = 0;
         for (TestCaseNode testCaseNode : testCaseNodes) {
             Scenario scenario = testCaseNode.getTestCase().getScenario();
@@ -297,7 +327,11 @@ public class ProjectDnD extends TransferHandler {
             if (existing != null) {
                 return existing;
             }
-            Scenario created = new Scenario(sourceScenario.getProject(), scenarioName, Scenario.Source.TEST_PLAN);
+            Scenario created = new Scenario(
+                sourceScenario.getProject(),
+                scenarioName,
+                Scenario.Source.TEST_PLAN
+            );
             sourceScenario.getProject().getScenarios().add(created);
             return created;
         }
@@ -306,16 +340,26 @@ public class ProjectDnD extends TransferHandler {
             if (existing != null) {
                 return existing;
             }
-            Scenario created = new Scenario(sourceScenario.getProject(), scenarioName, Scenario.Source.REUSABLE_COMPONENTS);
+            Scenario created = new Scenario(
+                sourceScenario.getProject(),
+                scenarioName,
+                Scenario.Source.REUSABLE_COMPONENTS
+            );
             sourceScenario.getProject().getReusableScenarios().add(created);
             return created;
         }
         if (pTree.getTreeModel().getRoot() instanceof SharedReusableNode) {
-            Scenario existing = sourceScenario.getProject().getSharedReusableScenarioByName(scenarioName);
+            Scenario existing = sourceScenario
+                .getProject()
+                .getSharedReusableScenarioByName(scenarioName);
             if (existing != null) {
                 return existing;
             }
-            Scenario created = new Scenario(sourceScenario.getProject(), scenarioName, Scenario.Source.SHARED_REUSABLE_COMPONENTS);
+            Scenario created = new Scenario(
+                sourceScenario.getProject(),
+                scenarioName,
+                Scenario.Source.SHARED_REUSABLE_COMPONENTS
+            );
             sourceScenario.getProject().getSharedScenarios().add(created);
             return created;
         }
@@ -328,13 +372,17 @@ public class ProjectDnD extends TransferHandler {
             // Copy/paste always creates a copied testcase name.
             newName = name + " Copy(1)";
             int i = 2;
-            while (scenario.getTestCaseByName(newName) != null
-                    || scenario.getProject().testCaseExistsInAnyScope(newName)) {
+            while (
+                scenario.getTestCaseByName(newName) != null ||
+                scenario.getProject().testCaseExistsInAnyScope(newName)
+            ) {
                 newName = name + " Copy(" + i++ + ")";
             }
         } else {
-            if (scenario.getTestCaseByName(newName) != null
-                    || scenario.getProject().testCaseExistsInAnyScope(newName)) {
+            if (
+                scenario.getTestCaseByName(newName) != null ||
+                scenario.getProject().testCaseExistsInAnyScope(newName)
+            ) {
                 return null;
             }
         }
@@ -349,13 +397,19 @@ public class ProjectDnD extends TransferHandler {
         String copiedScenarioName = buildCopiedScenarioName(scenario);
         Scenario createdScenario = createScenarioInDestinationScope(scenario, copiedScenarioName);
         if (createdScenario == null) {
-            Notification.showWarning("Skipped scenario '" + scenario.getName() + "' due to naming conflict or invalid destination.");
+            Notification.showWarning(
+                "Skipped scenario '" +
+                scenario.getName() +
+                "' due to naming conflict or invalid destination."
+            );
             return;
         }
 
         ScenarioNode sNode = pTree.getTreeModel().addScenario(gNode, createdScenario);
         if (sNode == null || sNode.getScenario() == null) {
-            Notification.showWarning("Skipped scenario '" + scenario.getName() + "' due to tree insertion failure.");
+            Notification.showWarning(
+                "Skipped scenario '" + scenario.getName() + "' due to tree insertion failure."
+            );
             return;
         }
 
@@ -373,8 +427,10 @@ public class ProjectDnD extends TransferHandler {
             // Scenario-folder paste always creates testcase copies with Copy(n) suffix.
             String newName = baseName + " Copy(1)";
             int i = 2;
-            while (sNode.getScenario().getTestCaseByName(newName) != null
-                    || sNode.getScenario().getProject().testCaseExistsInAnyScope(newName)) {
+            while (
+                sNode.getScenario().getTestCaseByName(newName) != null ||
+                sNode.getScenario().getProject().testCaseExistsInAnyScope(newName)
+            ) {
                 newName = baseName + " Copy(" + i++ + ")";
             }
             TestCase newTestCase = sNode.getScenario().addTestCase(newName);
@@ -392,27 +448,44 @@ public class ProjectDnD extends TransferHandler {
         String baseName = sourceScenario.getName();
         String newName = baseName + " Copy(1)";
         int i = 2;
-        while (sourceScenario.getProject().getScenarioByName(newName) != null
-                || sourceScenario.getProject().getReusableScenarioByName(newName) != null
-                || sourceScenario.getProject().getSharedReusableScenarioByName(newName) != null) {
+        while (
+            sourceScenario.getProject().getScenarioByName(newName) != null ||
+            sourceScenario.getProject().getReusableScenarioByName(newName) != null ||
+            sourceScenario.getProject().getSharedReusableScenarioByName(newName) != null
+        ) {
             newName = baseName + " Copy(" + i++ + ")";
         }
         return newName;
     }
 
-    private Scenario createScenarioInDestinationScope(Scenario sourceScenario, String scenarioName) {
+    private Scenario createScenarioInDestinationScope(
+        Scenario sourceScenario,
+        String scenarioName
+    ) {
         if (pTree.getTreeModel().getRoot() instanceof TestPlanNode) {
-            Scenario created = new Scenario(sourceScenario.getProject(), scenarioName, Scenario.Source.TEST_PLAN);
+            Scenario created = new Scenario(
+                sourceScenario.getProject(),
+                scenarioName,
+                Scenario.Source.TEST_PLAN
+            );
             sourceScenario.getProject().getScenarios().add(created);
             return created;
         }
         if (pTree.getTreeModel().getRoot() instanceof ReusableNode) {
-            Scenario created = new Scenario(sourceScenario.getProject(), scenarioName, Scenario.Source.REUSABLE_COMPONENTS);
+            Scenario created = new Scenario(
+                sourceScenario.getProject(),
+                scenarioName,
+                Scenario.Source.REUSABLE_COMPONENTS
+            );
             sourceScenario.getProject().getReusableScenarios().add(created);
             return created;
         }
         if (pTree.getTreeModel().getRoot() instanceof SharedReusableNode) {
-            Scenario created = new Scenario(sourceScenario.getProject(), scenarioName, Scenario.Source.SHARED_REUSABLE_COMPONENTS);
+            Scenario created = new Scenario(
+                sourceScenario.getProject(),
+                scenarioName,
+                Scenario.Source.SHARED_REUSABLE_COMPONENTS
+            );
             sourceScenario.getProject().getSharedScenarios().add(created);
             return created;
         }
@@ -431,26 +504,40 @@ public class ProjectDnD extends TransferHandler {
     }
 
     private boolean isMoveFromTestPlanOrProjectToShared() {
-        if (sourceTreeModel == null || sourceTreeModel.getRoot() == null
-                || pTree == null || pTree.getTreeModel() == null || pTree.getTreeModel().getRoot() == null) {
+        if (
+            sourceTreeModel == null ||
+            sourceTreeModel.getRoot() == null ||
+            pTree == null ||
+            pTree.getTreeModel() == null ||
+            pTree.getTreeModel().getRoot() == null
+        ) {
             return false;
         }
 
         String sourceScope = getScopeName(sourceTreeModel.getRoot());
         String destinationScope = getScopeName(pTree.getTreeModel().getRoot());
-        return "shared".equals(destinationScope)
-                && ("testplan".equals(sourceScope) || "project".equals(sourceScope));
+        return (
+            "shared".equals(destinationScope) &&
+            ("testplan".equals(sourceScope) || "project".equals(sourceScope))
+        );
     }
 
     private String getCrossScopeMoveWarning() {
-        if (sourceTreeModel == null || sourceTreeModel.getRoot() == null
-                || pTree == null || pTree.getTreeModel() == null || pTree.getTreeModel().getRoot() == null) {
+        if (
+            sourceTreeModel == null ||
+            sourceTreeModel.getRoot() == null ||
+            pTree == null ||
+            pTree.getTreeModel() == null ||
+            pTree.getTreeModel().getRoot() == null
+        ) {
             return null;
         }
 
         String sourceScope = getScopeName(sourceTreeModel.getRoot());
         String destinationScope = getScopeName(pTree.getTreeModel().getRoot());
-        if (sourceScope == null || destinationScope == null || sourceScope.equals(destinationScope)) {
+        if (
+            sourceScope == null || destinationScope == null || sourceScope.equals(destinationScope)
+        ) {
             return null;
         }
 
@@ -491,9 +578,11 @@ public class ProjectDnD extends TransferHandler {
 
     private void showSkippedPasteNotification(int skippedCount) {
         if (skippedCount > 0) {
-            Notification.showWarning("Skipped " + skippedCount + " pasted item(s) due to name conflicts or invalid destination.");
+            Notification.showWarning(
+                "Skipped " +
+                skippedCount +
+                " pasted item(s) due to name conflicts or invalid destination."
+            );
         }
-
     }
-
 }

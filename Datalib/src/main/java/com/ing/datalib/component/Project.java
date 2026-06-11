@@ -20,6 +20,7 @@ import com.ing.datalib.settings.ProjectSettings;
 import com.ing.datalib.util.data.FileScanner;
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -166,9 +167,11 @@ public class Project {
             }
         }
 
-        LOGGER.log(Level.FINE,
-                "Legacy Execute reference migration check completed for {0} test case(s)",
-                testCasesScanned);
+        LOGGER.log(
+            Level.FINE,
+            "Legacy Execute reference migration check completed for {0} test case(s)",
+            testCasesScanned
+        );
     }
 
     /**
@@ -200,10 +203,12 @@ public class Project {
      * @return combined list of all scenarios
      */
     public List<Scenario> getAllScenarios() {
-        return Stream.concat(
+        return Stream
+            .concat(
                 Stream.concat(scenarios.stream(), reusableScenarios.stream()),
                 sharedReusableScenarios.stream()
-        ).collect(toList());
+            )
+            .collect(toList());
     }
 
     /**
@@ -360,10 +365,22 @@ public class Project {
     public static String getSharedReusableComponentsPath() {
         try {
             String appRoot = new File(System.getProperty("user.dir")).getCanonicalPath();
-            return appRoot + File.separator + "Shared" + File.separator + SHARED_REUSABLE_COMPONENTS_DIR;
+            return (
+                appRoot +
+                File.separator +
+                "Shared" +
+                File.separator +
+                SHARED_REUSABLE_COMPONENTS_DIR
+            );
         } catch (java.io.IOException ex) {
             // Fallback to non-canonical path
-            return System.getProperty("user.dir") + File.separator + "Shared" + File.separator + SHARED_REUSABLE_COMPONENTS_DIR;
+            return (
+                System.getProperty("user.dir") +
+                File.separator +
+                "Shared" +
+                File.separator +
+                SHARED_REUSABLE_COMPONENTS_DIR
+            );
         }
     }
 
@@ -581,7 +598,9 @@ public class Project {
         File sharedRoot = new File(getSharedReusableComponentsPath());
         if (sharedRoot.exists() && sharedRoot.isDirectory() && sharedRoot.list() != null) {
             for (String scenario : sharedRoot.list(DIR_FILTER)) {
-                sharedReusableScenarios.add(new Scenario(this, scenario, Scenario.Source.SHARED_REUSABLE_COMPONENTS));
+                sharedReusableScenarios.add(
+                    new Scenario(this, scenario, Scenario.Source.SHARED_REUSABLE_COMPONENTS)
+                );
             }
             return true;
         }
@@ -653,12 +672,14 @@ public class Project {
         }
 
         lastImpactedReusableReferenceUpdates = 0;
-        
+
         String scenarioName = testCase.getScenario().getName();
         String testCaseName = testCase.getName();
         Scenario.Source sourceType = testCase.getScenario().getSource();
-        String targetName = targetSource == Scenario.Source.REUSABLE_COMPONENTS ? "Reusable Components" : "Test Plan";
-        
+        String targetName = targetSource == Scenario.Source.REUSABLE_COMPONENTS
+            ? "Reusable Components"
+            : "Test Plan";
+
         File source = new File(testCase.getLocation());
         if (!source.exists()) {
             throw new TestCaseConversionException("Test Case file does not exist");
@@ -689,7 +710,8 @@ public class Project {
             );
         }
 
-        lastImpactedReusableReferenceUpdates = refactorReusableReferencesAcrossProject(
+        lastImpactedReusableReferenceUpdates =
+            refactorReusableReferencesAcrossProject(
                 scenarioName,
                 testCaseName,
                 sourceType,
@@ -697,7 +719,7 @@ public class Project {
                 testCaseName,
                 targetSource,
                 testCase
-        );
+            );
     }
 
     /**
@@ -753,7 +775,10 @@ public class Project {
      * @return the created scenario, or null if a scenario with the same name already exists in any scope
      */
     public Scenario addReusableScenario(String scenarioName) {
-        if (getReusableScenarioByName(scenarioName) == null && !scenarioExistsInAnyScope(scenarioName)) {
+        if (
+            getReusableScenarioByName(scenarioName) == null &&
+            !scenarioExistsInAnyScope(scenarioName)
+        ) {
             Scenario scn = new Scenario(this, scenarioName, Scenario.Source.REUSABLE_COMPONENTS);
             reusableScenarios.add(scn);
             return scn;
@@ -767,8 +792,15 @@ public class Project {
      * @return the newly created shared reusable scenario, or null if already exists in any scope
      */
     public Scenario addSharedReusableScenario(String scenarioName) {
-        if (getSharedReusableScenarioByName(scenarioName) == null && !scenarioExistsInAnyScope(scenarioName)) {
-            Scenario scn = new Scenario(this, scenarioName, Scenario.Source.SHARED_REUSABLE_COMPONENTS);
+        if (
+            getSharedReusableScenarioByName(scenarioName) == null &&
+            !scenarioExistsInAnyScope(scenarioName)
+        ) {
+            Scenario scn = new Scenario(
+                this,
+                scenarioName,
+                Scenario.Source.SHARED_REUSABLE_COMPONENTS
+            );
             sharedReusableScenarios.add(scn);
             return scn;
         }
@@ -798,9 +830,11 @@ public class Project {
      * @return true if scenario exists in any scope, false otherwise
      */
     private boolean scenarioExistsInAnyScope(String scenarioName) {
-        return getScenarioByName(scenarioName) != null
-                || getReusableScenarioByName(scenarioName) != null
-                || getSharedReusableScenarioByName(scenarioName) != null;
+        return (
+            getScenarioByName(scenarioName) != null ||
+            getReusableScenarioByName(scenarioName) != null ||
+            getSharedReusableScenarioByName(scenarioName) != null
+        );
     }
 
     /**
@@ -852,16 +886,26 @@ public class Project {
      * Copies a project reusable test case to shared reusables.
      * If destination scenario doesn't exist, it is created.
      */
-    public TestCase copyTestCaseToSharedReusable(TestCase testCase) throws TestCaseConversionException {
-        return transferReusableBetweenScopes(testCase, Scenario.Source.SHARED_REUSABLE_COMPONENTS, false);
+    public TestCase copyTestCaseToSharedReusable(TestCase testCase)
+        throws TestCaseConversionException {
+        return transferReusableBetweenScopes(
+            testCase,
+            Scenario.Source.SHARED_REUSABLE_COMPONENTS,
+            false
+        );
     }
 
     /**
      * Moves a project reusable test case to shared reusables.
      * Source scenario is removed when no test cases remain.
      */
-    public TestCase moveTestCaseToSharedReusable(TestCase testCase) throws TestCaseConversionException {
-        return transferReusableBetweenScopes(testCase, Scenario.Source.SHARED_REUSABLE_COMPONENTS, true);
+    public TestCase moveTestCaseToSharedReusable(TestCase testCase)
+        throws TestCaseConversionException {
+        return transferReusableBetweenScopes(
+            testCase,
+            Scenario.Source.SHARED_REUSABLE_COMPONENTS,
+            true
+        );
     }
 
     /**
@@ -876,15 +920,17 @@ public class Project {
      * Moves a shared reusable test case to project reusables.
      * Source scenario is removed when no test cases remain.
      */
-    public TestCase moveSharedReusableToReusable(TestCase testCase) throws TestCaseConversionException {
+    public TestCase moveSharedReusableToReusable(TestCase testCase)
+        throws TestCaseConversionException {
         return transferReusableBetweenScopes(testCase, Scenario.Source.REUSABLE_COMPONENTS, true);
     }
 
     private TestCase transferReusableBetweenScopes(
-            TestCase testCase,
-            Scenario.Source targetSource,
-            boolean move
-    ) throws TestCaseConversionException {
+        TestCase testCase,
+        Scenario.Source targetSource,
+        boolean move
+    )
+        throws TestCaseConversionException {
         if (testCase == null || testCase.getScenario() == null) {
             throw new TestCaseConversionException("Invalid test case or scenario");
         }
@@ -894,9 +940,15 @@ public class Project {
         Scenario sourceScenario = testCase.getScenario();
         Scenario.Source sourceType = sourceScenario.getSource();
 
-        if (!(targetSource == Scenario.Source.REUSABLE_COMPONENTS
-                || targetSource == Scenario.Source.SHARED_REUSABLE_COMPONENTS)) {
-            throw new TestCaseConversionException("Target scope must be reusable or shared reusable");
+        if (
+            !(
+                targetSource == Scenario.Source.REUSABLE_COMPONENTS ||
+                targetSource == Scenario.Source.SHARED_REUSABLE_COMPONENTS
+            )
+        ) {
+            throw new TestCaseConversionException(
+                "Target scope must be reusable or shared reusable"
+            );
         }
         if (sourceType == targetSource) {
             throw new TestCaseConversionException("Source and destination scopes are the same");
@@ -904,23 +956,32 @@ public class Project {
 
         String scenarioName = sourceScenario.getName();
         String testCaseName = testCase.getName();
-        
+
         // For move operations only: validate that same scenario + testcase doesn't exist in target
         if (move) {
             Scenario existingTargetScenario = getScenarioInScope(targetSource, scenarioName);
-            if (existingTargetScenario != null && existingTargetScenario.getTestCaseByName(testCaseName) != null) {
+            if (
+                existingTargetScenario != null &&
+                existingTargetScenario.getTestCaseByName(testCaseName) != null
+            ) {
                 throw new TestCaseConversionException(
-                    "Cannot move: Scenario '" + scenarioName + "' with test case '" + testCaseName + 
+                    "Cannot move: Scenario '" +
+                    scenarioName +
+                    "' with test case '" +
+                    testCaseName +
                     "' already exists in the target scope. Same scenario and test case names are not allowed."
                 );
             }
         }
         // For copy operations: no validation needed - names will be appended with Copy(n)
-        
+
         Scenario targetScenario = getOrCreateScenarioForScope(targetSource, scenarioName, !move);
         if (targetScenario == null) {
             throw new TestCaseConversionException(
-                "Failed to create or resolve target scenario '" + scenarioName + "' in destination scope");
+                "Failed to create or resolve target scenario '" +
+                scenarioName +
+                "' in destination scope"
+            );
         }
         String targetTestCaseName = uniqueNameInScenario(targetScenario, testCase.getName(), !move);
 
@@ -935,13 +996,20 @@ public class Project {
 
         try {
             if (move) {
-                Files.move(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Files.move(
+                    sourceFile.toPath(),
+                    targetFile.toPath(),
+                    StandardCopyOption.REPLACE_EXISTING
+                );
             } else {
                 Files.copy(sourceFile.toPath(), targetFile.toPath());
             }
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Failed transfering test case file", ex);
-            throw new TestCaseConversionException("Failed to transfer test case: " + ex.getMessage(), ex);
+            throw new TestCaseConversionException(
+                "Failed to transfer test case: " + ex.getMessage(),
+                ex
+            );
         }
 
         TestCase targetTestCase = new TestCase(targetScenario, targetTestCaseName);
@@ -949,7 +1017,8 @@ public class Project {
 
         if (move) {
             sourceScenario.removeTestCase(testCase);
-            lastImpactedReusableReferenceUpdates = refactorReusableReferencesAcrossProject(
+            lastImpactedReusableReferenceUpdates =
+                refactorReusableReferencesAcrossProject(
                     scenarioName,
                     testCaseName,
                     sourceType,
@@ -957,7 +1026,7 @@ public class Project {
                     targetTestCaseName,
                     targetSource,
                     null
-            );
+                );
             cleanupEmptyScenario(sourceScenario);
         }
 
@@ -974,13 +1043,13 @@ public class Project {
     }
 
     private int refactorReusableReferencesAcrossProject(
-            String oldScenarioName,
-            String oldTestCaseName,
-            Scenario.Source oldSource,
-            String newScenarioName,
-            String newTestCaseName,
-            Scenario.Source newSource,
-            TestCase excluded
+        String oldScenarioName,
+        String oldTestCaseName,
+        Scenario.Source oldSource,
+        String newScenarioName,
+        String newTestCaseName,
+        Scenario.Source newSource,
+        TestCase excluded
     ) {
         int impacted = 0;
         for (Scenario scenario : getAllScenarios()) {
@@ -988,14 +1057,16 @@ public class Project {
                 if (candidate == excluded) {
                     continue;
                 }
-                if (candidate.refactorReusableReferenceAcrossScope(
+                if (
+                    candidate.refactorReusableReferenceAcrossScope(
                         oldScenarioName,
                         oldTestCaseName,
                         oldSource,
                         newScenarioName,
                         newTestCaseName,
                         newSource
-                )) {
+                    )
+                ) {
                     impacted++;
                 }
             }
@@ -1018,7 +1089,11 @@ public class Project {
         return null;
     }
 
-    private Scenario getOrCreateScenarioForScope(Scenario.Source scope, String scenarioName, boolean isCopy) {
+    private Scenario getOrCreateScenarioForScope(
+        Scenario.Source scope,
+        String scenarioName,
+        boolean isCopy
+    ) {
         if (!isCopy) {
             Scenario scenario = getScenarioInScope(scope, scenarioName);
             if (scenario != null) {
@@ -1042,7 +1117,11 @@ public class Project {
             if (existing != null) {
                 return existing;
             }
-            Scenario created = new Scenario(this, scenarioName, Scenario.Source.REUSABLE_COMPONENTS);
+            Scenario created = new Scenario(
+                this,
+                scenarioName,
+                Scenario.Source.REUSABLE_COMPONENTS
+            );
             reusableScenarios.add(created);
             return created;
         }
@@ -1051,7 +1130,11 @@ public class Project {
             if (existing != null) {
                 return existing;
             }
-            Scenario created = new Scenario(this, scenarioName, Scenario.Source.SHARED_REUSABLE_COMPONENTS);
+            Scenario created = new Scenario(
+                this,
+                scenarioName,
+                Scenario.Source.SHARED_REUSABLE_COMPONENTS
+            );
             sharedReusableScenarios.add(created);
             return created;
         }

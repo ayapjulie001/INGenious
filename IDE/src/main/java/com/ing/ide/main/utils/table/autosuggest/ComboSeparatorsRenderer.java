@@ -17,8 +17,20 @@ public abstract class ComboSeparatorsRenderer implements ListCellRenderer {
     }
 
     @Override
-    public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-        Component comp = delegate.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+    public Component getListCellRendererComponent(
+        JList list,
+        Object value,
+        int index,
+        boolean isSelected,
+        boolean cellHasFocus
+    ) {
+        Component comp = delegate.getListCellRendererComponent(
+            list,
+            value,
+            index,
+            isSelected,
+            cellHasFocus
+        );
         customizeListItemComponent(comp, list, value, index, isSelected, cellHasFocus);
         if (index != -1) {
             boolean addHeader = addHeaderBefore(list, value, index);
@@ -27,9 +39,13 @@ public abstract class ComboSeparatorsRenderer implements ListCellRenderer {
             if (addHeader || addSeparator) {
                 separatorPanel.removeAll();
                 if (addHeader) {
-                    separatorPanel.add(createHeaderLabel(
+                    separatorPanel.add(
+                        createHeaderLabel(
                             getHeaderLabel(list, value, index),
-                            getHeaderForeground(list, value, index, comp)), BorderLayout.NORTH);
+                            getHeaderForeground(list, value, index, comp)
+                        ),
+                        BorderLayout.NORTH
+                    );
                 }
                 separatorPanel.add(comp, BorderLayout.CENTER);
                 if (addSeparator) {
@@ -49,8 +65,14 @@ public abstract class ComboSeparatorsRenderer implements ListCellRenderer {
         return "";
     }
 
-    protected void customizeListItemComponent(Component comp, JList list, Object value, int index,
-            boolean isSelected, boolean cellHasFocus) {
+    protected void customizeListItemComponent(
+        Component comp,
+        JList list,
+        Object value,
+        int index,
+        boolean isSelected,
+        boolean cellHasFocus
+    ) {
         // no-op by default
     }
 

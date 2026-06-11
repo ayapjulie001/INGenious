@@ -9,7 +9,7 @@ import java.util.Objects;
  * - Scoped: {@code [Project] Scenario:TestCase} or {@code [Shared] Scenario:TestCase}
  * - Unscoped (legacy): {@code Scenario:TestCase} (resolves using project-first fallback)
  * </p>
- * 
+ *
  * <p>
  * This class mirrors the PageRef pattern used in Object Repository scope resolution,
  * providing deterministic parsing and formatting for Execute action references.
@@ -23,7 +23,7 @@ public class ReusableRef {
     public enum Scope {
         PROJECT,
         SHARED,
-        UNSCOPED  // Legacy format without explicit scope
+        UNSCOPED // Legacy format without explicit scope
     }
 
     private final Scope scope;
@@ -75,7 +75,9 @@ public class ReusableRef {
             } else if (scopeStr.equalsIgnoreCase("Shared")) {
                 scope = Scope.SHARED;
             } else {
-                throw new IllegalArgumentException("Unknown scope: " + scopeStr + ". Expected [Project] or [Shared]");
+                throw new IllegalArgumentException(
+                    "Unknown scope: " + scopeStr + ". Expected [Project] or [Shared]"
+                );
             }
 
             // Extract the rest after the closing bracket
@@ -95,8 +97,11 @@ public class ReusableRef {
 
         if (scenario.isEmpty() || testCase.isEmpty()) {
             throw new IllegalArgumentException(
-                "Scenario and TestCase names cannot be empty. Got scenario='" + scenario
-                + "', testcase='" + testCase + "'"
+                "Scenario and TestCase names cannot be empty. Got scenario='" +
+                scenario +
+                "', testcase='" +
+                testCase +
+                "'"
             );
         }
 
@@ -204,9 +209,11 @@ public class ReusableRef {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ReusableRef that = (ReusableRef) o;
-        return scope == that.scope
-                && scenarioName.equalsIgnoreCase(that.scenarioName)
-                && testCaseName.equalsIgnoreCase(that.testCaseName);
+        return (
+            scope == that.scope &&
+            scenarioName.equalsIgnoreCase(that.scenarioName) &&
+            testCaseName.equalsIgnoreCase(that.testCaseName)
+        );
     }
 
     @Override

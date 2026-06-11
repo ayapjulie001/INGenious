@@ -1067,37 +1067,55 @@ public class TestCaseComponent extends JPanel implements ActionListener {
 
     private void goToSelectedReusable() {
         if (testCaseTable.getSelectedRow() != -1) {
-            TestStep tStep = getCurrentTestCase().getTestSteps().get(testCaseTable.getSelectedRow());
-            
+            TestStep tStep = getCurrentTestCase()
+                .getTestSteps()
+                .get(testCaseTable.getSelectedRow());
+
             // Go To Reusable is only available for PROJECT and SHARED scope reusables
             if (!tStep.isReusableStep()) {
                 Notification.showWarning("Selected step is not a reusable step.");
                 return;
             }
-            
+
             String[] reusableData = tStep.getReusableData();
             if (reusableData != null) {
                 ReusableRef ref;
                 try {
                     ref = tStep.getEffectiveReusableRef();
                 } catch (IllegalArgumentException ex) {
-                    ref = new ReusableRef(ReusableRef.Scope.UNSCOPED, reusableData[0], reusableData[1]);
+                    ref =
+                        new ReusableRef(
+                            ReusableRef.Scope.UNSCOPED,
+                            reusableData[0],
+                            reusableData[1]
+                        );
                 }
                 if (ref == null) {
-                    ref = new ReusableRef(ReusableRef.Scope.UNSCOPED, reusableData[0], reusableData[1]);
+                    ref =
+                        new ReusableRef(
+                            ReusableRef.Scope.UNSCOPED,
+                            reusableData[0],
+                            reusableData[1]
+                        );
                 }
 
                 // Only allow navigation for PROJECT and SHARED scoped reusables
                 if (ref.getScope() == ReusableRef.Scope.UNSCOPED) {
-                    Notification.showWarning("Cannot navigate to unscoped reusable. Please explicitly scope the reference as [Project] or [Shared] in the Action column.");
+                    Notification.showWarning(
+                        "Cannot navigate to unscoped reusable. Please explicitly scope the reference as [Project] or [Shared] in the Action column."
+                    );
                     return;
                 }
 
                 Scenario scenario = null;
                 if (ref.getScope() == ReusableRef.Scope.PROJECT) {
-                    scenario = testDesign.getProject().getReusableScenarioByName(ref.getScenarioName());
+                    scenario =
+                        testDesign.getProject().getReusableScenarioByName(ref.getScenarioName());
                 } else if (ref.getScope() == ReusableRef.Scope.SHARED) {
-                    scenario = testDesign.getProject().getSharedReusableScenarioByName(ref.getScenarioName());
+                    scenario =
+                        testDesign
+                            .getProject()
+                            .getSharedReusableScenarioByName(ref.getScenarioName());
                 }
 
                 if (scenario != null) {
@@ -1105,12 +1123,22 @@ public class TestCaseComponent extends JPanel implements ActionListener {
                     if (testCase != null) {
                         testDesign.loadTableModelForSelection(testCase);
                     } else {
-                        Notification.show("TestCase [" + ref.getTestCaseName()
-                                + "] not present in the Scenario [" + ref.getScenarioName() + "]");
+                        Notification.show(
+                            "TestCase [" +
+                            ref.getTestCaseName() +
+                            "] not present in the Scenario [" +
+                            ref.getScenarioName() +
+                            "]"
+                        );
                     }
                 } else {
-                    Notification.show("Scenario [" + ref.getScenarioName()
-                            + "] not present in " + ref.getScope() + " reusable scope");
+                    Notification.show(
+                        "Scenario [" +
+                        ref.getScenarioName() +
+                        "] not present in " +
+                        ref.getScope() +
+                        " reusable scope"
+                    );
                 }
             }
         }

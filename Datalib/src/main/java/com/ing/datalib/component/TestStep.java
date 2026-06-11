@@ -21,18 +21,18 @@ public class TestStep {
     private static String BREAKPOINT = "*";
     private static String COMMENT = "//";
     private static final Set<String> NON_PAGE_OBJECTS = Set.of(
-            "execute",
-            "app",
-            "browser",
-            "mobile",
-            "database",
-            "webservice",
-            "kafka",
-            "synthetic data",
-            "queue",
-            "file",
-            "general",
-            "string operations"
+        "execute",
+        "app",
+        "browser",
+        "mobile",
+        "database",
+        "webservice",
+        "kafka",
+        "synthetic data",
+        "queue",
+        "file",
+        "general",
+        "string operations"
     );
 
     public enum HEADERS {
@@ -264,9 +264,11 @@ public class TestStep {
     public Boolean isPageObjectStep() {
         String objectName = Objects.toString(getObject(), "").trim();
         String reference = Objects.toString(getReference(), "").trim();
-        return !objectName.isEmpty()
-            && !reference.isEmpty()
-            && !NON_PAGE_OBJECTS.contains(objectName.toLowerCase(Locale.ROOT));
+        return (
+            !objectName.isEmpty() &&
+            !reference.isEmpty() &&
+            !NON_PAGE_OBJECTS.contains(objectName.toLowerCase(Locale.ROOT))
+        );
     }
 
     public Boolean isReusableStep() {
@@ -324,7 +326,7 @@ public class TestStep {
         if (isReusableStep()) {
             try {
                 ReusableRef ref = getEffectiveReusableRef();
-                return new String[]{ref.getScenarioName(), ref.getTestCaseName()};
+                return new String[] { ref.getScenarioName(), ref.getTestCaseName() };
             } catch (IllegalArgumentException ex) {
                 String[] parts = getAction().split(":", 2);
                 if (parts.length == 2) {
@@ -353,7 +355,11 @@ public class TestStep {
         if (scopedFromReference == ReusableRef.Scope.UNSCOPED) {
             return parsed;
         }
-        return new ReusableRef(scopedFromReference, parsed.getScenarioName(), parsed.getTestCaseName());
+        return new ReusableRef(
+            scopedFromReference,
+            parsed.getScenarioName(),
+            parsed.getTestCaseName()
+        );
     }
 
     private ReusableRef.Scope parseReusableScopeFromReference(String reference) {
