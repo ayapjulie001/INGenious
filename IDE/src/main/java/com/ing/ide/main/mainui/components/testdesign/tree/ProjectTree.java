@@ -1082,45 +1082,31 @@ public class ProjectTree implements ActionListener {
             // if (opt == JOptionPane.CANCEL_OPTION || opt == JOptionPane.CLOSED_OPTION) return false;
             if (opt != JOptionPane.YES_OPTION) return true; // proceed without moving objects
 
-            // User agreed to move objects/pages to Shared OR. Attempt to move at page-level first.
+            // User agreed to move objects/pages to Shared OR.
+            // Only move the specific objects referenced by the selected test cases.
             for (String pageName : projectRefs.keySet()) {
-                // Try to move page; ObjectRepository.moveXxxPage returns non-null if moved
                 try {
-                    String moved = repo.moveWebPage(pageName, pageName);
-                    if (moved == null) {
-                        // Try mobile
-                        moved = repo.moveMobilePage(pageName, pageName);
-                    }
-                    if (moved == null) {
-                        moved = repo.moveSapPage(pageName, pageName);
-                    }
-                    if (moved == null) {
-                        moved = repo.moveStructuredDataPage(pageName, pageName);
-                    }
-                    // If none returned non-null, move individual objects instead
-                    if (moved == null) {
-                        for (String obj : projectRefs.get(pageName)) {
-                            // try web
-                            var r = repo.resolveWebObjectWithScope(pageName, obj);
-                            if (r != null && r.isFromProject()) {
-                                repo.moveWebObject(r, pageName);
-                                continue;
-                            }
-                            var rm = repo.resolveMobileObjectWithScope(pageName, obj);
-                            if (rm != null && rm.isFromProject()) {
-                                repo.moveMobileObject(rm, pageName);
-                                continue;
-                            }
-                            var rs = repo.resolveStructuredDataObjectWithScope(pageName, obj);
-                            if (rs != null && rs.isFromProject()) {
-                                repo.moveStructuredDataObject(rs, pageName);
-                                continue;
-                            }
-                            var rsp = repo.resolveSapObjectWithScope(pageName, obj);
-                            if (rsp != null && rsp.isFromProject()) {
-                                repo.moveSapObject(rsp, pageName);
-                                continue;
-                            }
+                    for (String obj : projectRefs.get(pageName)) {
+                        // try web
+                        var r = repo.resolveWebObjectWithScope(pageName, obj);
+                        if (r != null && r.isFromProject()) {
+                            repo.moveWebObject(r, pageName);
+                            continue;
+                        }
+                        var rm = repo.resolveMobileObjectWithScope(pageName, obj);
+                        if (rm != null && rm.isFromProject()) {
+                            repo.moveMobileObject(rm, pageName);
+                            continue;
+                        }
+                        var rs = repo.resolveStructuredDataObjectWithScope(pageName, obj);
+                        if (rs != null && rs.isFromProject()) {
+                            repo.moveStructuredDataObject(rs, pageName);
+                            continue;
+                        }
+                        var rsp = repo.resolveSapObjectWithScope(pageName, obj);
+                        if (rsp != null && rsp.isFromProject()) {
+                            repo.moveSapObject(rsp, pageName);
+                            continue;
                         }
                     }
                 } catch (Exception ex) {
