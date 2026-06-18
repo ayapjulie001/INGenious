@@ -28,36 +28,49 @@ public class CsvDataProvider extends TestData {
                     try {
                         boolean modified = false;
                         for (com.ing.datalib.testdata.model.Record record : csvData.getRecords()) {
-                            // If the CSV was using the older 4-column format, values for Iteration/SubIteration
-                            // will currently be at indices 2 and 3 while index 4 is empty. Detect this pattern
-                            // (index2 and index3 numeric, index4 empty) and shift them right so index2 can
-                            // be used for the new Scope column.
+                            // If the CSV was using the older 4-column format (Scenario, Flow, Iteration, SubIteration),
+                            // the Scope column didn't exist. After loading, values will be at wrong indices:
+                            // Old: idx0=Scenario, idx1=Flow, idx2=Iteration, idx3=SubIteration, idx4+=DataColumns
+                            // New: idx0=Scenario, idx1=Flow, idx2=Scope, idx3=Iteration, idx4=SubIteration, idx5+=DataColumns
+                            // Detect old format by checking if index 2 is numeric (would be Iteration in old format)
+                            // AND index 3 is also numeric (would be SubIteration).
+                            // If index 2 has a Scope value like "[Project]" or "[Shared]", it's already new format.
                             try {
-                                String idx2 = java.util.Objects.toString(record.get(2), "");
-                                String idx3 = java.util.Objects.toString(record.get(3), "");
-                                String idx4 = java.util.Objects.toString(record.get(4), "");
-                                if (
-                                    (idx4 == null || idx4.isEmpty()) &&
-                                    idx2.matches("\\d+") &&
-                                    idx3.matches("\\d+")
-                                ) {
+                                String idx2 = java.util.Objects.toString(record.get(2), "").trim();
+                                String idx3 = java.util.Objects.toString(record.get(3), "").trim();
+
+                                // Check if index 2 is numeric and index 3 is numeric - this indicates old 4-column format
+                                // Also verify idx2 is NOT a Scope marker like "[Project]" or "[Shared]"
+                                boolean idx2IsNumeric = idx2.matches("\\d+");
+                                boolean idx3IsNumeric = idx3.matches("\\d+");
+                                boolean idx2IsScopeMarker =
+                                    idx2.startsWith("[") && idx2.endsWith("]");
+
+                                if (idx2IsNumeric && idx3IsNumeric && !idx2IsScopeMarker) {
+                                    // Old format detected: shift Iteration and SubIteration to correct positions
+                                    // Shift backwards: set index 4 = index 3 (SubIteration), set index 3 = index 2 (Iteration), clear index 2 (for Scope)
                                     record.set(4, idx3);
                                     record.set(3, idx2);
                                     record.set(2, "");
+                                    modified = true;
                                 }
                             } catch (Exception ex) {
-                                // ignore index errors
+                                // ignore index errors - record may not have enough elements
                             }
                             // ensure record has slots for all headers (Record constructor does this for new records)
-                            // get current scenario value
+                            // get current scenario and testcase values
                             String scenario = "";
+                            String testcase = "";
                             try {
                                 scenario = java.util.Objects.toString(record.get(0), "").trim();
+                                testcase = java.util.Objects.toString(record.get(1), "").trim();
                             } catch (Exception ex) {
                                 // ignore
                             }
                             String scope = "";
                             String normalized = scenario;
+
+                            // First, check scenario for explicit scope markers
                             if (normalized.startsWith("[Project] ")) {
                                 scope = "[Project]";
                                 normalized = normalized.substring("[Project] ".length());
@@ -90,6 +103,33 @@ public class CsvDataProvider extends TestData {
                                     // project may not be fully initialized; ignore
                                 }
                             }
+
+                            // If scope is still not determined, check the test case to infer scope
+                            if (scope == null || scope.isEmpty()) {
+                                try {
+                                    com.ing.datalib.component.Project proj = getsProject();
+                                    if (proj != null && !testcase.isEmpty()) {
+                                        // Check if the test case exists in project reusable scenarios
+                                        boolean foundInReusables = false;
+                                        for (com.ing.datalib.component.Scenario reusableScenario : proj.getReusableScenarios()) {
+                                            if (
+                                                reusableScenario.getTestCaseByName(testcase) != null
+                                            ) {
+                                                foundInReusables = true;
+                                                break;
+                                            }
+                                        }
+                                        if (foundInReusables) {
+                                            // Found in project reusables - set scope to [Project]
+                                            scope = "[Project]";
+                                        }
+                                        // If not found in project reusables, it's from test plan - scope remains empty
+                                    }
+                                } catch (Exception ex) {
+                                    // project may not be fully initialized; ignore
+                                }
+                            }
+
                             // if scope determined or slot exists but empty, update record
                             try {
                                 String existingScope = java.util.Objects.toString(
