@@ -1114,9 +1114,27 @@ public class ProjectTree implements ActionListener {
                 }
             }
 
-            // Save repository and refresh UI
+            // Save repository and refresh UI.
+            // Remove any now-empty source pages (moved all objects) to keep repository consistent
+            try {
+                com.ing.datalib.or.web.WebOR projectWebOR = repo.getWebOR();
+                if (projectWebOR != null) {
+                    for (String pageName : projectRefs.keySet()) {
+                        com.ing.datalib.or.web.WebORPage sourcePage = projectWebOR.getPageByName(
+                            pageName
+                        );
+                        if (sourcePage != null && sourcePage.getObjectGroups().isEmpty()) {
+                            sourcePage.removeFromParent();
+                        }
+                    }
+                }
+            } catch (Throwable t) {
+                // Ignore - best effort cleanup
+            }
+
             repo.save();
-            getTestDesign().getObjectRepo().load();
+            // Ensure UI reload runs on the Swing EDT to avoid potential threading/race issues
+            javax.swing.SwingUtilities.invokeLater(() -> getTestDesign().getObjectRepo().load());
             return true;
         } catch (Exception e) {
             e.printStackTrace();
